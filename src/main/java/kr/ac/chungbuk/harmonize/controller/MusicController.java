@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -31,7 +32,7 @@ public class MusicController {
     public ResponseEntity<String> create(String title, String genre, String karaokeNum, String releaseDate,
                                          String playLink, MultipartFile albumCover) {
         try {
-            musicService.create(title, genre, "", karaokeNum, LocalDateTime.parse(releaseDate), playLink);
+            musicService.create(title, genre, albumCover, karaokeNum, LocalDateTime.parse(releaseDate), playLink);
         } catch (Exception e) {
             log.info(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("음악 생성 중 오류가 발생하였습니다.");

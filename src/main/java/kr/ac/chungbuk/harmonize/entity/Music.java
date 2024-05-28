@@ -22,7 +22,7 @@ public class Music {
     @Enumerated(value = EnumType.STRING)
     private Genre genre;                // 장르
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String albumCover;          // 앨범 표지
 
     @Column(length = 50, nullable = false)
