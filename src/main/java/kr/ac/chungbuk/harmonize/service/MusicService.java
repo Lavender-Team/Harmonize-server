@@ -11,11 +11,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class MusicService {
 
-    private MusicRepository musicRepository;
+    private final MusicRepository musicRepository;
 
     @Autowired
     public MusicService(MusicRepository musicRepository) {
@@ -45,4 +46,10 @@ public class MusicService {
         musicRepository.save(music);
     }
 
+    public void delete(Long musicId) throws Exception {
+        Music music = musicRepository.findById(musicId).orElseThrow();
+
+        FileHandler.deleteAlbumCoverFile(music.getAlbumCover(), music.getMusicId());
+        musicRepository.delete(music);
+    }
 }
