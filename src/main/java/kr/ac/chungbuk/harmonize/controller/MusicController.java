@@ -1,9 +1,11 @@
 package kr.ac.chungbuk.harmonize.controller;
 
+import kr.ac.chungbuk.harmonize.dto.MusicListDTO;
+import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.service.MusicService;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -12,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Controller
 @Slf4j
@@ -48,5 +51,25 @@ public class MusicController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("음악 삭제 중 오류가 발생하였습니다.");
         }
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
+    }
+
+    // 음악 목록 조회
+    @GetMapping(path = "/api/music")
+    @ResponseBody
+    public Page<MusicListDTO> list(@RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
+                                   @RequestParam(required = false, defaultValue = "10", value = "size") int pageSize) {
+        try {
+            Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "musicId"));
+
+            Page<Music> list = musicService.list(pageable);
+
+            return new PageImpl<>(
+                    list.getContent().stream().map(MusicListDTO::build).toList(),
+                    pageable,
+                    list.getTotalElements()
+            );
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
 }
