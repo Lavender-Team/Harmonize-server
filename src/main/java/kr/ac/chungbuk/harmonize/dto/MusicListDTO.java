@@ -12,13 +12,23 @@ import lombok.NoArgsConstructor;
 @Builder
 public class MusicListDTO {
 
-    private Long musicId;
+    private Long id;
     private String title;
+    private String artist;
+    private String genre;
+    private String status;
+    private Long view;
+    private Long likes;
 
     public static MusicListDTO build(Music music) {
         return MusicListDTO.builder()
-                .musicId(music.getMusicId())
+                .id(music.getMusicId())
                 .title(music.getTitle())
+                .artist("구현안됨")
+                .genre(music.getGenre().name())
+                .status("INCOMPLETE")
+                .view(music.getView())
+                .likes(music.getLikes())
                 .build();
     }
 }

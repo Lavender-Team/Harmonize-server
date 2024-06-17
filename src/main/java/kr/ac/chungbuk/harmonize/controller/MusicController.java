@@ -35,7 +35,7 @@ public class MusicController {
         try {
             musicService.create(title, genre, albumCover, karaokeNum, LocalDateTime.parse(releaseDate), playLink);
         } catch (Exception e) {
-            log.info(e.getMessage());
+            log.debug(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("음악 생성 중 오류가 발생하였습니다.");
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(null);
@@ -69,6 +69,7 @@ public class MusicController {
                     list.getTotalElements()
             );
         } catch (Exception e) {
+            log.debug(e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
