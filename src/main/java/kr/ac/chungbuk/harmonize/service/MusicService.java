@@ -1,30 +1,30 @@
 package kr.ac.chungbuk.harmonize.service;
 
-import jakarta.transaction.Transactional;
 import kr.ac.chungbuk.harmonize.entity.Music;
+import kr.ac.chungbuk.harmonize.entity.MusicAnalysis;
 import kr.ac.chungbuk.harmonize.enums.Genre;
+import kr.ac.chungbuk.harmonize.repository.MusicAnalysisRepository;
 import kr.ac.chungbuk.harmonize.repository.MusicRepository;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 public class MusicService {
 
     private final MusicRepository musicRepository;
+    private final MusicAnalysisRepository musicAnalysisRepository;
 
     @Autowired
-    public MusicService(MusicRepository musicRepository) {
+    public MusicService(MusicRepository musicRepository, MusicAnalysisRepository musicAnalysisRepository) {
         this.musicRepository = musicRepository;
+        this.musicAnalysisRepository = musicAnalysisRepository;
     }
 
     // 음악 생성
@@ -41,6 +41,9 @@ public class MusicService {
 
         music = musicRepository.save(music);
 
+        MusicAnalysis analysis = new MusicAnalysis(music.getMusicId());
+        musicAnalysisRepository.save(analysis);
+
         try {
             String albumCoverPath = FileHandler.saveAlbumCoverFile(albumCover, music.getMusicId());
             music.setAlbumCover(albumCoverPath);
@@ -54,9 +57,12 @@ public class MusicService {
     // 음악 삭제
     public void delete(Long musicId) throws Exception {
         Music music = musicRepository.findById(musicId).orElseThrow();
+        MusicAnalysis analysis = musicAnalysisRepository.findById(music.getMusicId()).orElseThrow();
 
-        FileHandler.deleteAlbumCoverFile(music.getAlbumCover(), music.getMusicId());
+        if (music.getAlbumCover() != null && !music.getAlbumCover().isEmpty())
+            FileHandler.deleteAlbumCoverFile(music.getAlbumCover(), music.getMusicId());
         musicRepository.delete(music);
+        musicAnalysisRepository.delete(analysis);
     }
     
     

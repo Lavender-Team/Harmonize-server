@@ -26,7 +26,7 @@ public class MusicListDTO {
                 .title(music.getTitle())
                 .artist("구현안됨")
                 .genre(music.getGenre().name())
-                .status("INCOMPLETE")
+                .status(music.getAnalysis().getStatus().name())
                 .view(music.getView())
                 .likes(music.getLikes())
                 .build();

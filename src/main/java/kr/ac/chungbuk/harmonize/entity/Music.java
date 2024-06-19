@@ -1,6 +1,5 @@
 package kr.ac.chungbuk.harmonize.entity;
 
-
 import jakarta.persistence.*;
 import kr.ac.chungbuk.harmonize.enums.Genre;
 import lombok.Data;
@@ -46,9 +45,8 @@ public class Music {
     private Long view;                  // 조회 수
     private Long likes;                 // 좋아요 수
 
-
-
-
-
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "musicId", nullable = false)
+    private MusicAnalysis analysis;
 
 }
