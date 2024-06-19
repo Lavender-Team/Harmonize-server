@@ -31,9 +31,10 @@ public class MusicController {
     // 음악 생성
     @PostMapping(path = "/api/music")
     public ResponseEntity<String> create(String title, String genre, String karaokeNum, String releaseDate,
-                                         String playLink, MultipartFile albumCover) {
+                                         String playLink, MultipartFile albumCover,
+                                         @RequestParam(value = "themes", defaultValue = "") List<String> themes) {
         try {
-            musicService.create(title, genre, albumCover, karaokeNum, LocalDateTime.parse(releaseDate), playLink);
+            musicService.create(title, genre, albumCover, karaokeNum, LocalDateTime.parse(releaseDate), playLink, themes);
         } catch (Exception e) {
             log.debug(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("음악 생성 중 오류가 발생하였습니다.");
@@ -73,4 +74,5 @@ public class MusicController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
+    
 }

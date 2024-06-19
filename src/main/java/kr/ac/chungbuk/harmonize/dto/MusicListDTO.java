@@ -1,10 +1,13 @@
 package kr.ac.chungbuk.harmonize.dto;
 
 import kr.ac.chungbuk.harmonize.entity.Music;
+import kr.ac.chungbuk.harmonize.entity.Theme;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -19,6 +22,7 @@ public class MusicListDTO {
     private String status;
     private Long view;
     private Long likes;
+    private List<String> themes;
 
     public static MusicListDTO build(Music music) {
         return MusicListDTO.builder()
@@ -29,6 +33,7 @@ public class MusicListDTO {
                 .status(music.getAnalysis().getStatus().name())
                 .view(music.getView())
                 .likes(music.getLikes())
+                .themes(music.getThemes().stream().map(Theme::getThemeName).toList())
                 .build();
     }
 }

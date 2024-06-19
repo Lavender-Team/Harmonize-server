@@ -5,6 +5,7 @@ import kr.ac.chungbuk.harmonize.enums.Genre;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -47,6 +48,9 @@ public class Music {
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "musicId", nullable = false)
-    private MusicAnalysis analysis;
+    private MusicAnalysis analysis;     // 음악 분석 결과
+
+    @OneToMany(mappedBy = "music", fetch = FetchType.EAGER)
+    private List<Theme> themes;
 
 }

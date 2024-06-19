@@ -54,6 +54,7 @@ class MusicControllerTest {
                         .param("karaokeNum", "TJ 53651")
                         .param("releaseDate", "2019-03-13T00:00:00")
                         .param("playLink", "https://youtu.be/1gmleC0dOYY?si=ZFejSnIAzEEZx7Xd")
+                        .param("themes", "부드러운 목소리, 비올 때")
         ).andExpect(status().isCreated());
 
         Music uploaded = musicRepository.findByTitle("주저하는 연인들을 위해(테스트)").orElseThrow();
@@ -82,6 +83,7 @@ class MusicControllerTest {
                         .param("karaokeNum", "TJ 53651")
                         .param("releaseDate", "2019-03-13T00:00:00")
                         .param("playLink", "https://youtu.be/1gmleC0dOYY?si=ZFejSnIAzEEZx7Xd")
+                        .param("themes", "부드러운 목소리, 비올 때")
         ).andExpect(status().isCreated());
 
         // When
@@ -116,6 +118,7 @@ class MusicControllerTest {
                         .param("karaokeNum", "TJ 53651")
                         .param("releaseDate", "2019-03-13T00:00:00")
                         .param("playLink", "https://youtu.be/1gmleC0dOYY?si=ZFejSnIAzEEZx7Xd")
+                        .param("themes", "부드러운 목소리, 비올 때")
         ).andExpect(status().isCreated());
 
         mvc.perform(
