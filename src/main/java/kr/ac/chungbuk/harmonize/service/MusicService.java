@@ -83,9 +83,13 @@ public class MusicService {
         musicAnalysisRepository.delete(analysis);
     }
     
-    
     // 음악 목록 조회
     public Page<Music> list(Pageable pageable) {
         return musicRepository.findAll(pageable);
+    }
+
+    // 전체 테마 목록 조회
+    public Page<Theme> listThemes(Pageable pageable) {
+        return themeRepository.findUniqueThemeNames(pageable);
     }
 }

@@ -2,6 +2,7 @@ package kr.ac.chungbuk.harmonize.controller;
 
 import kr.ac.chungbuk.harmonize.dto.MusicListDTO;
 import kr.ac.chungbuk.harmonize.entity.Music;
+import kr.ac.chungbuk.harmonize.entity.Theme;
 import kr.ac.chungbuk.harmonize.service.MusicService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,5 +75,19 @@ public class MusicController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
-    
+
+    // 전체 테마 목록 조회
+    @GetMapping(path = "/api/music/themes")
+    @ResponseBody
+    public Page<Theme> listThemes(@RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
+                             @RequestParam(required = false, defaultValue = "10", value = "size") int pageSize) {
+        try {
+            Pageable pageable = PageRequest.of(pageNo, pageSize);
+
+            return musicService.listThemes(pageable);
+        } catch (Exception e) {
+            log.debug(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
 }
