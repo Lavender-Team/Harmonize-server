@@ -38,6 +38,7 @@ public class MusicService {
     // 음악 생성
     public void create(String title, String genre, MultipartFile albumCover, String karaokeNum,
                        LocalDateTime releaseDate, String playLink, List<String> themes) throws Exception {
+        // 음악 객체
         Music music = new Music();
         music.setTitle(title);
         music.setGenre(Genre.fromString(genre));
@@ -49,9 +50,11 @@ public class MusicService {
 
         music = musicRepository.save(music);
 
+        // 음악 분석 결과
         MusicAnalysis analysis = new MusicAnalysis(music.getMusicId());
         musicAnalysisRepository.save(analysis);
 
+        // 음악 테마(특징)
         List<Theme> themeList = new ArrayList<>();
         for (String theme : themes) {
             Theme themeObj = new Theme(music, theme);
@@ -60,12 +63,51 @@ public class MusicService {
         }
         music.setThemes(themeList);
 
+        // 앨범 커버 파일 저장
         try {
             String albumCoverPath = FileHandler.saveAlbumCoverFile(albumCover, music.getMusicId());
             music.setAlbumCover(albumCoverPath);
         } catch (IOException e) {
             musicRepository.delete(music);
             throw e;
+        }
+        musicRepository.save(music);
+    }
+
+    // 음악 수정
+    @Transactional
+    public void update(Long musicId, String title, String genre, MultipartFile albumCover, String karaokeNum,
+                       LocalDateTime releaseDate, String playLink, List<String> themes) throws IOException {
+        // 음악 객체
+        Music music = musicRepository.findById(musicId).orElseThrow();
+        music.setTitle(title);
+        music.setGenre(Genre.fromString(genre));
+        music.setKaraokeNum(karaokeNum);
+        music.setReleaseDate(releaseDate);
+        music.setPlayLink(playLink);
+
+        // 기존에 저장된 음악 테마(특징) 삭제
+        themeRepository.deleteAllByMusic(music);
+
+        // 음악 테마(특징) 저장
+        List<Theme> themeList = new ArrayList<>();
+        for (String theme : themes) {
+            Theme themeObj = new Theme(music, theme);
+            themeList.add(themeObj);
+            themeRepository.save(themeObj);
+        }
+        music.setThemes(themeList);
+
+        // 앨범 커버 파일 새로 업로드시 수정
+        if (albumCover != null) {
+            try {
+                FileHandler.deleteAlbumCoverFile(music.getAlbumCover(), music.getMusicId()); // 기존 파일 삭제
+                String albumCoverPath = FileHandler.saveAlbumCoverFile(albumCover, music.getMusicId()); // 새 파일 저장
+                music.setAlbumCover(albumCoverPath);
+            } catch (IOException e) {
+                musicRepository.delete(music);
+                throw e;
+            }
         }
         musicRepository.save(music);
     }
@@ -82,7 +124,12 @@ public class MusicService {
         musicRepository.delete(music);
         musicAnalysisRepository.delete(analysis);
     }
-    
+
+    // 음악 상세정보 조회 (어드민)
+    public Music readByAdmin(Long musicId) throws Exception {
+        return musicRepository.findById(musicId).orElseThrow();
+    }
+
     // 음악 목록 조회
     public Page<Music> list(Pageable pageable) {
         return musicRepository.findAll(pageable);

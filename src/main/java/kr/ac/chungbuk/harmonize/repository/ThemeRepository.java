@@ -17,4 +17,6 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
     List<Theme> findByThemeName(String themeName);
 
     void deleteAllByMusic(Music music);
+
+    void deleteByMusicAndThemeName(Music music, String themeName);
 }
