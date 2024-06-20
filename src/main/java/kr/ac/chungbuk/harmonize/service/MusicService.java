@@ -92,4 +92,9 @@ public class MusicService {
     public Page<Theme> listThemes(Pageable pageable) {
         return themeRepository.findUniqueThemeNames(pageable);
     }
+
+    // 특정 테마의 음악 목록 조회
+    public Page<Music> listMusicOfTheme(Pageable pageable, String themeName) {
+        return musicRepository.findAllByTheme(pageable, themeName);
+    }
 }

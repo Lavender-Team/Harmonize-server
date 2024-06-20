@@ -77,7 +77,7 @@ public class MusicController {
     }
 
     // 전체 테마 목록 조회
-    @GetMapping(path = "/api/music/themes")
+    @GetMapping(path = "/api/music/theme")
     @ResponseBody
     public Page<Theme> listThemes(@RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
                              @RequestParam(required = false, defaultValue = "10", value = "size") int pageSize) {
@@ -85,6 +85,30 @@ public class MusicController {
             Pageable pageable = PageRequest.of(pageNo, pageSize);
 
             return musicService.listThemes(pageable);
+        } catch (Exception e) {
+            log.debug(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    // 특정 테마의 음악 목록 조회
+    @GetMapping(path = "/api/music/theme/music")
+    @ResponseBody
+    public Page<MusicListDTO> listMusicOfTheme(
+        @RequestParam(required = true) String themeName,
+        @RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
+        @RequestParam(required = false, defaultValue = "10", value = "size") int pageSize)
+    {
+        try {
+            Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "musicId"));
+
+            Page<Music> list = musicService.listMusicOfTheme(pageable, themeName);
+
+            return new PageImpl<>(
+                    list.getContent().stream().map(MusicListDTO::build).toList(),
+                    pageable,
+                    list.getTotalElements()
+            );
         } catch (Exception e) {
             log.debug(e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
