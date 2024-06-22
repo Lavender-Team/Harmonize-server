@@ -44,4 +44,39 @@ public class FileHandler {
 
         Files.deleteIfExists(Paths.get(directoryPath + filename));
     }
+
+
+    /**
+     * 음악의 오디오 파일을 파일시스템에 저장할 때 사용합니다.
+     * @param audioFile 저장할 앨범 표지 이미지 파일
+     * @param musicId 음악 ID
+     * @return 음악 파일에 접근하기 위한 URL
+     * @throws IOException
+     */
+    public static String saveAudioFile(MultipartFile audioFile, Long musicId) throws IOException {
+        String directoryPath = System.getProperty("user.dir") + "/upload/audio/";
+        if (!new File(directoryPath).exists()) {
+            new File(directoryPath).mkdirs();
+        }
+
+        String fileExtension = StringUtils.getFilenameExtension(audioFile.getOriginalFilename());
+        String filePath = directoryPath + "/" + Objects.requireNonNull(Objects.toString(musicId)) + "." + fileExtension;
+
+        File destFile = new File(filePath);
+        audioFile.transferTo(destFile);
+
+        return "/api/music/audio/" + musicId + "." + fileExtension;
+    }
+
+    /**
+     * 음악의 오디오 파일을 파일시스템에서 삭제할 때 사용합니다.
+     * @param audioFilePath 음악 파일에 접근하기 위한 URL (saveAudioFile의 return 값)
+     * @throws IOException
+     */
+    public static void deleteAudioFile(String audioFilePath, Long musicId) throws IOException {
+        String directoryPath = System.getProperty("user.dir") + "/upload/audio/";
+        String filename = audioFilePath.substring(audioFilePath.indexOf(String.valueOf(musicId)));
+
+        Files.deleteIfExists(Paths.get(directoryPath + filename));
+    }
 }

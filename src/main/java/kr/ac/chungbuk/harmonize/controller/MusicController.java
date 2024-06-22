@@ -4,6 +4,8 @@ import kr.ac.chungbuk.harmonize.dto.MusicDTO;
 import kr.ac.chungbuk.harmonize.dto.MusicListDTO;
 import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.entity.Theme;
+import kr.ac.chungbuk.harmonize.repository.MusicRepository;
+import kr.ac.chungbuk.harmonize.service.MusicAnalysisService;
 import kr.ac.chungbuk.harmonize.service.MusicService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -56,10 +56,10 @@ public class MusicController {
     @PutMapping(path = "/api/music/{musicId}")
     public ResponseEntity<String> update(@PathVariable Long musicId, String title, String genre, String karaokeNum,
                                          String releaseDate, String playLink, MultipartFile albumCover,
-                                         @RequestParam(value = "themes", defaultValue = "") List<String> themes) {
+                                         @RequestParam(value = "themes", required = false) List<String> themes) {
         try {
-            musicService.update(musicId, title, genre, albumCover, karaokeNum, LocalDateTime.parse(releaseDate),
-                                playLink, themes);
+            musicService.update(musicId, title, genre, albumCover, karaokeNum,
+                    (releaseDate != null) ? LocalDateTime.parse(releaseDate) : null, playLink, themes);
         } catch (Exception e) {
             log.debug(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("음악 편집 중 오류가 발생하였습니다.");

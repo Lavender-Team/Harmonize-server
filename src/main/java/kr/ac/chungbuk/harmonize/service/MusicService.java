@@ -78,30 +78,34 @@ public class MusicService {
     @Transactional
     public void update(Long musicId, String title, String genre, MultipartFile albumCover, String karaokeNum,
                        LocalDateTime releaseDate, String playLink, List<String> themes) throws IOException {
+
         // 음악 객체
         Music music = musicRepository.findById(musicId).orElseThrow();
-        music.setTitle(title);
-        music.setGenre(Genre.fromString(genre));
-        music.setKaraokeNum(karaokeNum);
-        music.setReleaseDate(releaseDate);
-        music.setPlayLink(playLink);
+        if (title != null) music.setTitle(title);
+        if (genre != null) music.setGenre(Genre.fromString(genre));
+        if (karaokeNum != null) music.setKaraokeNum(karaokeNum);
+        if (releaseDate != null) music.setReleaseDate(releaseDate);
+        if (playLink != null) music.setPlayLink(playLink);
 
-        // 기존에 저장된 음악 테마(특징) 삭제
-        themeRepository.deleteAllByMusic(music);
+        if (themes != null) {
+            // 기존에 저장된 음악 테마(특징) 삭제
+            themeRepository.deleteAllByMusic(music);
 
-        // 음악 테마(특징) 저장
-        List<Theme> themeList = new ArrayList<>();
-        for (String theme : themes) {
-            Theme themeObj = new Theme(music, theme);
-            themeList.add(themeObj);
-            themeRepository.save(themeObj);
+            // 음악 테마(특징) 저장
+            List<Theme> themeList = new ArrayList<>();
+            for (String theme : themes) {
+                Theme themeObj = new Theme(music, theme);
+                themeList.add(themeObj);
+                themeRepository.save(themeObj);
+            }
+            music.setThemes(themeList);
         }
-        music.setThemes(themeList);
 
         // 앨범 커버 파일 새로 업로드시 수정
         if (albumCover != null) {
             try {
-                FileHandler.deleteAlbumCoverFile(music.getAlbumCover(), music.getMusicId()); // 기존 파일 삭제
+                if (music.getAlbumCover() != null)
+                    FileHandler.deleteAlbumCoverFile(music.getAlbumCover(), music.getMusicId()); // 기존 파일 삭제
                 String albumCoverPath = FileHandler.saveAlbumCoverFile(albumCover, music.getMusicId()); // 새 파일 저장
                 music.setAlbumCover(albumCoverPath);
             } catch (IOException e) {
