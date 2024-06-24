@@ -11,6 +11,8 @@ public enum Genre {
     DANCE,      // 댄스
     JPOP,       // 일본곡
     RNB,        // R&B
+    FOLK,       // 포크/블루스
+    ROCK,       // 록/메탈
     OST,        // OST
     INDIE,      // 인디뮤직
     TROT,       // 트로트
