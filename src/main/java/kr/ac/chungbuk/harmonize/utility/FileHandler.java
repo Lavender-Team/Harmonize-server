@@ -3,7 +3,9 @@ package kr.ac.chungbuk.harmonize.utility;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -78,5 +80,36 @@ public class FileHandler {
         String filename = audioFilePath.substring(audioFilePath.indexOf(String.valueOf(musicId)));
 
         Files.deleteIfExists(Paths.get(directoryPath + filename));
+    }
+
+
+    /**
+     * 각 음악별로 벌크 업로드 결과를 파일로 작성합니다.
+     * @param title 음악 제목
+     * @param result 업로드 결과를 설명하는 문자열
+     */
+    public static void writeBulkUploadLog(String title, String result) throws IOException {
+        File file = new File(System.getProperty("user.dir") + "/upload/bulk_log.txt");
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+        FileWriter fw = new FileWriter(file, true);
+        BufferedWriter writer = new BufferedWriter(fw);
+
+        writer.write(title + ": " + result + '\n');
+        writer.close();
+    }
+
+    /**
+     * 벌크 업로드 결과 파일의 내용을 지웁니다.
+     */
+    public static void clearBulkUploadLog() throws IOException {
+        File file = new File(System.getProperty("user.dir") + "/upload/bulk_log.txt");
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+        FileWriter fw = new FileWriter(file);
+        BufferedWriter writer = new BufferedWriter(fw);
+        writer.close();
     }
 }

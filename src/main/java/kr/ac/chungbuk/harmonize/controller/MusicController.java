@@ -79,6 +79,18 @@ public class MusicController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
     }
 
+    // 음악 벌크 업로드
+    @PostMapping("/api/music/bulk")
+    public ResponseEntity<String> createBulk(MultipartFile bulkFile) {
+        try {
+            musicService.createBulk(bulkFile);
+        } catch (Exception e) {
+            log.debug(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("음악 벌크 업로드 중 오류가 발생하였습니다.");
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(null);
+    }
+
     // 음악 상세정보 조회 (어드민)
     @GetMapping("/api/music/{musicId}")
     @ResponseBody

@@ -1,5 +1,8 @@
 package kr.ac.chungbuk.harmonize.service;
 
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import com.opencsv.exceptions.CsvValidationException;
 import jakarta.transaction.Transactional;
 import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.entity.MusicAnalysis;
@@ -9,6 +12,7 @@ import kr.ac.chungbuk.harmonize.repository.MusicAnalysisRepository;
 import kr.ac.chungbuk.harmonize.repository.MusicRepository;
 import kr.ac.chungbuk.harmonize.repository.ThemeRepository;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,11 +20,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 public class MusicService {
 
     private final MusicRepository musicRepository;
@@ -36,15 +43,17 @@ public class MusicService {
     }
 
     // 음악 생성
-    public void create(String title, String genre, MultipartFile albumCover, String karaokeNum,
+    public Music create(String title, String genre, MultipartFile albumCover, String karaokeNum,
                        LocalDateTime releaseDate, String playLink, List<String> themes) throws Exception {
         // 음악 객체
         Music music = new Music();
         music.setTitle(title);
         music.setGenre(Genre.fromString(genre));
-        music.setKaraokeNum(karaokeNum);
+        if (!karaokeNum.isEmpty())
+            music.setKaraokeNum(karaokeNum);
         music.setReleaseDate(releaseDate);
-        music.setPlayLink(playLink);
+        if (!playLink.isEmpty())
+            music.setPlayLink(playLink);
         music.setView(0L);
         music.setLikes(0L);
 
@@ -55,23 +64,20 @@ public class MusicService {
         musicAnalysisRepository.save(analysis);
 
         // 음악 테마(특징)
-        List<Theme> themeList = new ArrayList<>();
-        for (String theme : themes) {
-            Theme themeObj = new Theme(music, theme);
-            themeList.add(themeObj);
-            themeRepository.save(themeObj);
-        }
-        music.setThemes(themeList);
+        saveThemes(themes, music);
 
         // 앨범 커버 파일 저장
-        try {
-            String albumCoverPath = FileHandler.saveAlbumCoverFile(albumCover, music.getMusicId());
-            music.setAlbumCover(albumCoverPath);
-        } catch (IOException e) {
-            musicRepository.delete(music);
-            throw e;
+        if (albumCover != null) {
+            try {
+                String albumCoverPath = FileHandler.saveAlbumCoverFile(albumCover, music.getMusicId());
+                music.setAlbumCover(albumCoverPath);
+            } catch (IOException e) {
+                musicRepository.delete(music);
+                throw e;
+            }
         }
-        musicRepository.save(music);
+
+        return musicRepository.save(music);
     }
 
     // 음악 수정
@@ -92,13 +98,7 @@ public class MusicService {
             themeRepository.deleteAllByMusic(music);
 
             // 음악 테마(특징) 저장
-            List<Theme> themeList = new ArrayList<>();
-            for (String theme : themes) {
-                Theme themeObj = new Theme(music, theme);
-                themeList.add(themeObj);
-                themeRepository.save(themeObj);
-            }
-            music.setThemes(themeList);
+            saveThemes(themes, music);
         }
 
         // 앨범 커버 파일 새로 업로드시 수정
@@ -129,6 +129,47 @@ public class MusicService {
         musicAnalysisRepository.delete(analysis);
     }
 
+    // 음악 벌크 업로드
+    public void createBulk(MultipartFile bulkFile) throws IOException, CsvValidationException {
+        Reader reader = new InputStreamReader(bulkFile.getInputStream());
+        CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1).build();
+
+        String[] line;
+
+        while ((line = csvReader.readNext()) != null) {
+            try {
+                for (int i = 0; i < line.length; i++)
+                    line[i] = line[i].trim();
+
+                if (line[0].isEmpty())
+                    continue;
+
+                // TODO 가수 관련 처리 : line[1]
+                LocalDateTime releaseDate = LocalDateTime.parse(
+                        (line[4].contains(".") ? line[4].replace('.', '-') : line[4])
+                                + "T00:00:00"
+                );
+                List<String> themes = new ArrayList<>();
+                if (!line[7].isEmpty()) {
+                    String[] themeArray = line[7].split(",");
+                    themes = List.of(themeArray);
+                }
+
+                Music created = create(line[0], line[2], null, line[3], releaseDate, line[5], themes);
+                if (!line[6].isEmpty())
+                    created.setLyrics(line[6]);
+                musicRepository.save(created);
+
+                FileHandler.writeBulkUploadLog(line[0], "업로드 성공");
+            } catch (Exception e) {
+                FileHandler.writeBulkUploadLog(line[0], e.getMessage());
+                log.debug(e.getMessage());
+            }
+        }
+
+        csvReader.close();
+    }
+
     // 음악 상세정보 조회 (어드민)
     public Music readByAdmin(Long musicId) throws Exception {
         return musicRepository.findById(musicId).orElseThrow();
@@ -147,5 +188,18 @@ public class MusicService {
     // 특정 테마의 음악 목록 조회
     public Page<Music> listMusicOfTheme(Pageable pageable, String themeName) {
         return musicRepository.findAllByTheme(pageable, themeName);
+    }
+
+
+
+
+    private void saveThemes(List<String> themes, Music music) {
+        List<Theme> themeList = new ArrayList<>();
+        for (String theme : themes) {
+            Theme themeObj = new Theme(music, theme);
+            themeList.add(themeObj);
+            themeRepository.save(themeObj);
+        }
+        music.setThemes(themeList);
     }
 }
