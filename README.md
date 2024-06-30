@@ -2,6 +2,8 @@
 
 **하모나이즈**는 사용자의 목소리를 분석하여, 부르기 좋은 노래를 추천해주는 음악 추천 서비스입니다.
 
+![workflow](https://github.com/Lavender-Team/Harmonize-server/actions/workflows/gradle.yml/badge.svg)
+
 ## Built With
 
 ![Spring](https://img.shields.io/badge/Spring-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
