@@ -1,9 +1,12 @@
 package kr.ac.chungbuk.harmonize.controller;
 
 import kr.ac.chungbuk.harmonize.service.MusicAnalysisService;
+import kr.ac.chungbuk.harmonize.utility.FileHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.NonUniqueResultException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.NoSuchElementException;
 
 @Controller
 @Slf4j
@@ -40,6 +44,42 @@ public class MusicAnalysisController {
             musicAnalysisService.updateFiles(musicId, audioFile, lyricFile);
         } catch (Exception e) {
             log.debug(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("파일 업로드 중 오류가 발생하였습니다.");
+        }
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
+    }
+
+    // 앨범 커버, 음악, 가사 파일 업로드 (벌크 업로드: 파일 이름으로 음악 조회)
+    @PostMapping(path = "/api/music/bulk/files")
+    public ResponseEntity<String> updateFiles(MultipartFile albumCover, MultipartFile audioFile,
+                                              MultipartFile lyricFile) throws Exception {
+        String musicTitle = "";
+
+        try {
+            if (albumCover != null) {
+                musicTitle = getMusicTitle(albumCover);
+                musicAnalysisService.updateAlbumCover(albumCover);
+            }
+            else if (audioFile != null) {
+                musicTitle = getMusicTitle(audioFile);
+                musicAnalysisService.updateAudioFile(audioFile);
+            }
+            else if (lyricFile != null) {
+                musicTitle = getMusicTitle(lyricFile);
+                musicAnalysisService.updateLyricFile(lyricFile);
+            }
+
+        } catch (NoSuchElementException e) {
+            log.debug(e.getMessage());
+            FileHandler.writeBulkUploadLog("[이름오류] " + musicTitle, "제목이 일치하는 곡이 없음", true);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("파일 이름과 제목이 일치하는 곡이 없습니다.");
+        } catch (IncorrectResultSizeDataAccessException e) {
+            log.debug(e.getMessage());
+            FileHandler.writeBulkUploadLog("[이름오류] " + musicTitle, "같은 제목 곡 두 개 이상", true);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("파일 이름과 제목이 일치하는 곡이 두 개 이상 존재합니다.");
+        } catch (Exception e) {
+            log.debug(e.getMessage());
+            FileHandler.writeBulkUploadLog(musicTitle, "파일 관련 오류 발생", true);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("파일 업로드 중 오류가 발생하였습니다.");
         }
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
@@ -68,5 +108,9 @@ public class MusicAnalysisController {
     }
 
 
-
+    private String getMusicTitle(MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
+        assert originalFilename != null;
+        return originalFilename.substring(0, originalFilename.lastIndexOf("."));
+    }
 }

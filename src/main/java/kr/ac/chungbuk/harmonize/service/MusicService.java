@@ -160,9 +160,9 @@ public class MusicService {
                     created.setLyrics(line[6]);
                 musicRepository.save(created);
 
-                FileHandler.writeBulkUploadLog(line[0], "업로드 성공");
+                FileHandler.writeBulkUploadLog(line[0], "업로드 성공", false);
             } catch (Exception e) {
-                FileHandler.writeBulkUploadLog(line[0], e.getMessage());
+                FileHandler.writeBulkUploadLog(line[0], e.getMessage(), false);
                 log.debug(e.getMessage());
             }
         }

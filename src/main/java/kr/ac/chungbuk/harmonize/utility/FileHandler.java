@@ -126,8 +126,12 @@ public class FileHandler {
      * @param title  음악 제목
      * @param result 업로드 결과를 설명하는 문자열
      */
-    public static void writeBulkUploadLog(String title, String result) throws IOException {
-        File file = new File(System.getProperty("user.dir") + "/upload/bulk_log.txt");
+    public static void writeBulkUploadLog(String title, String result, boolean isFileUpload) throws IOException {
+        String filename = "bulk_log.txt";
+        if (isFileUpload)
+            filename = "bulk_file_log.txt";
+
+        File file = new File(System.getProperty("user.dir") + "/upload/" + filename);
         if (!file.exists()) {
             file.createNewFile();
         }
@@ -141,8 +145,12 @@ public class FileHandler {
     /**
      * 벌크 업로드 결과 파일의 내용을 지웁니다.
      */
-    public static void clearBulkUploadLog() throws IOException {
-        File file = new File(System.getProperty("user.dir") + "/upload/bulk_log.txt");
+    public static void clearBulkUploadLog(boolean isFileUpload) throws IOException {
+        String filename = "bulk_log.txt";
+        if (isFileUpload)
+            filename = "bulk_file_log.txt";
+
+        File file = new File(System.getProperty("user.dir") + "/upload/" + filename);
         if (!file.exists()) {
             file.createNewFile();
         }

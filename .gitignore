@@ -36,3 +36,4 @@ out/
 ### VS Code ###
 .vscode/
 /upload/
+src/main/resources/application.properties
