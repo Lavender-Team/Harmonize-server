@@ -7,7 +7,7 @@ import kr.ac.chungbuk.harmonize.repository.ArtistRepository;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -54,8 +54,7 @@ public class ArtistService {
     // 가수 수정
     @Transactional
     public void update(Long artistId, String artistName, String gender, MultipartFile profileImage,
-            String activityPeriod,
-            String nation, String agency) throws IOException {
+            String activityPeriod, String nation, String agency) throws IOException {
         // 가수 객체
         Artist artist = artistRepository.findById(artistId).orElseThrow();
         if (artistName != null)
@@ -102,8 +101,8 @@ public class ArtistService {
     }
 
     // 가수 목록 조회
-    public Page<Artist> list(int pageNo, int pageSize) {
-        return artistRepository.findAll(PageRequest.of(pageNo, pageSize));
+    public Page<Artist> list(Pageable pageable) {
+        return artistRepository.findAll(pageable);
     }
 
     public Optional<Artist> findById(Long artistId) {

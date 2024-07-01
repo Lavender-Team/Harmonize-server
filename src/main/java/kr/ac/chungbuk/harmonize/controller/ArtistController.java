@@ -4,6 +4,8 @@ import kr.ac.chungbuk.harmonize.entity.Artist;
 import kr.ac.chungbuk.harmonize.service.ArtistService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -60,7 +62,8 @@ public class ArtistController {
     @ResponseBody
     public Page<Artist> list(@RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
             @RequestParam(required = false, defaultValue = "10", value = "size") int pageSize) {
-        return artistService.list(pageNo, pageSize);
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        return artistService.list(pageable);
     }
 
     // 가수 수정
