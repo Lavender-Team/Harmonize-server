@@ -15,7 +15,8 @@ public class FileHandler {
 
     /**
      * 음악의 앨범 표지를 파일시스템에 저장할 때 사용합니다.
-     * @param file 저장할 앨범 표지 이미지 파일
+     * 
+     * @param file    저장할 앨범 표지 이미지 파일
      * @param musicId 음악 ID
      * @return 음악 파일에 접근하기 위한 URL
      * @throws IOException
@@ -37,6 +38,7 @@ public class FileHandler {
 
     /**
      * 음악의 앨범 표지를 파일시스템에서 삭제할 때 사용합니다.
+     * 
      * @param albumCoverPath 음악 파일에 접근하기 위한 URL (saveAlbumCoverFile의 return 값)
      * @throws IOException
      */
@@ -47,11 +49,11 @@ public class FileHandler {
         Files.deleteIfExists(Paths.get(directoryPath + filename));
     }
 
-
     /**
      * 음악의 오디오 파일을 파일시스템에 저장할 때 사용합니다.
+     * 
      * @param audioFile 저장할 앨범 표지 이미지 파일
-     * @param musicId 음악 ID
+     * @param musicId   음악 ID
      * @return 음악 파일에 접근하기 위한 URL
      * @throws IOException
      */
@@ -72,6 +74,7 @@ public class FileHandler {
 
     /**
      * 음악의 오디오 파일을 파일시스템에서 삭제할 때 사용합니다.
+     * 
      * @param audioFilePath 음악 파일에 접근하기 위한 URL (saveAudioFile의 return 값)
      * @throws IOException
      */
@@ -82,10 +85,45 @@ public class FileHandler {
         Files.deleteIfExists(Paths.get(directoryPath + filename));
     }
 
+    /**
+     * 가수의 프로필 이미지를 파일시스템에 저장할 때 사용합니다.
+     * 
+     * @param file     저장할 프로필 이미지 파일
+     * @param artistId 가수 ID
+     */
+    public static String saveProfileImageFile(MultipartFile file, Long artistId) throws IOException {
+        String directoryPath = System.getProperty("user.dir") + "/upload/profile/";
+        if (!new File(directoryPath).exists()) {
+            new File(directoryPath).mkdirs();
+        }
+
+        String fileExtension = StringUtils.getFilenameExtension(file.getOriginalFilename());
+        String filePath = directoryPath + "/" + Objects.requireNonNull(Objects.toString(artistId)) + "."
+                + fileExtension;
+
+        File destFile = new File(filePath);
+        file.transferTo(destFile);
+
+        return "/api/artist/profile/" + artistId + "." + fileExtension;
+    }
+
+    /**
+     * 가수의 프로필 이미지를 파일시스템에서 삭제할 때 사용합니다.
+     * 
+     * @param profileImagePath 가수 파일에 접근하기 위한 URL (saveProfileImageFile의 return 값)
+     * @param artistId         가수 ID
+     */
+    public static void deleteProfileImageFile(String profileImagePath, Long artistId) throws IOException {
+        String directoryPath = System.getProperty("user.dir") + "/upload/profile/";
+        String filename = profileImagePath.substring(profileImagePath.indexOf(String.valueOf(artistId)));
+
+        Files.deleteIfExists(Paths.get(directoryPath + filename));
+    }
 
     /**
      * 각 음악별로 벌크 업로드 결과를 파일로 작성합니다.
-     * @param title 음악 제목
+     * 
+     * @param title  음악 제목
      * @param result 업로드 결과를 설명하는 문자열
      */
     public static void writeBulkUploadLog(String title, String result) throws IOException {

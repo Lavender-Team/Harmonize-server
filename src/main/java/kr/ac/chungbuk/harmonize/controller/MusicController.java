@@ -37,14 +37,14 @@ public class MusicController {
         this.musicService = musicService;
     }
 
-
     // 음악 생성
     @PostMapping(path = "/api/music")
     public ResponseEntity<String> create(String title, String genre, String karaokeNum, String releaseDate,
-                                         String playLink, MultipartFile albumCover,
-                                         @RequestParam(value = "themes", defaultValue = "") List<String> themes) {
+            String playLink, MultipartFile albumCover,
+            @RequestParam(value = "themes", defaultValue = "") List<String> themes) {
         try {
-            musicService.create(title, genre, albumCover, karaokeNum, LocalDateTime.parse(releaseDate), playLink, themes);
+            musicService.create(title, genre, albumCover, karaokeNum, LocalDateTime.parse(releaseDate), playLink,
+                    themes);
         } catch (Exception e) {
             log.debug(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("음악 생성 중 오류가 발생하였습니다.");
@@ -55,8 +55,8 @@ public class MusicController {
     // 음악 수정
     @PutMapping(path = "/api/music/{musicId}")
     public ResponseEntity<String> update(@PathVariable Long musicId, String title, String genre, String karaokeNum,
-                                         String releaseDate, String playLink, MultipartFile albumCover,
-                                         @RequestParam(value = "themes", required = false) List<String> themes) {
+            String releaseDate, String playLink, MultipartFile albumCover,
+            @RequestParam(value = "themes", required = false) List<String> themes) {
         try {
             musicService.update(musicId, title, genre, albumCover, karaokeNum,
                     (releaseDate != null) ? LocalDateTime.parse(releaseDate) : null, playLink, themes);
@@ -130,7 +130,7 @@ public class MusicController {
     @GetMapping(path = "/api/music")
     @ResponseBody
     public Page<MusicListDTO> list(@RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
-                                   @RequestParam(required = false, defaultValue = "10", value = "size") int pageSize) {
+            @RequestParam(required = false, defaultValue = "10", value = "size") int pageSize) {
         try {
             Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "musicId"));
 
@@ -139,8 +139,7 @@ public class MusicController {
             return new PageImpl<>(
                     list.getContent().stream().map(MusicListDTO::build).toList(),
                     pageable,
-                    list.getTotalElements()
-            );
+                    list.getTotalElements());
         } catch (Exception e) {
             log.debug(e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
@@ -151,7 +150,7 @@ public class MusicController {
     @GetMapping(path = "/api/music/theme")
     @ResponseBody
     public Page<Theme> listThemes(@RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
-                             @RequestParam(required = false, defaultValue = "10", value = "size") int pageSize) {
+            @RequestParam(required = false, defaultValue = "10", value = "size") int pageSize) {
         try {
             Pageable pageable = PageRequest.of(pageNo, pageSize);
 
@@ -166,10 +165,9 @@ public class MusicController {
     @GetMapping(path = "/api/music/theme/music")
     @ResponseBody
     public Page<MusicListDTO> listMusicOfTheme(
-        @RequestParam(required = true) String themeName,
-        @RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
-        @RequestParam(required = false, defaultValue = "10", value = "size") int pageSize)
-    {
+            @RequestParam(required = true) String themeName,
+            @RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
+            @RequestParam(required = false, defaultValue = "10", value = "size") int pageSize) {
         try {
             Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "musicId"));
 
@@ -178,8 +176,7 @@ public class MusicController {
             return new PageImpl<>(
                     list.getContent().stream().map(MusicListDTO::build).toList(),
                     pageable,
-                    list.getTotalElements()
-            );
+                    list.getTotalElements());
         } catch (Exception e) {
             log.debug(e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
