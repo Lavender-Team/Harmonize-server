@@ -4,11 +4,15 @@ import jakarta.transaction.Transactional;
 import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.repository.MusicRepository;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
+import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.stream.Collectors;
 
 @Service
 public class MusicAnalysisService {
@@ -34,7 +38,10 @@ public class MusicAnalysisService {
             music.setAudioFile(audioFilePath);
         }
 
-        // TODO 가사 파일 읽어오기 및 저장 처리
+        // 가사 파일
+        if (lyricFile != null) {
+            saveLyric(lyricFile, music);
+        }
     }
 
     // 앨범 커버 파일 업로드 (벌크 업로드)
@@ -85,8 +92,22 @@ public class MusicAnalysisService {
         String musicTitle = originalFilename.substring(0, originalFilename.lastIndexOf("."));
         // TODO 중복된 음악 이름 처리를 위해 [가수명]을 제목에 포함하고 있으면 음악 조회시 사용하기
 
-        // TODO 가사 파일 읽기
-        FileHandler.writeBulkUploadLog("[가사] " + musicTitle, "아직 구현 안됨", true);
-        return;
+        Music music = musicRepository.findByTitle(musicTitle).orElseThrow();
+
+        saveLyric(lyricFile, music);
+        FileHandler.writeBulkUploadLog("[가사] " + musicTitle, "업로드 성공", true);
+    }
+
+
+
+    private void saveLyric(MultipartFile lyricFile, Music music) throws Exception {
+        if (lyricFile.getSize() > 10000) {
+            throw new SizeLimitExceededException("Too heavy lyricFile", lyricFile.getSize(), 10000);
+        }
+
+        InputStream stream = lyricFile.getInputStream();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        String lyric = reader.lines().collect(Collectors.joining("\n"));
+        music.setLyrics(lyric);
     }
 }

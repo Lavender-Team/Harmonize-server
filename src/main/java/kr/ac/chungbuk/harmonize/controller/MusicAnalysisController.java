@@ -3,6 +3,7 @@ package kr.ac.chungbuk.harmonize.controller;
 import kr.ac.chungbuk.harmonize.service.MusicAnalysisService;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
 import org.hibernate.NonUniqueResultException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
@@ -42,6 +43,9 @@ public class MusicAnalysisController {
                                               MultipartFile lyricFile) {
         try {
             musicAnalysisService.updateFiles(musicId, audioFile, lyricFile);
+        } catch (SizeLimitExceededException e) {
+            log.debug(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("가사 파일의 용량이 너무 큽니다.");
         } catch (Exception e) {
             log.debug(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("파일 업로드 중 오류가 발생하였습니다.");
@@ -77,6 +81,10 @@ public class MusicAnalysisController {
             log.debug(e.getMessage());
             FileHandler.writeBulkUploadLog("[이름오류] " + musicTitle, "같은 제목 곡 두 개 이상", true);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("파일 이름과 제목이 일치하는 곡이 두 개 이상 존재합니다.");
+        } catch (SizeLimitExceededException e) {
+            log.debug(e.getMessage());
+            FileHandler.writeBulkUploadLog(musicTitle, "가사 용량 너무 큼", true);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("가사 파일의 용량이 너무 큽니다.");
         } catch (Exception e) {
             log.debug(e.getMessage());
             FileHandler.writeBulkUploadLog(musicTitle, "파일 관련 오류 발생", true);
