@@ -27,17 +27,20 @@ public class ArtistController {
 
     // 가수 등록
     @PostMapping(path = "/api/artist")
-    public ResponseEntity<String> create(@RequestParam String artistName,
-            @RequestParam String gender,
-            @RequestParam(required = false) MultipartFile profileImage,
-            @RequestParam String activityPeriod,
-            @RequestParam String nation,
-            @RequestParam String agency) {
+    public ResponseEntity<String> create(@RequestParam("artistName") String artistName,
+            @RequestParam("gender") String gender,
+            @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
+            @RequestParam("activityPeriod") String activityPeriod,
+            @RequestParam("nation") String nation,
+            @RequestParam("agency") String agency) {
         try {
             artistService.create(artistName, gender, profileImage, activityPeriod, nation, agency);
             return ResponseEntity.status(HttpStatus.CREATED).body("Artist created successfully");
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create artist");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to create artist: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid input: " + e.getMessage());
         }
     }
 
@@ -50,7 +53,10 @@ public class ArtistController {
                 artistService.delete(artistId);
                 return ResponseEntity.status(HttpStatus.ACCEPTED).body("Artist deleted successfully");
             } catch (IOException e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete artist");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Failed to delete artist: " + e.getMessage());
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid input: " + e.getMessage());
             }
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Artist not found");
@@ -69,17 +75,20 @@ public class ArtistController {
     // 가수 수정
     @PutMapping(path = "/api/artist/{artistId}")
     public ResponseEntity<String> update(@PathVariable Long artistId,
-            @RequestParam(required = false) String artistName,
-            @RequestParam(required = false) String gender,
-            @RequestParam(required = false) MultipartFile profileImage,
-            @RequestParam(required = false) String activityPeriod,
-            @RequestParam(required = false) String nation,
-            @RequestParam(required = false) String agency) {
+            @RequestParam(value = "artistName", required = false) String artistName,
+            @RequestParam(value = "gender", required = false) String gender,
+            @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
+            @RequestParam(value = "activityPeriod", required = false) String activityPeriod,
+            @RequestParam(value = "nation", required = false) String nation,
+            @RequestParam(value = "agency", required = false) String agency) {
         try {
             artistService.update(artistId, artistName, gender, profileImage, activityPeriod, nation, agency);
             return ResponseEntity.status(HttpStatus.OK).body("Artist updated successfully");
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update artist");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to update artist: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid input: " + e.getMessage());
         }
     }
 }

@@ -36,7 +36,7 @@ public class MusicService {
 
     @Autowired
     public MusicService(MusicRepository musicRepository, MusicAnalysisRepository musicAnalysisRepository,
-                        ThemeRepository themeRepository) {
+            ThemeRepository themeRepository) {
         this.musicRepository = musicRepository;
         this.musicAnalysisRepository = musicAnalysisRepository;
         this.themeRepository = themeRepository;
@@ -44,7 +44,7 @@ public class MusicService {
 
     // 음악 생성
     public Music create(String title, String genre, MultipartFile albumCover, String karaokeNum,
-                       LocalDateTime releaseDate, String playLink, List<String> themes) throws Exception {
+            LocalDateTime releaseDate, String playLink, List<String> themes) throws Exception {
         // 음악 객체
         Music music = new Music();
         music.setTitle(title);
@@ -83,15 +83,20 @@ public class MusicService {
     // 음악 수정
     @Transactional
     public void update(Long musicId, String title, String genre, MultipartFile albumCover, String karaokeNum,
-                       LocalDateTime releaseDate, String playLink, List<String> themes) throws IOException {
+            LocalDateTime releaseDate, String playLink, List<String> themes) throws IOException {
 
         // 음악 객체
         Music music = musicRepository.findById(musicId).orElseThrow();
-        if (title != null) music.setTitle(title);
-        if (genre != null) music.setGenre(Genre.fromString(genre));
-        if (karaokeNum != null) music.setKaraokeNum(karaokeNum);
-        if (releaseDate != null) music.setReleaseDate(releaseDate);
-        if (playLink != null) music.setPlayLink(playLink);
+        if (title != null)
+            music.setTitle(title);
+        if (genre != null)
+            music.setGenre(Genre.fromString(genre));
+        if (karaokeNum != null)
+            music.setKaraokeNum(karaokeNum);
+        if (releaseDate != null)
+            music.setReleaseDate(releaseDate);
+        if (playLink != null)
+            music.setPlayLink(playLink);
 
         if (themes != null) {
             // 기존에 저장된 음악 테마(특징) 삭제
@@ -147,8 +152,7 @@ public class MusicService {
                 // TODO 가수 관련 처리 : line[1]
                 LocalDateTime releaseDate = LocalDateTime.parse(
                         (line[4].contains(".") ? line[4].replace('.', '-') : line[4])
-                                + "T00:00:00"
-                );
+                                + "T00:00:00");
                 List<String> themes = new ArrayList<>();
                 if (!line[7].isEmpty()) {
                     String[] themeArray = line[7].split(",");
@@ -189,9 +193,6 @@ public class MusicService {
     public Page<Music> listMusicOfTheme(Pageable pageable, String themeName) {
         return musicRepository.findAllByTheme(pageable, themeName);
     }
-
-
-
 
     private void saveThemes(List<String> themes, Music music) {
         List<Theme> themeList = new ArrayList<>();
