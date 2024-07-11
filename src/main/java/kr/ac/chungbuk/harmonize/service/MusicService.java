@@ -49,10 +49,10 @@ public class MusicService {
         Music music = new Music();
         music.setTitle(title);
         music.setGenre(Genre.fromString(genre));
-        if (!karaokeNum.isEmpty())
+        if (karaokeNum != null && !karaokeNum.isEmpty())
             music.setKaraokeNum(karaokeNum);
         music.setReleaseDate(releaseDate);
-        if (!playLink.isEmpty())
+        if (playLink != null && !playLink.isEmpty())
             music.setPlayLink(playLink);
         music.setView(0L);
         music.setLikes(0L);

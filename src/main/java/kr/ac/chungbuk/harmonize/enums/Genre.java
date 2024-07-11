@@ -37,6 +37,7 @@ public enum Genre {
         values.put("포크/블루스", FOLK);
         values.put("록/메탈", ROCK);
         values.put("OST", OST);
+        values.put("인디음악", INDIE);
         values.put("인디뮤직", INDIE);
         values.put("트로트", TROT);
         values.put("어린이곡", KID);

@@ -2,10 +2,12 @@ package kr.ac.chungbuk.harmonize.service;
 
 import jakarta.transaction.Transactional;
 import kr.ac.chungbuk.harmonize.entity.Music;
+import kr.ac.chungbuk.harmonize.enums.Status;
 import kr.ac.chungbuk.harmonize.repository.MusicRepository;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
 import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,10 +20,12 @@ import java.util.stream.Collectors;
 public class MusicAnalysisService {
 
     private final MusicRepository musicRepository;
+    private KafkaTemplate<String, String> kafkaTemplate;
 
     @Autowired
-    public MusicAnalysisService(MusicRepository musicRepository) {
+    public MusicAnalysisService(MusicRepository musicRepository, KafkaTemplate<String, String> kafkaTemplate) {
         this.musicRepository = musicRepository;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     // 음악 파일 및 가사 파일 업로드
@@ -98,8 +102,6 @@ public class MusicAnalysisService {
         FileHandler.writeBulkUploadLog("[가사] " + musicTitle, "업로드 성공", true);
     }
 
-
-
     private void saveLyric(MultipartFile lyricFile, Music music) throws Exception {
         if (lyricFile.getSize() > 10000) {
             throw new SizeLimitExceededException("Too heavy lyricFile", lyricFile.getSize(), 10000);
@@ -109,5 +111,31 @@ public class MusicAnalysisService {
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
         String lyric = reader.lines().collect(Collectors.joining("\n"));
         music.setLyrics(lyric);
+    }
+
+    // 음악 분석 요청 전송
+    @Transactional
+    public void analyze(Long musicId, Double confidence) throws Exception {
+        Music music = musicRepository.findById(musicId).orElseThrow();
+
+        if (music.getAudioFile() == null)
+            throw new Exception("Audio file not uploaded");
+
+        String path = System.getProperty("user.dir") + "/upload/audio/";
+        path = path.replace("\\", "\\\\");
+
+        int lastIndex = music.getAudioFile().lastIndexOf('/');
+        String filename = music.getAudioFile().substring(lastIndex + 1);
+
+        kafkaTemplate.send("musicAnalysis", String.format("""
+            {
+                "music_id": %d,
+                "confidence": %f,
+                "path": "%s",
+                "filename": "%s"
+            }
+        """, musicId, (confidence != null) ? confidence : 0.8, path, filename));
+
+        music.getAnalysis().setStatus(Status.RUNNING);
     }
 }

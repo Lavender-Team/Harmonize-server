@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -114,16 +115,20 @@ public class MusicController {
         String path = System.getProperty("user.dir") + "/upload/albumcover/" + filename;
 
         if (new File(path).exists()) {
-            FileSystemResource resource = new FileSystemResource(path);
-
-            return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType(Files.probeContentType(Path.of(path))))
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" +
-                            new String(filename.getBytes("UTF-8"), "ISO-8859-1") + "\"")
-                    .body(resource);
+            return getFileSystemResource(filename, path);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
         }
+    }
+
+    private ResponseEntity<FileSystemResource> getFileSystemResource(String filename, String path) throws IOException {
+        FileSystemResource resource = new FileSystemResource(path);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(Files.probeContentType(Path.of(path))))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" +
+                        new String(filename.getBytes("UTF-8"), "ISO-8859-1") + "\"")
+                .body(resource);
     }
 
     // 음악 목록 조회
