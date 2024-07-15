@@ -4,8 +4,6 @@ import kr.ac.chungbuk.harmonize.dto.MusicDTO;
 import kr.ac.chungbuk.harmonize.dto.MusicListDTO;
 import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.entity.Theme;
-import kr.ac.chungbuk.harmonize.repository.MusicRepository;
-import kr.ac.chungbuk.harmonize.service.MusicAnalysisService;
 import kr.ac.chungbuk.harmonize.service.MusicService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

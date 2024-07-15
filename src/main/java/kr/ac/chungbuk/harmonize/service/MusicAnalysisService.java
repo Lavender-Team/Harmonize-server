@@ -2,7 +2,9 @@ package kr.ac.chungbuk.harmonize.service;
 
 import jakarta.transaction.Transactional;
 import kr.ac.chungbuk.harmonize.entity.Music;
+import kr.ac.chungbuk.harmonize.entity.MusicAnalysis;
 import kr.ac.chungbuk.harmonize.enums.Status;
+import kr.ac.chungbuk.harmonize.repository.MusicAnalysisRepository;
 import kr.ac.chungbuk.harmonize.repository.MusicRepository;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
 import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
@@ -20,10 +22,11 @@ import java.util.stream.Collectors;
 public class MusicAnalysisService {
 
     private final MusicRepository musicRepository;
-    private KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
     @Autowired
-    public MusicAnalysisService(MusicRepository musicRepository, KafkaTemplate<String, String> kafkaTemplate) {
+    public MusicAnalysisService(MusicRepository musicRepository, KafkaTemplate<String, String> kafkaTemplate,
+                                MusicAnalysisRepository musicAnalysisRepository) {
         this.musicRepository = musicRepository;
         this.kafkaTemplate = kafkaTemplate;
     }
