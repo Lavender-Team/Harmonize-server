@@ -115,6 +115,18 @@ public class MusicAnalysisController {
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
+    // 음악 분석 특정 Pitch 값 제거 요청 전송
+    @PostMapping(path = "/api/music/{musicId}/delete")
+    public ResponseEntity<String> deletePitch(@PathVariable Long musicId, Double time) {
+        try {
+            musicAnalysisService.deletePitch(musicId, time);
+        } catch (Exception e) {
+            log.debug(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Pitch 삭제 요청 전송 중 오류가 발생하였습니다.");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
+
     // 음악 파일 다운로드
     @GetMapping(path = "/api/music/audio/{filename}")
     public ResponseEntity<FileSystemResource> getAudioFile(@PathVariable String filename) throws IOException {

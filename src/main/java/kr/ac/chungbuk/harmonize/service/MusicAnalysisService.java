@@ -132,6 +132,7 @@ public class MusicAnalysisService {
 
         kafkaTemplate.send("musicAnalysis", String.format("""
             {
+                "command": "analysis",
                 "music_id": %d,
                 "confidence": %f,
                 "path": "%s",
@@ -140,5 +141,25 @@ public class MusicAnalysisService {
         """, musicId, (confidence != null) ? confidence : 0.8, path, filename));
 
         music.getAnalysis().setStatus(Status.RUNNING);
+    }
+    
+    // 음악 분석 특정 Pitch 값 제거 요청 전송
+    public void deletePitch(Long musicId, Double time) throws Exception {
+        Music music = musicRepository.findById(musicId).orElseThrow();
+
+        if (music.getAnalysis().getStatus() != Status.COMPLETE)
+            throw new Exception("Analysis status is not COMPLETE");
+
+        String path = System.getProperty("user.dir") + "/upload/audio/";
+        path = path.replace("\\", "\\\\");
+
+        kafkaTemplate.send("musicAnalysis", String.format("""
+            {
+                "command": "delete",
+                "music_id": %d,
+                "time": %f,
+                "path": "%s"
+            }
+        """, musicId, time, path));
     }
 }
