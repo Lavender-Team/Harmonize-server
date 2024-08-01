@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import kr.ac.chungbuk.harmonize.enums.Gender;
 import lombok.Data;
 
+import java.util.List;
+
 @Entity
 @Data
 public class Artist {
@@ -30,4 +32,7 @@ public class Artist {
 
     @Column(nullable = true)
     private String profileImage;                // 가수 프로필 이미지
+
+    @OneToMany(mappedBy = "artist", fetch = FetchType.EAGER)
+    private List<GroupMember> groups;
 }
