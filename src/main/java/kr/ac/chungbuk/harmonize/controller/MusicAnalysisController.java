@@ -137,7 +137,7 @@ public class MusicAnalysisController {
         String path = System.getProperty("user.dir") + "/upload/audio/" + filename;
 
         if (new File(path).exists()) {
-            return getFileSystemResource(filename, path);
+            return FileHandler.getFileSystemResource(filename, path);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
         }
@@ -150,20 +150,10 @@ public class MusicAnalysisController {
         String path = System.getProperty("user.dir") + "/upload/audio/" + musicId + "/pitch.xlsx";
 
         if (new File(path).exists()) {
-            return getFileSystemResource("pitch.xlsx", path);
+            return FileHandler.getFileSystemResource("pitch.xlsx", path);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
         }
-    }
-
-    private ResponseEntity<FileSystemResource> getFileSystemResource(String filename, String path) throws IOException {
-        FileSystemResource resource = new FileSystemResource(path);
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(Files.probeContentType(Path.of(path))))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" +
-                        new String(filename.getBytes("UTF-8"), "ISO-8859-1") + "\"")
-                .body(resource);
     }
 
 }

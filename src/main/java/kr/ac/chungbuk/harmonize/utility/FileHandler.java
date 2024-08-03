@@ -1,5 +1,9 @@
 package kr.ac.chungbuk.harmonize.utility;
 
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -8,6 +12,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
@@ -157,5 +162,22 @@ public class FileHandler {
         FileWriter fw = new FileWriter(file);
         BufferedWriter writer = new BufferedWriter(fw);
         writer.close();
+    }
+
+    public static ResponseEntity<FileSystemResource> getFileSystemResource(String filename, String path) throws IOException {
+        FileSystemResource resource = new FileSystemResource(path);
+
+        MediaType mediaType;
+        try {
+            mediaType = MediaType.parseMediaType(Files.probeContentType(Path.of(path)));
+        } catch (Exception e){
+            mediaType = MediaType.parseMediaType("application/octet-stream");
+        }
+
+        return ResponseEntity.ok()
+                .contentType(mediaType)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" +
+                        new String(filename.getBytes("UTF-8"), "ISO-8859-1") + "\"")
+                .body(resource);
     }
 }

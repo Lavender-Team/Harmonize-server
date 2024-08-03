@@ -20,6 +20,7 @@ public class MusicListDTO {
     private String artist;
     private String genre;
     private String status;
+    private String albumCover;
     private Long view;
     private Long likes;
     private List<String> themes;
@@ -31,6 +32,7 @@ public class MusicListDTO {
                 .artist("구현안됨")
                 .genre(music.getGenre().name())
                 .status(music.getAnalysis().getStatus().name())
+                .albumCover(music.getAlbumCover())
                 .view(music.getView())
                 .likes(music.getLikes())
                 .themes(music.getThemes().stream().map(Theme::getThemeName).toList())
