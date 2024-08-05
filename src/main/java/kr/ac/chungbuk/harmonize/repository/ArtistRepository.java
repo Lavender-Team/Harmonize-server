@@ -15,6 +15,8 @@ public interface ArtistRepository extends JpaRepository<Artist, Long> {
 
     Page<Artist> findAll(Pageable pageable);
 
+    Page<Artist> findByArtistNameContaining(String artistName, Pageable pageable);
+
     @Query("SELECT a FROM Artist a WHERE a.nation = :nation")
     Page<Artist> findAllByNation(Pageable pageable, String nation);
 

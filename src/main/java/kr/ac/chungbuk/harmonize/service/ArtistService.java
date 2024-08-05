@@ -105,6 +105,11 @@ public class ArtistService {
         return artistRepository.findAll(pageable);
     }
 
+    // 가수 이름 검색
+    public Page<Artist> search(String artistName, Pageable pageable) {
+        return artistRepository.findByArtistNameContaining(artistName, pageable);
+    }
+
     public Optional<Artist> findById(Long artistId) {
         return artistRepository.findById(artistId);
     }

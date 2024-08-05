@@ -126,6 +126,41 @@ public class FileHandler {
     }
 
     /**
+     * 그룹의 프로필 이미지를 파일시스템에 저장할 때 사용합니다.
+     *
+     * @param file     저장할 프로필 이미지 파일
+     * @param groupId  그룹 ID
+     */
+    public static String saveGroupProfileImageFile(MultipartFile file, Long groupId) throws IOException {
+        String directoryPath = System.getProperty("user.dir") + "/upload/group/profile/";
+        if (!new File(directoryPath).exists()) {
+            new File(directoryPath).mkdirs();
+        }
+
+        String fileExtension = StringUtils.getFilenameExtension(file.getOriginalFilename());
+        String filePath = directoryPath + "/" + Objects.requireNonNull(Objects.toString(groupId)) + "."
+                + fileExtension;
+
+        File destFile = new File(filePath);
+        file.transferTo(destFile);
+
+        return "/api/group/profile/" + groupId + "." + fileExtension;
+    }
+
+    /**
+     * 그룹의 프로필 이미지를 파일시스템에서 삭제할 때 사용합니다.
+     *
+     * @param profileImagePath 그룹 프로필 이미지 파일에 접근하기 위한 URL (saveProfileImageFile의 return 값)
+     * @param groupId          그룹 ID
+     */
+    public static void deleteGroupProfileImageFile(String profileImagePath, Long groupId) throws IOException {
+        String directoryPath = System.getProperty("user.dir") + "/upload/group/profile/";
+        String filename = profileImagePath.substring(profileImagePath.indexOf(String.valueOf(groupId)));
+
+        Files.deleteIfExists(Paths.get(directoryPath + filename));
+    }
+
+    /**
      * 각 음악별로 벌크 업로드 결과를 파일로 작성합니다.
      * 
      * @param title  음악 제목

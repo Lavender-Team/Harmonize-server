@@ -114,7 +114,6 @@ public class MusicService {
                 String albumCoverPath = FileHandler.saveAlbumCoverFile(albumCover, music.getMusicId()); // 새 파일 저장
                 music.setAlbumCover(albumCoverPath);
             } catch (IOException e) {
-                musicRepository.delete(music);
                 throw e;
             }
         }

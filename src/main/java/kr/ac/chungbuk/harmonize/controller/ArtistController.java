@@ -74,10 +74,16 @@ public class ArtistController {
     // 가수 목록 조회
     @GetMapping(path = "/api/artist")
     @ResponseBody
-    public Page<ArtistDTO> list(@RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
+    public Page<ArtistDTO> list(String artistName,
+            @RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
             @RequestParam(required = false, defaultValue = "10", value = "size") int pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
-        Page<Artist> list = artistService.list(pageable);
+        Page<Artist> list;
+
+        if (artistName == null || artistName.isEmpty())
+            list = artistService.list(pageable);
+        else
+            list = artistService.search(artistName, pageable);
 
         return new PageImpl<>(
                 list.getContent().stream().map(ArtistDTO::build).toList(),

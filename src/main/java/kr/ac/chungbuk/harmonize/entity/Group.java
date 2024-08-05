@@ -12,7 +12,7 @@ public class Group {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long groupId;
+    private Long groupId;
 
     @Column(length = 50, nullable = false)
     private String groupName;                       // 그룹 이름
