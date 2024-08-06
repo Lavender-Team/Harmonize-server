@@ -34,7 +34,6 @@ public class GroupService {
         Group group = new Group();
         group.setGroupName(groupName);
         group.setGroupType(GroupType.fromString(groupType));
-        group.setGroupSize(artistIds == null ? 0 : artistIds.size());
         group.setAgency(agency);
         group = groupRepository.save(group);
 
@@ -50,12 +49,16 @@ public class GroupService {
         }
 
         // 그룹 멤버
+        int groupSize = 0;
         if (artistIds != null) {
             for (Long artistId : artistIds) {
-                if (artistRepository.existsById(artistId))
+                if (artistRepository.existsById(artistId)) {
                     groupRepository.addMember(group.getGroupId(), artistId);
+                    groupSize++;
+                }
             }
         }
+        group.setGroupSize(groupSize);
     }
 
     @Transactional
@@ -82,13 +85,17 @@ public class GroupService {
         }
 
         // 그룹 멤버
+        int groupSize = 0;
         if (artistIds != null) {
             groupRepository.clearMember(group.getGroupId());
             for (Long artistId : artistIds) {
-                if (artistRepository.existsById(artistId))
+                if (artistRepository.existsById(artistId)) {
                     groupRepository.addMember(group.getGroupId(), artistId);
+                    groupSize++;
+                }
             }
         }
+        group.setGroupSize(groupSize);
     }
 
     // 그룹 삭제
@@ -105,5 +112,15 @@ public class GroupService {
     // 그룹 목록 조회
     public Page<Group> list(Pageable pageable) {
         return groupRepository.findAll(pageable);
+    }
+
+    // 그룹 목록 검색
+    public Page<Group> search(String groupName, Pageable pageable) {
+        return groupRepository.findByGroupNameContaining(groupName, pageable);
+    }
+
+    // 그룹 상세정보 조회
+    public Group findById(Long groupId) {
+        return groupRepository.findById(groupId).orElseThrow();
     }
 }

@@ -17,6 +17,11 @@ public interface MusicRepository extends JpaRepository<Music, Long> {
 
     Page<Music> findAll(Pageable pageable);
 
+    Page<Music> findByTitleContaining(String title, Pageable pageable);
+
     @Query("SELECT m FROM Music m INNER JOIN Theme t ON m.musicId = t.music.musicId WHERE t.themeName = :themeName")
-    Page<Music> findAllByTheme(Pageable pageable, String themeName);
+    Page<Music> findAllByTheme(String themeName, Pageable pageable);
+
+    @Query("SELECT m FROM Music m INNER JOIN Theme t ON m.musicId = t.music.musicId WHERE t.themeName = :themeName AND m.title LIKE %:title%")
+    Page<Music> findAllByThemeTitleContaining(String title, String themeName, Pageable pageable);
 }

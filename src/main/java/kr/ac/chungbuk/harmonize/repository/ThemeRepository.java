@@ -14,6 +14,9 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
     @Query(value = "SELECT DISTINCT t.themeName FROM Theme t")
     Page<Theme> findUniqueThemeNames(Pageable pageable);
 
+    @Query(value = "SELECT DISTINCT t.themeName FROM Theme t WHERE t.themeName LIKE %:themeName%")
+    Page<Theme> findUniqueThemeNamesContaining(String themeName, Pageable pageable);
+
     List<Theme> findByThemeName(String themeName);
 
     void deleteAllByMusic(Music music);

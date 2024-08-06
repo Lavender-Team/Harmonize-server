@@ -12,6 +12,8 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 
     Page<Group> findAll(Pageable pageable);
 
+    Page<Group> findByGroupNameContaining(String groupName, Pageable pageable);
+
     @Query(value = "INSERT INTO group_member (group_id, artist_id) VALUES (:groupId, :artistId)", nativeQuery = true)
     void addMember(Long groupId, Long artistId);
 

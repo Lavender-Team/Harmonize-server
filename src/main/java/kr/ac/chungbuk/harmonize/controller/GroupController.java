@@ -71,12 +71,17 @@ public class GroupController {
     // 그룹 목록 조회
     @GetMapping(path = "/api/group")
     @ResponseBody
-    public Page<GroupDTO> list(@RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
-                               @RequestParam(required = false, defaultValue = "10", value = "size") int pageSize) {
+    public Page<GroupDTO> list(String groupName,
+            @RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
+           @RequestParam(required = false, defaultValue = "10", value = "size") int pageSize) {
         try {
             Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "groupId"));
 
-            Page<Group> list = groupService.list(pageable);
+            Page<Group> list;
+            if (groupName == null || groupName.isEmpty())
+                list = groupService.list(pageable);
+            else
+                list = groupService.search(groupName, pageable);
 
             return new PageImpl<>(
                     list.getContent().stream().map(GroupDTO::build).toList(),
@@ -84,6 +89,19 @@ public class GroupController {
                     list.getTotalElements());
         } catch (Exception e) {
             log.debug(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    // 그룹 상세정보 조회
+    @GetMapping("/api/group/{groupId}")
+    @ResponseBody
+    public GroupDTO readByAdmin(@PathVariable Long groupId) {
+        try {
+            Group group = groupService.findById(groupId);
+            return GroupDTO.build(group);
+        } catch (Exception e) {
+            log.info(e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }

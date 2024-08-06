@@ -188,9 +188,24 @@ public class MusicService {
         return themeRepository.findUniqueThemeNames(pageable);
     }
 
+    // 전체 테마 목록 검색
+    public Page<Theme> searchThemes(String themeName, Pageable pageable) {
+        return themeRepository.findUniqueThemeNamesContaining(themeName, pageable);
+    }
+
     // 특정 테마의 음악 목록 조회
-    public Page<Music> listMusicOfTheme(Pageable pageable, String themeName) {
-        return musicRepository.findAllByTheme(pageable, themeName);
+    public Page<Music> listMusicOfTheme(String themeName, Pageable pageable) {
+        return musicRepository.findAllByTheme(themeName, pageable);
+    }
+
+    // 특정 테마의 음악 목록 검색
+    public Page<Music> searchMusicOfTheme(String title, String themeName, Pageable pageable) {
+        return musicRepository.findAllByThemeTitleContaining(title, themeName, pageable);
+    }
+
+    // 음악 제목 검색
+    public Page<Music> search(String title, Pageable pageable) {
+        return musicRepository.findByTitleContaining(title, pageable);
     }
 
     private void saveThemes(List<String> themes, Music music) {

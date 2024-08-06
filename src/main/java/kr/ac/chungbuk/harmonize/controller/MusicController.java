@@ -123,12 +123,18 @@ public class MusicController {
     // 음악 목록 조회
     @GetMapping(path = "/api/music")
     @ResponseBody
-    public Page<MusicListDTO> list(@RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
+    public Page<MusicListDTO> list(String title,
+            @RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
             @RequestParam(required = false, defaultValue = "10", value = "size") int pageSize) {
         try {
             Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "musicId"));
 
-            Page<Music> list = musicService.list(pageable);
+            Page<Music> list;
+
+            if (title == null || title.isEmpty())
+                list = musicService.list(pageable);
+            else
+                list = musicService.search(title, pageable);
 
             return new PageImpl<>(
                     list.getContent().stream().map(MusicListDTO::build).toList(),
@@ -143,12 +149,19 @@ public class MusicController {
     // 전체 테마 목록 조회
     @GetMapping(path = "/api/music/theme")
     @ResponseBody
-    public Page<Theme> listThemes(@RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
+    public Page<Theme> listThemes(String themeName,
+            @RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
             @RequestParam(required = false, defaultValue = "10", value = "size") int pageSize) {
         try {
             Pageable pageable = PageRequest.of(pageNo, pageSize);
 
-            return musicService.listThemes(pageable);
+            Page<Theme> list;
+            if (themeName == null || themeName.isEmpty())
+                list = musicService.listThemes(pageable);
+            else
+                list = musicService.searchThemes(themeName, pageable);
+
+            return list;
         } catch (Exception e) {
             log.debug(e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
@@ -158,14 +171,18 @@ public class MusicController {
     // 특정 테마의 음악 목록 조회
     @GetMapping(path = "/api/music/theme/music")
     @ResponseBody
-    public Page<MusicListDTO> listMusicOfTheme(
-            @RequestParam(required = true) String themeName,
+    public Page<MusicListDTO> listMusicOfTheme(String themeName, String title,
             @RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
             @RequestParam(required = false, defaultValue = "10", value = "size") int pageSize) {
         try {
             Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "musicId"));
 
-            Page<Music> list = musicService.listMusicOfTheme(pageable, themeName);
+            Page<Music> list;
+
+            if (title == null || title.isEmpty())
+                list = musicService.listMusicOfTheme(themeName, pageable);
+            else
+                list = musicService.searchMusicOfTheme(title, themeName, pageable);
 
             return new PageImpl<>(
                     list.getContent().stream().map(MusicListDTO::build).toList(),
