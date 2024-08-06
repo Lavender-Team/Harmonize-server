@@ -30,6 +30,9 @@ public class Group {
     @Column(nullable = true)
     private String profileImage;                    // 그룹 프로필 이미지
 
+    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
+    private List<Music> musics;
+
     @OneToMany(mappedBy = "group", fetch = FetchType.EAGER)
     private List<GroupMember> members;
 }

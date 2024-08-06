@@ -29,7 +29,7 @@ public class MusicListDTO {
         return MusicListDTO.builder()
                 .id(music.getMusicId())
                 .title(music.getTitle())
-                .artist("구현안됨")
+                .artist((music.getGroup() == null) ? "-" : music.getGroup().getGroupName())
                 .genre(music.getGenre().name())
                 .status(music.getAnalysis().getStatus().name())
                 .albumCover(music.getAlbumCover())

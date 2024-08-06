@@ -33,6 +33,7 @@ public class GroupService {
                        MultipartFile profileImage) throws IOException {
         Group group = new Group();
         group.setGroupName(groupName);
+        group.setGroupSize(artistIds.size());
         group.setGroupType(GroupType.fromString(groupType));
         group.setAgency(agency);
         group = groupRepository.save(group);

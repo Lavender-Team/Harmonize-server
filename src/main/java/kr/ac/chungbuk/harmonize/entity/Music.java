@@ -46,6 +46,10 @@ public class Music {
     private Long view;                  // 조회 수
     private Long likes;                 // 좋아요 수
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "groupId", nullable = true)
+    private Group group;
+
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "musicId", nullable = false)
     private MusicAnalysis analysis;     // 음악 분석 결과

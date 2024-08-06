@@ -45,7 +45,7 @@ public class MusicDTO {
         return MusicDTO.builder()
                 .id(music.getMusicId())
                 .title(music.getTitle())
-                .artist("구현안됨")
+                .artist((music.getGroup() == null) ? "-" : music.getGroup().getGroupName())
                 .genre(music.getGenre().name())
                 .karaokeNum(music.getKaraokeNum())
                 .releaseDate(music.getReleaseDate())

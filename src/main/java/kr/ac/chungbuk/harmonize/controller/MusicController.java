@@ -40,11 +40,11 @@ public class MusicController {
     // 음악 생성
     @PostMapping(path = "/api/music")
     public ResponseEntity<String> create(String title, String genre, String karaokeNum, String releaseDate,
-            String playLink, MultipartFile albumCover,
+            String playLink, MultipartFile albumCover, Long groupId,
             @RequestParam(value = "themes", defaultValue = "") List<String> themes) {
         try {
             musicService.create(title, genre, albumCover, karaokeNum, LocalDateTime.parse(releaseDate), playLink,
-                    themes);
+                    themes, groupId);
         } catch (Exception e) {
             log.debug(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("음악 생성 중 오류가 발생하였습니다.");
@@ -56,10 +56,10 @@ public class MusicController {
     @PutMapping(path = "/api/music/{musicId}")
     public ResponseEntity<String> update(@PathVariable Long musicId, String title, String genre, String karaokeNum,
             String releaseDate, String playLink, MultipartFile albumCover,
-            @RequestParam(value = "themes", required = false) List<String> themes) {
+            @RequestParam(value = "themes", required = false) List<String> themes, Long groupId) {
         try {
             musicService.update(musicId, title, genre, albumCover, karaokeNum,
-                    (releaseDate != null) ? LocalDateTime.parse(releaseDate) : null, playLink, themes);
+                    (releaseDate != null) ? LocalDateTime.parse(releaseDate) : null, playLink, themes, groupId);
         } catch (Exception e) {
             log.debug(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("음악 편집 중 오류가 발생하였습니다.");

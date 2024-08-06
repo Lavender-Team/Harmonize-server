@@ -4,10 +4,12 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvValidationException;
 import jakarta.transaction.Transactional;
+import kr.ac.chungbuk.harmonize.entity.Group;
 import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.entity.MusicAnalysis;
 import kr.ac.chungbuk.harmonize.entity.Theme;
 import kr.ac.chungbuk.harmonize.enums.Genre;
+import kr.ac.chungbuk.harmonize.repository.GroupRepository;
 import kr.ac.chungbuk.harmonize.repository.MusicAnalysisRepository;
 import kr.ac.chungbuk.harmonize.repository.MusicRepository;
 import kr.ac.chungbuk.harmonize.repository.ThemeRepository;
@@ -25,6 +27,7 @@ import java.io.Reader;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -32,19 +35,21 @@ public class MusicService {
 
     private final MusicRepository musicRepository;
     private final MusicAnalysisRepository musicAnalysisRepository;
+    private final GroupRepository groupRepository;
     private final ThemeRepository themeRepository;
 
     @Autowired
     public MusicService(MusicRepository musicRepository, MusicAnalysisRepository musicAnalysisRepository,
-            ThemeRepository themeRepository) {
+            GroupRepository groupRepository, ThemeRepository themeRepository) {
         this.musicRepository = musicRepository;
         this.musicAnalysisRepository = musicAnalysisRepository;
+        this.groupRepository = groupRepository;
         this.themeRepository = themeRepository;
     }
 
     // 음악 생성
     public Music create(String title, String genre, MultipartFile albumCover, String karaokeNum,
-            LocalDateTime releaseDate, String playLink, List<String> themes) throws Exception {
+            LocalDateTime releaseDate, String playLink, List<String> themes, Long groupId) throws Exception {
         // 음악 객체
         Music music = new Music();
         music.setTitle(title);
@@ -62,6 +67,12 @@ public class MusicService {
         // 음악 분석 결과
         MusicAnalysis analysis = new MusicAnalysis(music.getMusicId());
         musicAnalysisRepository.save(analysis);
+
+        // 가수(그룹)
+        if (groupId != null) {
+            Optional<Group> group = groupRepository.findById(groupId);
+            group.ifPresent(music::setGroup);
+        }
 
         // 음악 테마(특징)
         saveThemes(themes, music);
@@ -83,7 +94,7 @@ public class MusicService {
     // 음악 수정
     @Transactional
     public void update(Long musicId, String title, String genre, MultipartFile albumCover, String karaokeNum,
-            LocalDateTime releaseDate, String playLink, List<String> themes) throws IOException {
+            LocalDateTime releaseDate, String playLink, List<String> themes, Long groupId) throws IOException {
 
         // 음악 객체
         Music music = musicRepository.findById(musicId).orElseThrow();
@@ -98,11 +109,15 @@ public class MusicService {
         if (playLink != null)
             music.setPlayLink(playLink);
 
-        if (themes != null) {
-            // 기존에 저장된 음악 테마(특징) 삭제
-            themeRepository.deleteAllByMusic(music);
+        // 가수(그룹)
+        if (groupId != null) {
+            Optional<Group> group = groupRepository.findById(groupId);
+            group.ifPresent(music::setGroup);
+        }
 
-            // 음악 테마(특징) 저장
+        // 음악 테마(특징)
+        if (themes != null) {
+            themeRepository.deleteAllByMusic(music);
             saveThemes(themes, music);
         }
 
@@ -158,7 +173,7 @@ public class MusicService {
                     themes = List.of(themeArray);
                 }
 
-                Music created = create(line[0], line[2], null, line[3], releaseDate, line[5], themes);
+                Music created = create(line[0], line[2], null, line[3], releaseDate, line[5], themes, null);
                 if (!line[6].isEmpty())
                     created.setLyrics(line[6]);
                 musicRepository.save(created);
