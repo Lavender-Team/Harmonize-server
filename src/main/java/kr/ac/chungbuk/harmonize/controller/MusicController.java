@@ -81,9 +81,10 @@ public class MusicController {
 
     // 음악 벌크 업로드
     @PostMapping("/api/music/bulk")
-    public ResponseEntity<String> createBulk(MultipartFile bulkFile) {
+    public ResponseEntity<String> createBulk(MultipartFile bulkFile,
+                                             @RequestParam(value="charset", defaultValue="utf-8") String charset) {
         try {
-            musicService.createBulk(bulkFile);
+            musicService.createBulk(bulkFile, charset);
         } catch (Exception e) {
             log.debug(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("음악 벌크 업로드 중 오류가 발생하였습니다.");

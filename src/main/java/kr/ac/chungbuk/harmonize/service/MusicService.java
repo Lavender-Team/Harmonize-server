@@ -149,8 +149,8 @@ public class MusicService {
     }
 
     // 음악 벌크 업로드
-    public void createBulk(MultipartFile bulkFile) throws IOException, CsvValidationException {
-        Reader reader = new InputStreamReader(bulkFile.getInputStream());
+    public void createBulk(MultipartFile bulkFile, String charset) throws IOException, CsvValidationException {
+        Reader reader = new InputStreamReader(bulkFile.getInputStream(), charset);
         CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1).build();
 
         String[] line;
