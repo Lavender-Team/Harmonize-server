@@ -2,6 +2,7 @@ package kr.ac.chungbuk.harmonize.dto;
 
 import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.entity.Theme;
+import kr.ac.chungbuk.harmonize.enums.Genre;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +20,7 @@ public class MusicListDTO {
     private String title;
     private String artist;
     private String genre;
+    private String genreName;
     private String status;
     private String albumCover;
     private Long view;
@@ -31,6 +33,7 @@ public class MusicListDTO {
                 .title(music.getTitle())
                 .artist((music.getGroup() == null) ? "-" : music.getGroup().getGroupName())
                 .genre(music.getGenre().name())
+                .genreName(Genre.toString(music.getGenre()))
                 .status(music.getAnalysis().getStatus().name())
                 .albumCover(music.getAlbumCover())
                 .view(music.getView())

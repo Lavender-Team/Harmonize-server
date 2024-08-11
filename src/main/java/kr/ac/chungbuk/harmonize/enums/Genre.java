@@ -43,11 +43,32 @@ public enum Genre {
         values.put("어린이곡", KID);
     }
 
+    private static final Map<Genre, String> names = new HashMap<>();
+    static {
+        names.put(KPOP, "가요");
+        names.put(POP, "팝송");
+        names.put(BALLADE, "발라드");
+        names.put(RAP, "랩/힙합");
+        names.put(DANCE, "댄스");
+        names.put(JPOP, "일본곡");
+        names.put(RNB, "R&B");
+        names.put(FOLK, "포크/블루스");
+        names.put(ROCK, "록/메탈");
+        names.put(OST, "OST");
+        names.put(INDIE, "인디뮤직");
+        names.put(TROT, "트로트");
+        names.put(KID, "어린이곡");
+    }
+
     public static Genre fromString(String value) throws IllegalArgumentException {
         Genre genre = values.get(value);
         if (values.get(value) == null)
             throw new IllegalArgumentException("invalid genre string");
         else
             return genre;
+    }
+
+    public static String toString(Genre genre) {
+        return names.get(genre);
     }
 }

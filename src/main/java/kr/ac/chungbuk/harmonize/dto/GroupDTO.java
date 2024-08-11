@@ -1,6 +1,7 @@
 package kr.ac.chungbuk.harmonize.dto;
 
 import kr.ac.chungbuk.harmonize.entity.Group;
+import kr.ac.chungbuk.harmonize.enums.GroupType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +18,7 @@ public class GroupDTO {
     Long id;
     private String groupName;
     private String groupType;
+    private String groupTypeName;
     private Integer groupSize;
     private String agency;
     private String profileImage;
@@ -27,6 +29,7 @@ public class GroupDTO {
                 .id(group.getGroupId())
                 .groupName(group.getGroupName())
                 .groupType(group.getGroupType().name())
+                .groupTypeName(GroupType.toString(group.getGroupType()))
                 .groupSize(group.getGroupSize())
                 .agency(group.getAgency())
                 .profileImage(group.getProfileImage())

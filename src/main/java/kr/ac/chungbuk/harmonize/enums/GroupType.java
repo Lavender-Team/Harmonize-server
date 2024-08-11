@@ -23,4 +23,10 @@ public enum GroupType {
         else
             return groupType;
     }
+
+    public static String toString(GroupType groupType) {
+        if (groupType == SOLO) return "솔로";
+        if (groupType == GROUP) return "그룹";
+        return "";
+    }
 }

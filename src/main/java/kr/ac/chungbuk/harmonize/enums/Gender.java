@@ -25,4 +25,11 @@ public enum Gender {
         else
             return genre;
     }
+
+    public static String toString(Gender gender) {
+        if (gender == MALE) return "남성";
+        if (gender == FEMALE) return "여성";
+        if (gender == ETC) return "기타";
+        return "";
+    }
 }

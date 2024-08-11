@@ -1,6 +1,7 @@
 package kr.ac.chungbuk.harmonize.dto;
 
 import kr.ac.chungbuk.harmonize.entity.Artist;
+import kr.ac.chungbuk.harmonize.enums.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +18,7 @@ public class ArtistDTO {
     private Long id;
     private String artistName;
     private String gender;
+    private String genderName;
     private String activityPeriod;
     private String nation;
     private String agency;
@@ -27,6 +29,7 @@ public class ArtistDTO {
                 .id(artist.getArtistId())
                 .artistName(artist.getArtistName())
                 .gender(artist.getGender().name())
+                .genderName(Gender.toString(artist.getGender()))
                 .activityPeriod(artist.getActivityPeriod())
                 .nation(artist.getNation())
                 .agency(artist.getAgency())
