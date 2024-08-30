@@ -4,6 +4,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvValidationException;
 import jakarta.transaction.Transactional;
+import kr.ac.chungbuk.harmonize.dto.request.MusicRequestDto;
 import kr.ac.chungbuk.harmonize.entity.Group;
 import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.entity.MusicAnalysis;
@@ -19,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -38,27 +41,27 @@ public class MusicService {
     private final GroupRepository groupRepository;
     private final ThemeRepository themeRepository;
 
+    Validator validator;
+
     @Autowired
     public MusicService(MusicRepository musicRepository, MusicAnalysisRepository musicAnalysisRepository,
-            GroupRepository groupRepository, ThemeRepository themeRepository) {
+            GroupRepository groupRepository, ThemeRepository themeRepository, Validator validator) {
         this.musicRepository = musicRepository;
         this.musicAnalysisRepository = musicAnalysisRepository;
         this.groupRepository = groupRepository;
         this.themeRepository = themeRepository;
+        this.validator = validator;
     }
 
     // 음악 생성
-    public Music create(String title, String genre, MultipartFile albumCover, String karaokeNum,
-            LocalDateTime releaseDate, String playLink, List<String> themes, Long groupId) throws Exception {
+    public Music create(MusicRequestDto musicParam) throws Exception {
         // 음악 객체
         Music music = new Music();
-        music.setTitle(title);
-        music.setGenre(Genre.fromString(genre));
-        if (karaokeNum != null && !karaokeNum.isEmpty())
-            music.setKaraokeNum(karaokeNum);
-        music.setReleaseDate(releaseDate);
-        if (playLink != null && !playLink.isEmpty())
-            music.setPlayLink(playLink);
+        music.setTitle(musicParam.getTitle());
+        music.setGenre(Genre.fromString(musicParam.getGenre()));
+        music.setKaraokeNum(musicParam.getKaraokeNum());
+        music.setReleaseDate(musicParam.getReleaseDate());
+        music.setPlayLink(musicParam.getPlayLink());
         music.setView(0L);
         music.setLikes(0L);
 
@@ -69,18 +72,19 @@ public class MusicService {
         musicAnalysisRepository.save(analysis);
 
         // 가수(그룹)
-        if (groupId != null) {
-            Optional<Group> group = groupRepository.findById(groupId);
+        if (musicParam.getGroupId() != null) {
+            Optional<Group> group = groupRepository.findById(musicParam.getGroupId());
             group.ifPresent(music::setGroup);
         }
 
         // 음악 테마(특징)
-        saveThemes(themes, music);
+        if (musicParam.getThemes() != null)
+            saveThemes(musicParam.getThemes(), music);
 
         // 앨범 커버 파일 저장
-        if (albumCover != null) {
+        if (musicParam.getAlbumCover() != null) {
             try {
-                String albumCoverPath = FileHandler.saveAlbumCoverFile(albumCover, music.getMusicId());
+                String albumCoverPath = FileHandler.saveAlbumCoverFile(musicParam.getAlbumCover(), music.getMusicId());
                 music.setAlbumCover(albumCoverPath);
             } catch (IOException e) {
                 musicRepository.delete(music);
@@ -93,40 +97,34 @@ public class MusicService {
 
     // 음악 수정
     @Transactional
-    public void update(Long musicId, String title, String genre, MultipartFile albumCover, String karaokeNum,
-            LocalDateTime releaseDate, String playLink, List<String> themes, Long groupId) throws IOException {
+    public void update(Long musicId, MusicRequestDto musicParam) throws IOException {
 
         // 음악 객체
         Music music = musicRepository.findById(musicId).orElseThrow();
-        if (title != null)
-            music.setTitle(title);
-        if (genre != null)
-            music.setGenre(Genre.fromString(genre));
-        if (karaokeNum != null)
-            music.setKaraokeNum(karaokeNum);
-        if (releaseDate != null)
-            music.setReleaseDate(releaseDate);
-        if (playLink != null)
-            music.setPlayLink(playLink);
+        music.setTitle(musicParam.getTitle());
+        music.setGenre(Genre.fromString(musicParam.getGenre()));
+        music.setKaraokeNum(musicParam.getKaraokeNum());
+        music.setReleaseDate(musicParam.getReleaseDate());
+        music.setPlayLink(musicParam.getPlayLink());
 
         // 가수(그룹)
-        if (groupId != null) {
-            Optional<Group> group = groupRepository.findById(groupId);
+        if (musicParam.getGroupId() != null) {
+            Optional<Group> group = groupRepository.findById(musicParam.getGroupId());
             group.ifPresent(music::setGroup);
         }
 
         // 음악 테마(특징)
-        if (themes != null) {
+        if (musicParam.getThemes() != null) {
             themeRepository.deleteAllByMusic(music);
-            saveThemes(themes, music);
+            saveThemes(musicParam.getThemes(), music);
         }
 
         // 앨범 커버 파일 새로 업로드시 수정
-        if (albumCover != null) {
+        if (musicParam.getAlbumCover() != null) {
             try {
                 if (music.getAlbumCover() != null)
                     FileHandler.deleteAlbumCoverFile(music.getAlbumCover(), music.getMusicId()); // 기존 파일 삭제
-                String albumCoverPath = FileHandler.saveAlbumCoverFile(albumCover, music.getMusicId()); // 새 파일 저장
+                String albumCoverPath = FileHandler.saveAlbumCoverFile(musicParam.getAlbumCover(), music.getMusicId()); // 새 파일 저장
                 music.setAlbumCover(albumCoverPath);
             } catch (IOException e) {
                 throw e;
@@ -173,7 +171,21 @@ public class MusicService {
                     themes = List.of(themeArray);
                 }
 
-                Music created = create(line[0], line[2], null, line[3], releaseDate, line[5], themes, null);
+                MusicRequestDto musicParam = new MusicRequestDto();
+                musicParam.setTitle(line[0]);
+                musicParam.setGenre(Genre.fromString(line[2]).name());
+                musicParam.setKaraokeNum(line[3]);
+                musicParam.setReleaseDate(releaseDate);
+                musicParam.setPlayLink(line[5]);
+                musicParam.setThemes(themes);
+
+                // 검증
+                Errors errors = validator.validateObject(musicParam);
+                if (errors.hasFieldErrors()) {
+                    throw new CsvValidationException(errors.getFieldError().getField() + " 검증 문제");
+                }
+
+                Music created = create(musicParam);
                 if (!line[6].isEmpty())
                     created.setLyrics(line[6]);
                 musicRepository.save(created);

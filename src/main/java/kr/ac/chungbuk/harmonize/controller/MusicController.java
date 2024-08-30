@@ -2,12 +2,16 @@ package kr.ac.chungbuk.harmonize.controller;
 
 import kr.ac.chungbuk.harmonize.dto.MusicDTO;
 import kr.ac.chungbuk.harmonize.dto.MusicListDTO;
+import kr.ac.chungbuk.harmonize.dto.request.MusicRequestDto;
 import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.entity.Theme;
 import kr.ac.chungbuk.harmonize.service.MusicService;
+import kr.ac.chungbuk.harmonize.utility.ErrorResult;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.MessageSource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpHeaders;
@@ -15,6 +19,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.SimpleErrors;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -25,26 +32,32 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 @Controller
 @Slf4j
 public class MusicController {
 
     private final MusicService musicService;
+    private final MessageSource messageSource;
 
     @Autowired
-    public MusicController(MusicService musicService) {
+    public MusicController(MusicService musicService, @Qualifier("messageSource") MessageSource messageSource) {
         this.musicService = musicService;
+        this.messageSource = messageSource;
     }
 
     // 음악 생성
     @PostMapping(path = "/api/music")
-    public ResponseEntity<String> create(String title, String genre, String karaokeNum, String releaseDate,
-            String playLink, MultipartFile albumCover, Long groupId,
-            @RequestParam(value = "themes", defaultValue = "") List<String> themes) {
+    public ResponseEntity<Object> create(@Validated MusicRequestDto musicParam, BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            ErrorResult errorResult = new ErrorResult(bindingResult, messageSource, Locale.getDefault());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResult);
+        }
+
         try {
-            musicService.create(title, genre, albumCover, karaokeNum, LocalDateTime.parse(releaseDate), playLink,
-                    themes, groupId);
+            musicService.create(musicParam);
         } catch (Exception e) {
             log.debug(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("음악 생성 중 오류가 발생하였습니다.");
@@ -54,12 +67,16 @@ public class MusicController {
 
     // 음악 수정
     @PutMapping(path = "/api/music/{musicId}")
-    public ResponseEntity<String> update(@PathVariable Long musicId, String title, String genre, String karaokeNum,
-            String releaseDate, String playLink, MultipartFile albumCover,
-            @RequestParam(value = "themes", required = false) List<String> themes, Long groupId) {
+    public ResponseEntity<Object> update(@PathVariable Long musicId,
+                                         @Validated MusicRequestDto musicParam, BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            ErrorResult errorResult = new ErrorResult(bindingResult, messageSource, Locale.getDefault());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResult);
+        }
+
         try {
-            musicService.update(musicId, title, genre, albumCover, karaokeNum,
-                    (releaseDate != null) ? LocalDateTime.parse(releaseDate) : null, playLink, themes, groupId);
+            musicService.update(musicId, musicParam);
         } catch (Exception e) {
             log.debug(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("음악 편집 중 오류가 발생하였습니다.");
