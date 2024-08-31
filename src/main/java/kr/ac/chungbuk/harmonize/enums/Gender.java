@@ -6,8 +6,7 @@ import java.util.Map;
 public enum Gender {
     MALE,       // 남성
     FEMALE,     // 여성
-    ETC;        // 그외
-
+    OTHER;      // 그외
 
     private static final Map<String, Gender> values = new HashMap<>();
     static {
@@ -18,18 +17,27 @@ public enum Gender {
         }
     }
 
+    // 입력된 문자열을 대문자로 변환한 후 Enum 값을 반환
     public static Gender fromString(String value) throws IllegalArgumentException {
-        Gender genre = values.get(value);
-        if (values.get(value) == null)
-            throw new IllegalArgumentException("invalid genre string");
-        else
-            return genre;
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalArgumentException("invalid gender string");
+        }
+
+        // 입력값을 대문자로 변환
+        value = value.toUpperCase();
+
+        Gender gender = values.get(value);
+        if (gender == null) {
+            throw new IllegalArgumentException("invalid gender string");
+        }
+        return gender;
     }
 
+    // Enum 값을 문자열로 변환
     public static String toString(Gender gender) {
         if (gender == MALE) return "남성";
         if (gender == FEMALE) return "여성";
-        if (gender == ETC) return "기타";
+        if (gender == OTHER) return "기타";
         return "";
     }
 }
