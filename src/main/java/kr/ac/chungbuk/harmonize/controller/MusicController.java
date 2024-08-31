@@ -14,25 +14,19 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.*;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.SimpleErrors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Locale;
+
+import static kr.ac.chungbuk.harmonize.utility.ErrorResult.SimpleErrorReturn;
 
 @Controller
 @Slf4j
@@ -60,7 +54,9 @@ public class MusicController {
             musicService.create(musicParam);
         } catch (Exception e) {
             log.debug(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("음악 생성 중 오류가 발생하였습니다.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    SimpleErrorReturn("createFailed.music", messageSource, Locale.getDefault())
+            );
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
@@ -79,7 +75,9 @@ public class MusicController {
             musicService.update(musicId, musicParam);
         } catch (Exception e) {
             log.debug(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("음악 편집 중 오류가 발생하였습니다.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    SimpleErrorReturn("updateFailed.music", messageSource, Locale.getDefault())
+            );
         }
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
     }
