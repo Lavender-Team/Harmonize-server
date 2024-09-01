@@ -72,5 +72,6 @@ public class User {
         this.gender = gender;
         this.age = age;
         this.createdAt = LocalDateTime.now();
+        this.deletedAt = LocalDateTime.now();
     }
 }

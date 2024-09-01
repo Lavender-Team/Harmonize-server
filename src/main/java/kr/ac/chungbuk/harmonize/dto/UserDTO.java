@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,6 +24,8 @@ public class UserDTO {
     private Boolean isDeleted;
     private Boolean isBanned;
     private Boolean isLocked;
+    private LocalDateTime createdAt;
+    private LocalDateTime deletedAt;
 
     public static UserDTO build(User user) {
         return UserDTO.builder()
@@ -35,6 +39,8 @@ public class UserDTO {
                 .isDeleted(user.getIsDeleted())
                 .isBanned(user.getIsBanned())
                 .isLocked(user.getIsLocked())
+                .createdAt(user.getCreatedAt())
+                .deletedAt(user.getDeletedAt())
                 .build();
     }
 }
