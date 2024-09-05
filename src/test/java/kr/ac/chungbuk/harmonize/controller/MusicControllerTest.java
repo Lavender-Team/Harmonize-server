@@ -97,7 +97,12 @@ class MusicControllerTest {
         Long musicId = musicRepository.findByTitle("주저하는 연인들을 위해(테스트)").orElseThrow().getMusicId();
 
         // When
-        mvc.perform(put(new URI("/api/music/"+musicId)).param("genre", "ROCK"))
+        mvc.perform(put(new URI("/api/music/"+musicId))
+                        .param("title", "주저하는 연인들을 위해(테스트)")
+                        .param("genre", "ROCK")
+                        .param("karaokeNum", "TJ 53651")
+                        .param("releaseDate", "2019-03-13T00:00:00")
+                        .param("playLink", "https://youtu.be/1gmleC0dOYY?si=ZFejSnIAzEEZx7Xd"))
                 .andExpect(status().isAccepted());
 
         // Then
