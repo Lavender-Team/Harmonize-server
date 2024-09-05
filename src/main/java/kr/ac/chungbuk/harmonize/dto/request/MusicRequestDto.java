@@ -24,7 +24,6 @@ public class MusicRequestDto {
 
     private MultipartFile albumCover;
 
-    @NotBlank
     @Size(min = 1, max = 50)
     private String karaokeNum;
 

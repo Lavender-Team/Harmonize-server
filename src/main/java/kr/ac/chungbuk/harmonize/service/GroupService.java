@@ -67,8 +67,10 @@ public class GroupService {
         Group group = groupRepository.findById(groupId).orElseThrow();
 
         group.setGroupName(groupParam.getGroupName());
-        group.setGroupType(GroupType.fromString(groupParam.getGroupType()));
-        group.setAgency(groupParam.getAgency());
+        if (group.getGroupType() != null)
+            group.setGroupType(GroupType.fromString(groupParam.getGroupType()));
+        if (group.getAgency() != null)
+            group.setAgency(groupParam.getAgency());
 
         // 그룹 프로필 이미지
         if (groupParam.getProfileImage() != null) {

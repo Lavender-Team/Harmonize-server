@@ -102,10 +102,14 @@ public class MusicService {
         // 음악 객체
         Music music = musicRepository.findById(musicId).orElseThrow();
         music.setTitle(musicParam.getTitle());
-        music.setGenre(Genre.fromString(musicParam.getGenre()));
-        music.setKaraokeNum(musicParam.getKaraokeNum());
-        music.setReleaseDate(musicParam.getReleaseDate());
-        music.setPlayLink(musicParam.getPlayLink());
+        if (musicParam.getGenre() != null)
+            music.setGenre(Genre.fromString(musicParam.getGenre()));
+        if (musicParam.getKaraokeNum() != null)
+            music.setKaraokeNum(musicParam.getKaraokeNum());
+        if (musicParam.getReleaseDate() != null)
+            music.setReleaseDate(musicParam.getReleaseDate());
+        if (musicParam.getPlayLink() != null)
+            music.setPlayLink(musicParam.getPlayLink());
 
         // 가수(그룹)
         if (musicParam.getGroupId() != null) {

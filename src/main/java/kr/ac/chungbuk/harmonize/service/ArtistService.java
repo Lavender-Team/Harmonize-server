@@ -56,10 +56,14 @@ public class ArtistService {
         // 가수 객체
         Artist artist = artistRepository.findById(artistId).orElseThrow();
         artist.setArtistName(artistParam.getArtistName());
-        artist.setGender(Gender.valueOf(artistParam.getGender()));
-        artist.setActivityPeriod(artistParam.getActivityPeriod());
-        artist.setNation(artistParam.getNation());
-        artist.setAgency(artistParam.getAgency());
+        if (artistParam.getGender() != null)
+            artist.setGender(Gender.fromString(artistParam.getGender()));
+        if (artistParam.getActivityPeriod() != null)
+            artist.setActivityPeriod(artistParam.getActivityPeriod());
+        if (artistParam.getNation() != null)
+            artist.setNation(artistParam.getNation());
+        if (artistParam.getAgency() != null)
+            artist.setAgency(artistParam.getAgency());
 
         // 프로필 이미지 파일 새로 업로드시 수정
         if (artistParam.getProfileImage() != null) {

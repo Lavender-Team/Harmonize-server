@@ -25,7 +25,7 @@ public class Music {
     @Column(nullable = true)
     private String albumCover;          // 앨범 표지
 
-    @Column(length = 50, nullable = false)
+    @Column(length = 50, nullable = true)
     private String karaokeNum;          // 노래방 번호
 
     @Column(nullable = true)
