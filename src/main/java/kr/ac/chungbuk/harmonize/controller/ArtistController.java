@@ -29,8 +29,9 @@ import java.util.Optional;
 
 import static kr.ac.chungbuk.harmonize.utility.ErrorResult.SimpleErrorReturn;
 
-@Controller
 @Slf4j
+@Controller
+@RequestMapping("/api/artist")
 public class ArtistController {
 
     private final ArtistService artistService;
@@ -43,7 +44,7 @@ public class ArtistController {
     }
 
     // 가수 등록
-    @PostMapping(path = "/api/artist")
+    @PostMapping
     public ResponseEntity<Object> create(@Validated ArtistRequestDto artistParam, BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
@@ -66,7 +67,7 @@ public class ArtistController {
     }
 
     // 가수 삭제
-    @DeleteMapping(path = "/api/artist/{artistId}")
+    @DeleteMapping("/{artistId}")
     public ResponseEntity<Object> delete(@PathVariable Long artistId) {
         Optional<Artist> artist = artistService.findById(artistId);
         if (artist.isPresent()) {
@@ -90,7 +91,7 @@ public class ArtistController {
     }
 
     // 가수 목록 조회
-    @GetMapping(path = "/api/artist")
+    @GetMapping
     @ResponseBody
     public Page<ArtistDto> list(String artistName, @PageableDefault Pageable pageable) {
         Page<Artist> list;
@@ -107,7 +108,7 @@ public class ArtistController {
     }
 
     // 가수 수정
-    @PutMapping(path = "/api/artist/{artistId}")
+    @PutMapping("/{artistId}")
     public ResponseEntity<Object> update(@PathVariable Long artistId,
                                          @Validated ArtistRequestDto artistParam, BindingResult bindingResult) {
 
@@ -131,7 +132,7 @@ public class ArtistController {
     }
 
     // 가수 상세정보 조회
-    @GetMapping("/api/artist/{artistId}")
+    @GetMapping("/{artistId}")
     @ResponseBody
     public ArtistDto readByAdmin(@PathVariable Long artistId) {
         try {
@@ -143,7 +144,7 @@ public class ArtistController {
     }
 
     // 가수 프로필 이미지 파일 다운로드
-    @GetMapping("/api/artist/profile/{filename}")
+    @GetMapping("/profile/{filename}")
     public ResponseEntity<FileSystemResource> getProfileImage(@PathVariable String filename) throws Exception {
 
         if (filename.contains(".."))

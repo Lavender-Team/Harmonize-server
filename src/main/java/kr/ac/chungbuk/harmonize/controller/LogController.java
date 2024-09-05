@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -14,12 +15,13 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.List;
 
-@Controller
 @Slf4j
+@Controller
+@RequestMapping("/api/log")
 public class LogController {
 
     // 벌크 업로드 결과 조회
-    @GetMapping("/api/log/bulk")
+    @GetMapping("/bulk")
     @ResponseBody
     public List<String> getBulkUploadLog() throws Exception {
         String path = System.getProperty("user.dir") + "/upload/bulk_log.txt";
@@ -32,7 +34,7 @@ public class LogController {
     }
 
     // 벌크 업로드 결과 로그 지우기
-    @DeleteMapping("/api/log/bulk")
+    @DeleteMapping("/bulk")
     public ResponseEntity<String> clearBulkUploadLog() {
         try {
             FileHandler.clearBulkUploadLog(false);
@@ -45,7 +47,7 @@ public class LogController {
 
 
     // 파일 벌크 업로드 결과 조회
-    @GetMapping("/api/log/bulk/files")
+    @GetMapping("/bulk/files")
     @ResponseBody
     public List<String> getBulkFileUploadLog() throws Exception {
         String path = System.getProperty("user.dir") + "/upload/bulk_file_log.txt";
@@ -58,7 +60,7 @@ public class LogController {
     }
 
     // 파일 벌크 업로드 결과 로그 지우기
-    @DeleteMapping("/api/log/bulk/files")
+    @DeleteMapping("/bulk/files")
     public ResponseEntity<String> clearBulkFileUploadLog() {
         try {
             FileHandler.clearBulkUploadLog(true);

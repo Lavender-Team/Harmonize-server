@@ -12,8 +12,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-@Controller
 @Slf4j
+@Controller
+@RequestMapping("/api/user")
 public class UserController {
 
     private final UserService userService;
@@ -24,7 +25,7 @@ public class UserController {
     }
 
     // 사용자 생성
-    @PostMapping(path = "/api/users")
+    @PostMapping
     public ResponseEntity<String> create(String loginId, String password, String email, String nickname,
             String role, String gender, Integer age) {
         try {
@@ -37,7 +38,7 @@ public class UserController {
     }
 
     // 사용자 수정
-    @PutMapping(path = "/api/users/{userId}")
+    @PutMapping("/{userId}")
     public ResponseEntity<String> update(@PathVariable Long userId, String email, String nickname,
             String role, String gender, Integer age) {
         try {
@@ -50,7 +51,7 @@ public class UserController {
     }
 
     // 사용자 삭제
-    @DeleteMapping(path = "/api/users/{userId}")
+    @DeleteMapping("/{userId}")
     public ResponseEntity<String> delete(@PathVariable Long userId) {
         try {
             userService.delete(userId);
@@ -62,7 +63,7 @@ public class UserController {
     }
 
     // 사용자 상세정보 조회 (어드민)
-    @GetMapping("/api/users/{userId}")
+    @GetMapping("/{userId}")
     @ResponseBody
     public UserDto readByAdmin(@PathVariable Long userId) {
         try {
@@ -75,7 +76,7 @@ public class UserController {
     }
 
     // 사용자 목록 조회
-    @GetMapping(path = "/api/users")
+    @GetMapping
     @ResponseBody
     public Page<UserDto> list(String nickname,
                               @RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,

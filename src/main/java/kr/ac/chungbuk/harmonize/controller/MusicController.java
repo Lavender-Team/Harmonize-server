@@ -9,6 +9,7 @@ import kr.ac.chungbuk.harmonize.service.MusicService;
 import kr.ac.chungbuk.harmonize.utility.ErrorResult;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
@@ -33,8 +34,9 @@ import java.util.NoSuchElementException;
 
 import static kr.ac.chungbuk.harmonize.utility.ErrorResult.SimpleErrorReturn;
 
-@Controller
 @Slf4j
+@Controller
+@RequestMapping("/api/music")
 public class MusicController {
 
     private final MusicService musicService;
@@ -47,7 +49,7 @@ public class MusicController {
     }
 
     // 음악 생성
-    @PostMapping(path = "/api/music")
+    @PostMapping
     public ResponseEntity<Object> create(@Validated MusicRequestDto musicParam, BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
@@ -68,7 +70,7 @@ public class MusicController {
     }
 
     // 음악 수정
-    @PutMapping(path = "/api/music/{musicId}")
+    @PutMapping(path = "/{musicId}")
     public ResponseEntity<Object> update(@PathVariable Long musicId,
                                          @Validated MusicRequestDto musicParam, BindingResult bindingResult) {
 
@@ -96,7 +98,7 @@ public class MusicController {
     }
 
     // 음악 삭제
-    @DeleteMapping(path = "/api/music/{musicId}")
+    @DeleteMapping(path = "/{musicId}")
     public ResponseEntity<Object> delete(@PathVariable Long musicId) {
         try {
             musicService.delete(musicId);
@@ -115,7 +117,7 @@ public class MusicController {
     }
 
     // 음악 벌크 업로드
-    @PostMapping("/api/music/bulk")
+    @PostMapping("/bulk")
     public ResponseEntity<Object> createBulk(MultipartFile bulkFile,
                                              @RequestParam(value="charset", defaultValue="utf-8") String charset) {
         try {
@@ -131,7 +133,7 @@ public class MusicController {
     }
 
     // 음악 상세정보 조회 (어드민)
-    @GetMapping("/api/music/{musicId}")
+    @GetMapping("/{musicId}")
     @ResponseBody
     public MusicDto readByAdmin(@PathVariable Long musicId) {
         try {
@@ -144,7 +146,7 @@ public class MusicController {
     }
 
     // 음악 앨범커버 파일 다운로드
-    @GetMapping("/api/music/albumcover/{filename}")
+    @GetMapping("/albumcover/{filename}")
     public ResponseEntity<FileSystemResource> getAlbumCover(@PathVariable String filename) throws Exception {
 
         if (filename.contains(".."))
@@ -160,7 +162,7 @@ public class MusicController {
     }
 
     // 음악 목록 조회
-    @GetMapping(path = "/api/music")
+    @GetMapping
     @ResponseBody
     public Page<MusicListDto> list(String title,
                                    @PageableDefault(sort = "musicId", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -183,7 +185,7 @@ public class MusicController {
     }
 
     // 전체 테마 목록 조회
-    @GetMapping(path = "/api/music/theme")
+    @GetMapping("/theme")
     @ResponseBody
     public Page<Theme> listThemes(String themeName, @PageableDefault Pageable pageable) {
         try {
@@ -201,7 +203,7 @@ public class MusicController {
     }
 
     // 특정 테마의 음악 목록 조회
-    @GetMapping(path = "/api/music/theme/music")
+    @GetMapping("/theme/music")
     @ResponseBody
     public Page<MusicListDto> listMusicOfTheme(String themeName, String title,
                                                @PageableDefault(sort = "musicId", direction = Sort.Direction.DESC) Pageable pageable) {

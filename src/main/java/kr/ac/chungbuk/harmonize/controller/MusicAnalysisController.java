@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -24,8 +25,9 @@ import java.util.NoSuchElementException;
 
 import static kr.ac.chungbuk.harmonize.utility.ErrorResult.SimpleErrorReturn;
 
-@Controller
 @Slf4j
+@Controller
+@RequestMapping("/api/music")
 public class MusicAnalysisController {
 
     private final MusicAnalysisService musicAnalysisService;
@@ -39,7 +41,7 @@ public class MusicAnalysisController {
 
 
     // 음악 파일 및 가사 파일 업로드
-    @PostMapping(path = "/api/music/{musicId}/files")
+    @PostMapping(path = "/{musicId}/files")
     public ResponseEntity<Object> updateFiles(@PathVariable Long musicId, MultipartFile audioFile,
                                               MultipartFile lyricFile) {
         try {
@@ -60,7 +62,7 @@ public class MusicAnalysisController {
     }
 
     // 앨범 커버, 음악, 가사 파일 업로드 (벌크 업로드: 파일 이름으로 음악 조회)
-    @PostMapping(path = "/api/music/bulk/files")
+    @PostMapping(path = "/bulk/files")
     public ResponseEntity<Object> updateFiles(MultipartFile albumCover, MultipartFile audioFile,
                                               MultipartFile lyricFile) throws Exception {
         String musicTitle = "";
@@ -114,7 +116,7 @@ public class MusicAnalysisController {
     }
 
     // 음악 분석 요청 전송
-    @PostMapping(path = "/api/music/{musicId}/analyze")
+    @PostMapping(path = "/{musicId}/analyze")
     public ResponseEntity<Object> analyze(@PathVariable Long musicId, Double confidence) {
         try {
             musicAnalysisService.analyze(musicId, confidence);
@@ -129,7 +131,7 @@ public class MusicAnalysisController {
     }
 
     // 음악 분석 특정 Pitch 값 제거 요청 전송
-    @PostMapping(path = "/api/music/{musicId}/delete")
+    @PostMapping(path = "/{musicId}/delete")
     public ResponseEntity<Object> deletePitch(@PathVariable Long musicId, Double time) {
         try {
             musicAnalysisService.deletePitch(musicId, time);
@@ -144,7 +146,7 @@ public class MusicAnalysisController {
     }
 
     // 음악 파일 다운로드
-    @GetMapping(path = "/api/music/audio/{filename}")
+    @GetMapping(path = "/audio/{filename}")
     public ResponseEntity<FileSystemResource> getAudioFile(@PathVariable String filename) throws IOException {
 
         if (filename.contains(".."))
@@ -160,7 +162,7 @@ public class MusicAnalysisController {
     }
 
     // Pitch 그래프 파일 다운로드
-    @GetMapping(path = "/api/music/pitch/{musicId}")
+    @GetMapping(path = "/pitch/{musicId}")
     public ResponseEntity<FileSystemResource> getPitchGraphFile(@PathVariable Long musicId) throws IOException {
 
         String path = System.getProperty("user.dir") + "/upload/audio/" + musicId + "/pitch.xlsx";

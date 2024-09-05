@@ -29,8 +29,9 @@ import java.util.NoSuchElementException;
 
 import static kr.ac.chungbuk.harmonize.utility.ErrorResult.SimpleErrorReturn;
 
-@Controller
 @Slf4j
+@Controller
+@RequestMapping("/api/group")
 public class GroupController {
 
     private final GroupService groupService;
@@ -43,7 +44,7 @@ public class GroupController {
     }
 
     // 그룹 생성
-    @PostMapping("/api/group")
+    @PostMapping
     public ResponseEntity<Object> create(@Validated GroupRequestDto groupParam, BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
@@ -64,7 +65,7 @@ public class GroupController {
     }
 
     // 그룹 수정
-    @PutMapping("/api/group/{groupId}")
+    @PutMapping("/{groupId}")
     public ResponseEntity<Object> create(@PathVariable Long groupId, @Validated GroupRequestDto groupParam,
                                          BindingResult bindingResult) {
 
@@ -89,7 +90,7 @@ public class GroupController {
     }
     
     // 그룹 삭제
-    @DeleteMapping("/api/group/{groupId}")
+    @DeleteMapping("/{groupId}")
     public ResponseEntity<Object> delete(@PathVariable Long groupId) {
         try {
             groupService.delete(groupId);
@@ -108,7 +109,7 @@ public class GroupController {
     }
     
     // 그룹 목록 조회
-    @GetMapping(path = "/api/group")
+    @GetMapping
     @ResponseBody
     public Page<GroupDto> list(String groupName,
                                @PageableDefault(sort = "groupId", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -130,7 +131,7 @@ public class GroupController {
     }
 
     // 그룹 상세정보 조회
-    @GetMapping("/api/group/{groupId}")
+    @GetMapping("/{groupId}")
     @ResponseBody
     public GroupDto readByAdmin(@PathVariable Long groupId) {
         try {
@@ -143,7 +144,7 @@ public class GroupController {
     }
 
     // 그룹 프로필 이미지 파일 다운로드
-    @GetMapping("/api/group/profile/{filename}")
+    @GetMapping("/profile/{filename}")
     public ResponseEntity<FileSystemResource> getProfileImage(@PathVariable String filename) throws Exception {
 
         if (filename.contains(".."))
