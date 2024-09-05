@@ -1,6 +1,6 @@
 package kr.ac.chungbuk.harmonize.controller;
 
-import kr.ac.chungbuk.harmonize.dto.UserDTO;
+import kr.ac.chungbuk.harmonize.dto.response.UserDto;
 import kr.ac.chungbuk.harmonize.entity.User;
 import kr.ac.chungbuk.harmonize.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -64,10 +64,10 @@ public class UserController {
     // 사용자 상세정보 조회 (어드민)
     @GetMapping("/api/users/{userId}")
     @ResponseBody
-    public UserDTO readByAdmin(@PathVariable Long userId) {
+    public UserDto readByAdmin(@PathVariable Long userId) {
         try {
             User user = userService.readByAdmin(userId);
-            return UserDTO.build(user);
+            return UserDto.build(user);
         } catch (Exception e) {
             log.info(e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
@@ -77,9 +77,9 @@ public class UserController {
     // 사용자 목록 조회
     @GetMapping(path = "/api/users")
     @ResponseBody
-    public Page<UserDTO> list(String nickname,
-            @RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
-            @RequestParam(required = false, defaultValue = "10", value = "size") int pageSize) {
+    public Page<UserDto> list(String nickname,
+                              @RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
+                              @RequestParam(required = false, defaultValue = "10", value = "size") int pageSize) {
         try {
             Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "userId"));
 
@@ -91,7 +91,7 @@ public class UserController {
                 list = userService.search(nickname, pageable);
 
             return new PageImpl<>(
-                    list.getContent().stream().map(UserDTO::build).toList(),
+                    list.getContent().stream().map(UserDto::build).toList(),
                     pageable,
                     list.getTotalElements());
         } catch (Exception e) {

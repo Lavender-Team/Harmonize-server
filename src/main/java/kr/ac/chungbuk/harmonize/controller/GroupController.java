@@ -1,82 +1,118 @@
 package kr.ac.chungbuk.harmonize.controller;
 
-import kr.ac.chungbuk.harmonize.dto.GroupDTO;
+import kr.ac.chungbuk.harmonize.dto.response.GroupDto;
+import kr.ac.chungbuk.harmonize.dto.request.GroupRequestDto;
 import kr.ac.chungbuk.harmonize.entity.Group;
 import kr.ac.chungbuk.harmonize.service.GroupService;
+import kr.ac.chungbuk.harmonize.utility.ErrorResult;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
-import java.util.List;
+import java.util.Locale;
+import java.util.NoSuchElementException;
+
+import static kr.ac.chungbuk.harmonize.utility.ErrorResult.SimpleErrorReturn;
 
 @Controller
 @Slf4j
 public class GroupController {
 
     private final GroupService groupService;
+    private final MessageSource messageSource;
 
     @Autowired
-    public GroupController(GroupService groupService) {
+    public GroupController(GroupService groupService, MessageSource messageSource) {
         this.groupService = groupService;
+        this.messageSource = messageSource;
     }
 
     // 그룹 생성
     @PostMapping("/api/group")
-    public ResponseEntity<String> create(String groupName, String groupType, String agency, MultipartFile profileImage,
-                                         @RequestParam(value = "artistIds", defaultValue = "") List<Long> artistIds) {
+    public ResponseEntity<Object> create(@Validated GroupRequestDto groupParam, BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            ErrorResult errorResult = new ErrorResult(bindingResult, messageSource, Locale.getDefault());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResult);
+        }
+
         try {
-            groupService.create(groupName, groupType, agency, artistIds, profileImage);
+            groupService.create(groupParam);
+            return ResponseEntity.status(HttpStatus.CREATED).body(null);
+
         } catch (Exception e) {
             log.debug(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("그룹 생성 중 오류가 발생하였습니다.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    SimpleErrorReturn("createFailed.group", messageSource, Locale.getDefault())
+            );
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
 
     // 그룹 수정
     @PutMapping("/api/group/{groupId}")
-    public ResponseEntity<String> create(@PathVariable Long groupId, String groupName, String groupType, String agency,
-                                         MultipartFile profileImage,
-                                         @RequestParam(value = "artistIds", defaultValue = "") List<Long> artistIds) {
+    public ResponseEntity<Object> create(@PathVariable Long groupId, @Validated GroupRequestDto groupParam,
+                                         BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            ErrorResult errorResult = new ErrorResult(bindingResult, messageSource, Locale.getDefault());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResult);
+        }
+
         try {
-            groupService.update(groupId, groupName, groupType, agency, artistIds, profileImage);
+            groupService.update(groupId, groupParam);
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    SimpleErrorReturn("notFound.group", messageSource, Locale.getDefault())
+            );
         } catch (Exception e) {
             log.debug(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("그룹 수정 중 오류가 발생하였습니다.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    SimpleErrorReturn("updateFailed.group", messageSource, Locale.getDefault())
+            );
         }
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
     }
     
     // 그룹 삭제
     @DeleteMapping("/api/group/{groupId}")
-    public ResponseEntity<String> delete(@PathVariable Long groupId) {
+    public ResponseEntity<Object> delete(@PathVariable Long groupId) {
         try {
             groupService.delete(groupId);
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
+
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    SimpleErrorReturn("notFound.group", messageSource, Locale.getDefault())
+            );
         } catch (Exception e) {
             log.info(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("그룹 삭제 중 오류가 발생하였습니다.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    SimpleErrorReturn("deleteFailed.group", messageSource, Locale.getDefault())
+            );
         }
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
     }
     
     // 그룹 목록 조회
     @GetMapping(path = "/api/group")
     @ResponseBody
-    public Page<GroupDTO> list(String groupName,
-            @RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
-           @RequestParam(required = false, defaultValue = "10", value = "size") int pageSize) {
+    public Page<GroupDto> list(String groupName,
+                               @PageableDefault(sort = "groupId", direction = Sort.Direction.DESC) Pageable pageable) {
         try {
-            Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "groupId"));
-
             Page<Group> list;
             if (groupName == null || groupName.isEmpty())
                 list = groupService.list(pageable);
@@ -84,7 +120,7 @@ public class GroupController {
                 list = groupService.search(groupName, pageable);
 
             return new PageImpl<>(
-                    list.getContent().stream().map(GroupDTO::build).toList(),
+                    list.getContent().stream().map(GroupDto::build).toList(),
                     pageable,
                     list.getTotalElements());
         } catch (Exception e) {
@@ -96,10 +132,10 @@ public class GroupController {
     // 그룹 상세정보 조회
     @GetMapping("/api/group/{groupId}")
     @ResponseBody
-    public GroupDTO readByAdmin(@PathVariable Long groupId) {
+    public GroupDto readByAdmin(@PathVariable Long groupId) {
         try {
             Group group = groupService.findById(groupId);
-            return GroupDTO.build(group);
+            return GroupDto.build(group);
         } catch (Exception e) {
             log.info(e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());

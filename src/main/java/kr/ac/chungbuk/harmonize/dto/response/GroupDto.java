@@ -1,4 +1,4 @@
-package kr.ac.chungbuk.harmonize.dto;
+package kr.ac.chungbuk.harmonize.dto.response;
 
 import kr.ac.chungbuk.harmonize.entity.Group;
 import kr.ac.chungbuk.harmonize.enums.GroupType;
@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class GroupDTO {
+public class GroupDto {
 
     Long id;
     private String groupName;
@@ -22,10 +22,10 @@ public class GroupDTO {
     private Integer groupSize;
     private String agency;
     private String profileImage;
-    private List<ArtistDTO> members;
+    private List<ArtistDto> members;
 
-    public static GroupDTO build(Group group) {
-        return GroupDTO.builder()
+    public static GroupDto build(Group group) {
+        return GroupDto.builder()
                 .id(group.getGroupId())
                 .groupName(group.getGroupName())
                 .groupType(group.getGroupType().name())
@@ -33,7 +33,7 @@ public class GroupDTO {
                 .groupSize(group.getGroupSize())
                 .agency(group.getAgency())
                 .profileImage(group.getProfileImage())
-                .members(group.getMembers().stream().map(m -> ArtistDTO.build(m.getArtist())).toList())
+                .members(group.getMembers().stream().map(m -> ArtistDto.build(m.getArtist())).toList())
                 .build();
     }
 

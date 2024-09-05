@@ -1,4 +1,4 @@
-package kr.ac.chungbuk.harmonize.dto;
+package kr.ac.chungbuk.harmonize.dto.response;
 
 import kr.ac.chungbuk.harmonize.entity.Artist;
 import kr.ac.chungbuk.harmonize.enums.Gender;
@@ -7,13 +7,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ArtistDTO {
+public class ArtistDto {
 
     private Long id;
     private String artistName;
@@ -24,8 +22,8 @@ public class ArtistDTO {
     private String agency;
     private String profileImage;
 
-    public static ArtistDTO build(Artist artist) {
-        return ArtistDTO.builder()
+    public static ArtistDto build(Artist artist) {
+        return ArtistDto.builder()
                 .id(artist.getArtistId())
                 .artistName(artist.getArtistName())
                 .gender(artist.getGender().name())

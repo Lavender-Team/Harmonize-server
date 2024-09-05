@@ -2,7 +2,6 @@ package kr.ac.chungbuk.harmonize.service;
 
 import jakarta.transaction.Transactional;
 import kr.ac.chungbuk.harmonize.entity.Music;
-import kr.ac.chungbuk.harmonize.entity.MusicAnalysis;
 import kr.ac.chungbuk.harmonize.enums.Status;
 import kr.ac.chungbuk.harmonize.repository.MusicAnalysisRepository;
 import kr.ac.chungbuk.harmonize.repository.MusicRepository;

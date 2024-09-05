@@ -1,8 +1,8 @@
 package kr.ac.chungbuk.harmonize.controller;
 
-import kr.ac.chungbuk.harmonize.dto.MusicDTO;
-import kr.ac.chungbuk.harmonize.dto.MusicListDTO;
 import kr.ac.chungbuk.harmonize.dto.request.MusicRequestDto;
+import kr.ac.chungbuk.harmonize.dto.response.MusicDto;
+import kr.ac.chungbuk.harmonize.dto.response.MusicListDto;
 import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.entity.Theme;
 import kr.ac.chungbuk.harmonize.service.MusicService;
@@ -13,7 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -25,6 +29,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
 import java.util.Locale;
+import java.util.NoSuchElementException;
 
 import static kr.ac.chungbuk.harmonize.utility.ErrorResult.SimpleErrorReturn;
 
@@ -52,13 +57,14 @@ public class MusicController {
 
         try {
             musicService.create(musicParam);
+            return ResponseEntity.status(HttpStatus.CREATED).body(null);
+
         } catch (Exception e) {
             log.debug(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     SimpleErrorReturn("createFailed.music", messageSource, Locale.getDefault())
             );
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
 
     // 음악 수정
@@ -73,47 +79,64 @@ public class MusicController {
 
         try {
             musicService.update(musicId, musicParam);
-        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
+
+        }
+        catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    SimpleErrorReturn("notFound.music", messageSource, Locale.getDefault())
+            );
+        }
+        catch (Exception e) {
             log.debug(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     SimpleErrorReturn("updateFailed.music", messageSource, Locale.getDefault())
             );
         }
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
     }
 
     // 음악 삭제
     @DeleteMapping(path = "/api/music/{musicId}")
-    public ResponseEntity<String> delete(@PathVariable Long musicId) {
+    public ResponseEntity<Object> delete(@PathVariable Long musicId) {
         try {
             musicService.delete(musicId);
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
+
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    SimpleErrorReturn("notFound.music", messageSource, Locale.getDefault())
+            );
         } catch (Exception e) {
             log.info(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("음악 삭제 중 오류가 발생하였습니다.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    SimpleErrorReturn("deleteFailed.music", messageSource, Locale.getDefault())
+            );
         }
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
     }
 
     // 음악 벌크 업로드
     @PostMapping("/api/music/bulk")
-    public ResponseEntity<String> createBulk(MultipartFile bulkFile,
+    public ResponseEntity<Object> createBulk(MultipartFile bulkFile,
                                              @RequestParam(value="charset", defaultValue="utf-8") String charset) {
         try {
             musicService.createBulk(bulkFile, charset);
+            return ResponseEntity.status(HttpStatus.CREATED).body(null);
+
         } catch (Exception e) {
             log.debug(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("음악 벌크 업로드 중 오류가 발생하였습니다.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    SimpleErrorReturn("bulkUploadFailed.music", messageSource, Locale.getDefault())
+            );
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
 
     // 음악 상세정보 조회 (어드민)
     @GetMapping("/api/music/{musicId}")
     @ResponseBody
-    public MusicDTO readByAdmin(@PathVariable Long musicId) {
+    public MusicDto readByAdmin(@PathVariable Long musicId) {
         try {
             Music music = musicService.readByAdmin(musicId);
-            return MusicDTO.build(music);
+            return MusicDto.build(music);
         } catch (Exception e) {
             log.info(e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
@@ -122,7 +145,7 @@ public class MusicController {
 
     // 음악 앨범커버 파일 다운로드
     @GetMapping("/api/music/albumcover/{filename}")
-    public ResponseEntity<FileSystemResource> getAlbumcover(@PathVariable String filename) throws Exception {
+    public ResponseEntity<FileSystemResource> getAlbumCover(@PathVariable String filename) throws Exception {
 
         if (filename.contains(".."))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Filename cannot contains \"..\"");
@@ -139,12 +162,9 @@ public class MusicController {
     // 음악 목록 조회
     @GetMapping(path = "/api/music")
     @ResponseBody
-    public Page<MusicListDTO> list(String title,
-            @RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
-            @RequestParam(required = false, defaultValue = "10", value = "size") int pageSize) {
+    public Page<MusicListDto> list(String title,
+                                   @PageableDefault(sort = "musicId", direction = Sort.Direction.DESC) Pageable pageable) {
         try {
-            Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "musicId"));
-
             Page<Music> list;
 
             if (title == null || title.isEmpty())
@@ -153,7 +173,7 @@ public class MusicController {
                 list = musicService.search(title, pageable);
 
             return new PageImpl<>(
-                    list.getContent().stream().map(MusicListDTO::build).toList(),
+                    list.getContent().stream().map(MusicListDto::build).toList(),
                     pageable,
                     list.getTotalElements());
         } catch (Exception e) {
@@ -165,12 +185,8 @@ public class MusicController {
     // 전체 테마 목록 조회
     @GetMapping(path = "/api/music/theme")
     @ResponseBody
-    public Page<Theme> listThemes(String themeName,
-            @RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
-            @RequestParam(required = false, defaultValue = "10", value = "size") int pageSize) {
+    public Page<Theme> listThemes(String themeName, @PageableDefault Pageable pageable) {
         try {
-            Pageable pageable = PageRequest.of(pageNo, pageSize);
-
             Page<Theme> list;
             if (themeName == null || themeName.isEmpty())
                 list = musicService.listThemes(pageable);
@@ -187,12 +203,9 @@ public class MusicController {
     // 특정 테마의 음악 목록 조회
     @GetMapping(path = "/api/music/theme/music")
     @ResponseBody
-    public Page<MusicListDTO> listMusicOfTheme(String themeName, String title,
-            @RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
-            @RequestParam(required = false, defaultValue = "10", value = "size") int pageSize) {
+    public Page<MusicListDto> listMusicOfTheme(String themeName, String title,
+                                               @PageableDefault(sort = "musicId", direction = Sort.Direction.DESC) Pageable pageable) {
         try {
-            Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "musicId"));
-
             Page<Music> list;
 
             if (title == null || title.isEmpty())
@@ -201,7 +214,7 @@ public class MusicController {
                 list = musicService.searchMusicOfTheme(title, themeName, pageable);
 
             return new PageImpl<>(
-                    list.getContent().stream().map(MusicListDTO::build).toList(),
+                    list.getContent().stream().map(MusicListDto::build).toList(),
                     pageable,
                     list.getTotalElements());
         } catch (Exception e) {

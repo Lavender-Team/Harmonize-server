@@ -1,4 +1,4 @@
-package kr.ac.chungbuk.harmonize.dto;
+package kr.ac.chungbuk.harmonize.dto.response;
 
 import kr.ac.chungbuk.harmonize.entity.User;
 import lombok.AllArgsConstructor;
@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserDTO {
+public class UserDto {
 
     private Long userId;
     private String loginId;
@@ -27,8 +27,8 @@ public class UserDTO {
     private LocalDateTime createdAt;
     private LocalDateTime deletedAt;
 
-    public static UserDTO build(User user) {
-        return UserDTO.builder()
+    public static UserDto build(User user) {
+        return UserDto.builder()
                 .userId(user.getUserId())
                 .loginId(user.getLoginId())
                 .email(user.getEmail())

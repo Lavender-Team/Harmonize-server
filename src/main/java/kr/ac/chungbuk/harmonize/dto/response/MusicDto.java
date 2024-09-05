@@ -1,7 +1,6 @@
-package kr.ac.chungbuk.harmonize.dto;
+package kr.ac.chungbuk.harmonize.dto.response;
 
 import kr.ac.chungbuk.harmonize.entity.Music;
-import kr.ac.chungbuk.harmonize.entity.MusicAnalysis;
 import kr.ac.chungbuk.harmonize.entity.Theme;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MusicDTO {
+public class MusicDto {
 
     private Long id;
     private String title;
@@ -41,8 +40,8 @@ public class MusicDTO {
     private Integer steepSlope;
     private Integer level;
 
-    public static MusicDTO build(Music music) {
-        return MusicDTO.builder()
+    public static MusicDto build(Music music) {
+        return MusicDto.builder()
                 .id(music.getMusicId())
                 .title(music.getTitle())
                 .artist((music.getGroup() == null) ? "-" : music.getGroup().getGroupName())

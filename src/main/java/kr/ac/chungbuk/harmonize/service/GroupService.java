@@ -1,8 +1,8 @@
 package kr.ac.chungbuk.harmonize.service;
 
 import jakarta.transaction.Transactional;
+import kr.ac.chungbuk.harmonize.dto.request.GroupRequestDto;
 import kr.ac.chungbuk.harmonize.entity.Group;
-import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.enums.GroupType;
 import kr.ac.chungbuk.harmonize.repository.ArtistRepository;
 import kr.ac.chungbuk.harmonize.repository.GroupRepository;
@@ -11,10 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
 
 @Service
 public class GroupService {
@@ -29,19 +27,21 @@ public class GroupService {
     }
 
     @Transactional
-    public void create(String groupName, String groupType, String agency,  List<Long> artistIds,
-                       MultipartFile profileImage) throws IOException {
+    public void create(GroupRequestDto groupParam) throws IOException {
         Group group = new Group();
-        group.setGroupName(groupName);
-        group.setGroupSize(artistIds.size());
-        group.setGroupType(GroupType.fromString(groupType));
-        group.setAgency(agency);
+        group.setGroupName(groupParam.getGroupName());
+        group.setGroupSize(groupParam.getArtistIds().size());
+        group.setGroupType(GroupType.fromString(groupParam.getGroupType()));
+        group.setAgency(groupParam.getAgency());
         group = groupRepository.save(group);
 
         // 그룹 프로필 이미지
-        if (profileImage != null) {
+        if (groupParam.getProfileImage() != null) {
             try {
-                String imagePath = FileHandler.saveGroupProfileImageFile(profileImage, group.getGroupId());
+                String imagePath = FileHandler.saveGroupProfileImageFile(
+                        groupParam.getProfileImage(),
+                        group.getGroupId()
+                );
                 group.setProfileImage(imagePath);
             } catch (IOException e) {
                 groupRepository.delete(group);
@@ -51,8 +51,8 @@ public class GroupService {
 
         // 그룹 멤버
         int groupSize = 0;
-        if (artistIds != null) {
-            for (Long artistId : artistIds) {
+        if (groupParam.getArtistIds() != null) {
+            for (Long artistId : groupParam.getArtistIds()) {
                 if (artistRepository.existsById(artistId)) {
                     groupRepository.addMember(group.getGroupId(), artistId);
                     groupSize++;
@@ -63,22 +63,22 @@ public class GroupService {
     }
 
     @Transactional
-    public void update(Long groupId, String groupName, String groupType, String agency,  List<Long> artistIds,
-                       MultipartFile profileImage) throws IOException {
+    public void update(Long groupId, GroupRequestDto groupParam) throws IOException {
         Group group = groupRepository.findById(groupId).orElseThrow();
-        if (groupName != null)
-            group.setGroupName(groupName);
-        if (groupType != null)
-            group.setGroupType(GroupType.fromString(groupType));
-        if (agency != null)
-            group.setAgency(agency);
+
+        group.setGroupName(groupParam.getGroupName());
+        group.setGroupType(GroupType.fromString(groupParam.getGroupType()));
+        group.setAgency(groupParam.getAgency());
 
         // 그룹 프로필 이미지
-        if (profileImage != null) {
+        if (groupParam.getProfileImage() != null) {
             try {
                 if (group.getProfileImage() != null)
                     FileHandler.deleteGroupProfileImageFile(group.getProfileImage(), group.getGroupId());
-                String imagePath = FileHandler.saveGroupProfileImageFile(profileImage, group.getGroupId());
+                String imagePath = FileHandler.saveGroupProfileImageFile(
+                        groupParam.getProfileImage(),
+                        group.getGroupId()
+                );
                 group.setProfileImage(imagePath);
             } catch (IOException e) {
                 throw e;
@@ -87,9 +87,9 @@ public class GroupService {
 
         // 그룹 멤버
         int groupSize = 0;
-        if (artistIds != null) {
+        if (groupParam.getArtistIds() != null) {
             groupRepository.clearMember(group.getGroupId());
-            for (Long artistId : artistIds) {
+            for (Long artistId : groupParam.getArtistIds()) {
                 if (artistRepository.existsById(artistId)) {
                     groupRepository.addMember(group.getGroupId(), artistId);
                     groupSize++;

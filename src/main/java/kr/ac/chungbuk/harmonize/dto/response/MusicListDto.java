@@ -1,4 +1,4 @@
-package kr.ac.chungbuk.harmonize.dto;
+package kr.ac.chungbuk.harmonize.dto.response;
 
 import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.entity.Theme;
@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MusicListDTO {
+public class MusicListDto {
 
     private Long id;
     private String title;
@@ -27,8 +27,8 @@ public class MusicListDTO {
     private Long likes;
     private List<String> themes;
 
-    public static MusicListDTO build(Music music) {
-        return MusicListDTO.builder()
+    public static MusicListDto build(Music music) {
+        return MusicListDto.builder()
                 .id(music.getMusicId())
                 .title(music.getTitle())
                 .artist((music.getGroup() == null) ? "-" : music.getGroup().getGroupName())
