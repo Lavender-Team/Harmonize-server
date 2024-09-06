@@ -78,7 +78,7 @@ public class GroupController {
             groupService.update(groupId, groupParam);
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
         } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     SimpleErrorReturn("notFound.group", messageSource, Locale.getDefault())
             );
         } catch (Exception e) {
@@ -97,7 +97,7 @@ public class GroupController {
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
 
         } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     SimpleErrorReturn("notFound.group", messageSource, Locale.getDefault())
             );
         } catch (Exception e) {

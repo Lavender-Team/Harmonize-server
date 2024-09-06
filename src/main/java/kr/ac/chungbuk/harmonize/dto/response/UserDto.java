@@ -34,7 +34,7 @@ public class UserDto {
                 .email(user.getEmail())
                 .nickname(user.getNickname())
                 .role(user.getRole().name())
-                .gender(user.getGender().name())
+                .gender((user.getGender() != null) ? user.getGender().name() : null)
                 .age(user.getAge())
                 .isDeleted(user.getIsDeleted())
                 .isBanned(user.getIsBanned())

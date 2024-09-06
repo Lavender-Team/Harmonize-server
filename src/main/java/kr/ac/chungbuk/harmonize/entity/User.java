@@ -1,8 +1,12 @@
 package kr.ac.chungbuk.harmonize.entity;
 
 import jakarta.persistence.*;
+import kr.ac.chungbuk.harmonize.enums.Gender;
+import kr.ac.chungbuk.harmonize.enums.Genre;
+import kr.ac.chungbuk.harmonize.enums.Role;
 import lombok.Data;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -29,11 +33,15 @@ public class User {
     private Role role; // 역할 (user, admin, moderator)
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Gender gender; // 성별 (male, female, other)
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Integer age; // 나이
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @Enumerated(value = EnumType.STRING)
+    private List<Genre> genre; // 선호 장르
 
     @Column(nullable = false)
     private LocalDateTime createdAt; // 생성일자
@@ -49,16 +57,6 @@ public class User {
 
     @Column(nullable = false)
     private Boolean isLocked = false; // 계정 잠금 여부
-
-    // Enum for Role
-    public enum Role {
-        USER, ADMIN, MODERATOR
-    }
-
-    // Enum for Gender
-    public enum Gender {
-        MALE, FEMALE, OTHER
-    }
 
     public User() {
     }

@@ -35,4 +35,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE u.nickname LIKE %:nickname% AND u.isLocked = :isLocked")
     Page<User> findAllByNicknameAndIsLocked(String nickname, boolean isLocked, Pageable pageable);
+
+    Boolean existsByLoginId(String loginId);
+
+    Boolean existsByEmail(String email);
 }
