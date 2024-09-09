@@ -5,11 +5,14 @@ import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvValidationException;
 import jakarta.transaction.Transactional;
 import kr.ac.chungbuk.harmonize.dto.request.MusicRequestDto;
+import kr.ac.chungbuk.harmonize.dto.request.SearchRequestDto;
 import kr.ac.chungbuk.harmonize.entity.Group;
 import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.entity.MusicAnalysis;
 import kr.ac.chungbuk.harmonize.entity.Theme;
+import kr.ac.chungbuk.harmonize.enums.Gender;
 import kr.ac.chungbuk.harmonize.enums.Genre;
+import kr.ac.chungbuk.harmonize.enums.GroupType;
 import kr.ac.chungbuk.harmonize.repository.GroupRepository;
 import kr.ac.chungbuk.harmonize.repository.MusicAnalysisRepository;
 import kr.ac.chungbuk.harmonize.repository.MusicRepository;
@@ -28,9 +31,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -237,6 +238,21 @@ public class MusicService {
     // 음악 제목 검색
     public Page<Music> search(String title, Pageable pageable) {
         return musicRepository.findByTitleContaining(title, pageable);
+    }
+
+    // 음악 상세 검색
+    public Map<String, Page<Music>> searchDetail(SearchRequestDto query, Pageable pageable) {
+        Map<String, Page<Music>> searchResult = new HashMap<>();
+
+        GroupType groupType = query.getGroupType() != null ? GroupType.fromString(query.getGroupType()) : null;
+        Genre genre = query.getGenre() != null ? Genre.fromString(query.getGenre()) : null;
+
+        searchResult.put("all", musicRepository.searchAll(query.getQuery(), groupType, genre, pageable));
+        searchResult.put("title", musicRepository.searchTitle(query.getQuery(), groupType, genre, pageable));
+        searchResult.put("artist", musicRepository.searchGroupName(query.getQuery(), groupType, genre, pageable));
+        searchResult.put("karaokeNum", musicRepository.searchKaraokeNum(query.getQuery(), groupType, genre, pageable));
+
+        return searchResult;
     }
 
     private void saveThemes(List<String> themes, Music music) {

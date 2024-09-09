@@ -2,6 +2,9 @@ package kr.ac.chungbuk.harmonize.repository;
 
 import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.entity.Theme;
+import kr.ac.chungbuk.harmonize.enums.Gender;
+import kr.ac.chungbuk.harmonize.enums.Genre;
+import kr.ac.chungbuk.harmonize.enums.GroupType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,6 +21,26 @@ public interface MusicRepository extends JpaRepository<Music, Long> {
     Page<Music> findAll(Pageable pageable);
 
     Page<Music> findByTitleContaining(String title, Pageable pageable);
+
+    @Query("SELECT m FROM Music m WHERE (:query is null or m.title LIKE %:query% or m.group.groupName LIKE %:query% or m.karaokeNum LIKE %:query%)" +
+            " AND (:groupType is null or :groupType = m.group.groupType)" +
+            " AND (:genre is null or :genre = m.genre)")
+    Page<Music> searchAll(String query, GroupType groupType, Genre genre, Pageable pageable);
+
+    @Query("SELECT m FROM Music m WHERE (:query is null or m.title LIKE %:query%)" +
+            " AND (:groupType is null or :groupType = m.group.groupType)" +
+            " AND (:genre is null or :genre = m.genre)")
+    Page<Music> searchTitle(String query, GroupType groupType, Genre genre, Pageable pageable);
+
+    @Query("SELECT m FROM Music m WHERE (:query is null or m.group.groupName LIKE %:query%)" +
+            " AND (:groupType is null or :groupType = m.group.groupType)" +
+            " AND (:genre is null or :genre = m.genre)")
+    Page<Music> searchGroupName(String query, GroupType groupType, Genre genre, Pageable pageable);
+
+    @Query("SELECT m FROM Music m WHERE (:query is null or m.karaokeNum LIKE %:query%)" +
+            " AND (:groupType is null or :groupType = m.group.groupType)" +
+            " AND (:genre is null or :genre = m.genre)")
+    Page<Music> searchKaraokeNum(String query, GroupType groupType, Genre genre, Pageable pageable);
 
     @Query("SELECT m FROM Music m INNER JOIN Theme t ON m.musicId = t.music.musicId WHERE t.themeName = :themeName")
     Page<Music> findAllByTheme(String themeName, Pageable pageable);

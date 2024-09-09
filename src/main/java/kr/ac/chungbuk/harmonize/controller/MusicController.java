@@ -1,6 +1,7 @@
 package kr.ac.chungbuk.harmonize.controller;
 
 import kr.ac.chungbuk.harmonize.dto.request.MusicRequestDto;
+import kr.ac.chungbuk.harmonize.dto.request.SearchRequestDto;
 import kr.ac.chungbuk.harmonize.dto.response.MusicDto;
 import kr.ac.chungbuk.harmonize.dto.response.MusicListDto;
 import kr.ac.chungbuk.harmonize.entity.Music;
@@ -29,7 +30,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import static kr.ac.chungbuk.harmonize.utility.ErrorResult.SimpleErrorReturn;
@@ -180,6 +183,36 @@ public class MusicController {
                     list.getTotalElements());
         } catch (Exception e) {
             log.debug(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    // 음악 상세 검색 (사용자)
+    @GetMapping("/search")
+    @ResponseBody
+    public ResponseEntity<Object> search(SearchRequestDto query, BindingResult bindingResult,
+            @PageableDefault(sort = "musicId", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        if (bindingResult.hasErrors()) {
+            ErrorResult errorResult = new ErrorResult(bindingResult, messageSource, Locale.getDefault());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResult);
+        }
+
+        try {
+            Map<String, Page> searchResultDto = new HashMap<>();
+            Map<String, Page<Music>> searchResult = musicService.searchDetail(query, pageable);
+
+            for (Map.Entry<String, Page<Music>> entry : searchResult.entrySet()) {
+                Page<Music> result = entry.getValue();
+                searchResultDto.put(entry.getKey(), new PageImpl<> (
+                    result.getContent().stream().map(MusicListDto::build).toList(),
+                        pageable,
+                        result.getTotalElements()
+                ));
+            }
+
+            return ResponseEntity.status(HttpStatus.OK).body(searchResultDto);
+        } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
