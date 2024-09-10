@@ -64,8 +64,10 @@ public class UserService {
         if (userParam.getAge() != null)
             user.setAge(userParam.getAge());
         if (userParam.getGenre() != null) {
+            user.getGenre().clear();
             List<Genre> genres = userParam.getGenre().stream().map(Genre::fromString).toList();
-            user.setGenre(genres);
+            for (Genre genre : genres)
+                user.getGenre().add(genre);
         }
 
         userRepository.save(user);

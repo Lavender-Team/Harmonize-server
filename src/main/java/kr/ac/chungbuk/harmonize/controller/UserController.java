@@ -178,7 +178,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResult);
         } else {
             // 이메일 중복 검사
-            if (userService.existsByEmail(userId, userParam.getEmail()))
+            if (userParam.getEmail() != null && userService.existsByEmail(userId, userParam.getEmail()))
                 bindingResult.rejectValue("email", "duplicated.email");
             if (bindingResult.hasErrors()) {
                 ErrorResult errorResult = new ErrorResult(bindingResult, messageSource, Locale.getDefault());
