@@ -4,7 +4,6 @@ import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.enums.Genre;
 import kr.ac.chungbuk.harmonize.repository.MusicRepository;
 import kr.ac.chungbuk.harmonize.service.MusicService;
-import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,15 +13,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -56,7 +53,7 @@ class MusicControllerTest {
         mvc.perform(
                 multipart("/api/music")
                         .file("albumCover", albumCover.getBytes())
-                        .param("title", "주저하는 연인들을 위해(테스트)")
+                        .param("title", "<테스트 노래명>")
                         .param("genre", "INDIE")
                         .param("karaokeNum", "TJ 53651")
                         .param("releaseDate", "2019-03-13T00:00:00")
@@ -67,7 +64,7 @@ class MusicControllerTest {
         mvc.perform(
                 multipart("/api/music")
                         .file("albumCover", albumCover.getBytes())
-                        .param("title", "주저하는 연인들을 위해(테스트)_2")
+                        .param("title", "<테스트 노래명2>")
                         .param("genre", "INDIE")
                         .param("karaokeNum", "TJ 53651")
                         .param("releaseDate", "2019-03-13T00:00:00")
@@ -77,10 +74,10 @@ class MusicControllerTest {
 
     @AfterEach
     void cleanUp() throws Exception {
-        Optional<Music> uploaded1 = musicRepository.findByTitle("주저하는 연인들을 위해(테스트)");
+        Optional<Music> uploaded1 = musicRepository.findByTitle("<테스트 노래명>");
         if (uploaded1.isPresent())
             musicService.delete(uploaded1.get().getMusicId());
-        Optional<Music> uploaded2 = musicRepository.findByTitle("주저하는 연인들을 위해(테스트)_2");
+        Optional<Music> uploaded2 = musicRepository.findByTitle("<테스트 노래명2>");
         if (uploaded2.isPresent())
             musicService.delete(uploaded2.get().getMusicId());
     }
@@ -88,35 +85,35 @@ class MusicControllerTest {
     @Test
     void create() throws Exception {
         // When & Then
-        Music uploaded = musicRepository.findByTitle("주저하는 연인들을 위해(테스트)").orElseThrow();
+        Music uploaded = musicRepository.findByTitle("<테스트 노래명>").orElseThrow();
     }
 
     @Test
     void update() throws Exception {
         // Given
-        Long musicId = musicRepository.findByTitle("주저하는 연인들을 위해(테스트)").orElseThrow().getMusicId();
+        Long musicId = musicRepository.findByTitle("<테스트 노래명>").orElseThrow().getMusicId();
 
         // When
         mvc.perform(put(new URI("/api/music/"+musicId))
-                        .param("title", "주저하는 연인들을 위해(테스트)")
+                        .param("title", "<테스트 노래명>")
                         .param("genre", "ROCK"))
                 .andExpect(status().isAccepted());
 
         // Then
-        Music music = musicRepository.findByTitle("주저하는 연인들을 위해(테스트)").orElseThrow();
-        Assertions.assertThat(music.getGenre() == Genre.ROCK);
+        Music music = musicRepository.findByTitle("<테스트 노래명>").orElseThrow();
+        assertThat(music.getGenre() == Genre.ROCK);
     }
 
     @Test
     void delete() throws Exception {
         // When
-        Music uploaded = musicRepository.findByTitle("주저하는 연인들을 위해(테스트)").orElseThrow();
+        Music uploaded = musicRepository.findByTitle("<테스트 노래명>").orElseThrow();
 
         mvc.perform(MockMvcRequestBuilders.delete(new URI("/api/music/" + uploaded.getMusicId())))
                 .andExpect(status().isAccepted());
 
         // Then
-        Assertions.assertThat(musicRepository.findByTitle("주저하는 연인들을 위해(테스트)").isEmpty());
+        assertThat(musicRepository.findByTitle("<테스트 노래명>").isEmpty());
     }
 
     @Test
@@ -126,8 +123,8 @@ class MusicControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content", Matchers.hasSize(2)))
-                .andExpect(jsonPath("$.content[0].title").value(Matchers.is("주저하는 연인들을 위해(테스트)_2")))
-                .andExpect(jsonPath("$.content[1].title").value(Matchers.is("주저하는 연인들을 위해(테스트)")));
+                .andExpect(jsonPath("$.content[0].title").value(Matchers.is("<테스트 노래명2>")))
+                .andExpect(jsonPath("$.content[1].title").value(Matchers.is("<테스트 노래명>")));
     }
 
     @Test

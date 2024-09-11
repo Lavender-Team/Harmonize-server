@@ -13,6 +13,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -93,7 +94,8 @@ public class ArtistController {
     // 가수 목록 조회
     @GetMapping
     @ResponseBody
-    public Page<ArtistDto> list(String artistName, @PageableDefault Pageable pageable) {
+    public Page<ArtistDto> list(String artistName,
+                                @PageableDefault(sort = "artistId", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<Artist> list;
 
         if (artistName == null || artistName.isEmpty())
@@ -119,7 +121,7 @@ public class ArtistController {
 
         try {
             artistService.update(artistId, artistParam);
-            return ResponseEntity.status(HttpStatus.OK).body(null);
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                     SimpleErrorReturn("io.updateFailed.artist", messageSource, Locale.getDefault())
