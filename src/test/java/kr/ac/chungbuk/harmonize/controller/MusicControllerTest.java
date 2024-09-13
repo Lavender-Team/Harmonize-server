@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.util.Optional;
 
@@ -39,16 +40,7 @@ class MusicControllerTest {
     @BeforeEach
     void setUp() throws Exception {
         // Given
-        final String filename = "albumcover.jpg";
-        final String filePath = "src/test/resources/" + filename;
-        FileInputStream fileInputStream = new FileInputStream(filePath);
-
-        MockMultipartFile albumCover = new MockMultipartFile(
-                "images",
-                filename,
-                "jpg",
-                fileInputStream
-        );
+        MockMultipartFile albumCover = getProfileImage();
 
         mvc.perform(
                 multipart("/api/music")
@@ -145,4 +137,18 @@ class MusicControllerTest {
                 .andExpect(jsonPath("$.content[0].themes").value(Matchers.hasItem("테스트 테마!")));
     }
 
+
+    private MockMultipartFile getProfileImage() throws IOException {
+        final String filename = "albumcover.jpg";
+        final String filePath = "src/test/resources/" + filename;
+        FileInputStream fileInputStream = new FileInputStream(filePath);
+
+        MockMultipartFile profileImage = new MockMultipartFile(
+                "images",
+                filename,
+                "jpg",
+                fileInputStream
+        );
+        return profileImage;
+    }
 }

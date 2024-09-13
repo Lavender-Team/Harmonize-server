@@ -66,7 +66,7 @@ public class GroupController {
 
     // 그룹 수정
     @PutMapping("/{groupId}")
-    public ResponseEntity<Object> create(@PathVariable Long groupId, @Validated GroupRequestDto groupParam,
+    public ResponseEntity<Object> update(@PathVariable Long groupId, @Validated GroupRequestDto groupParam,
                                          BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
