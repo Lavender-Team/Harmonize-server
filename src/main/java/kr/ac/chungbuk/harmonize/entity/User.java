@@ -4,12 +4,16 @@ import jakarta.persistence.*;
 import kr.ac.chungbuk.harmonize.enums.Gender;
 import kr.ac.chungbuk.harmonize.enums.Genre;
 import kr.ac.chungbuk.harmonize.enums.Role;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 public class User {
 
     @Id
@@ -72,4 +76,18 @@ public class User {
         this.createdAt = LocalDateTime.now();
         this.deletedAt = LocalDateTime.now();
     }
+
+
+    /* 관계(Relationships) */
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    List<Bookmark> bookmarks = new ArrayList<>();
+
+    public void addBookmark(Bookmark bookmark) {
+        this.bookmarks.add(bookmark);
+
+        if (bookmark.getUser() != this)
+            bookmark.setUser(this);
+    }
+
 }
