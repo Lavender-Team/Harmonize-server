@@ -6,15 +6,20 @@ import kr.ac.chungbuk.harmonize.enums.Genre;
 import kr.ac.chungbuk.harmonize.enums.Role;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
 @Getter
 @Setter
-public class User {
+@Table(name = "user")
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -78,8 +83,12 @@ public class User {
     }
 
 
-    /* 관계(Relationships) */
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "attempt_id")
+    private Attempt attempt;
+
+    /* 관계(Relationships) */
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     List<Bookmark> bookmarks = new ArrayList<>();
 
@@ -90,4 +99,35 @@ public class User {
             bookmark.setUser(this);
     }
 
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority(this.role.name()));
+
+        return authorities;
+    }
+
+    @Override
+    public String getUsername() {
+        return "";
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return (!isLocked && !isBanned && !isDeleted);
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return !isLocked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return (!isLocked && !isBanned && !isDeleted);
+    }
 }

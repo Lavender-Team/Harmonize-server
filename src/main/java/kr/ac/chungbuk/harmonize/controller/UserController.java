@@ -1,5 +1,8 @@
 package kr.ac.chungbuk.harmonize.controller;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import kr.ac.chungbuk.harmonize.dto.request.UserSaveDto;
 import kr.ac.chungbuk.harmonize.dto.request.UserUpdateAdminDto;
 import kr.ac.chungbuk.harmonize.dto.request.UserUpdateDto;
@@ -7,6 +10,13 @@ import kr.ac.chungbuk.harmonize.dto.response.UserDto;
 import kr.ac.chungbuk.harmonize.entity.User;
 import kr.ac.chungbuk.harmonize.service.UserService;
 import kr.ac.chungbuk.harmonize.utility.ErrorResult;
+import kr.ac.chungbuk.harmonize.entity.Attempt;
+import kr.ac.chungbuk.harmonize.entity.User;
+import kr.ac.chungbuk.harmonize.repository.AttemptRepository;
+import kr.ac.chungbuk.harmonize.repository.UserRepository;
+import kr.ac.chungbuk.harmonize.security.JwtTokenProvider;
+import kr.ac.chungbuk.harmonize.security.UserAuthentication;
+import kr.ac.chungbuk.harmonize.utility.Security;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -14,13 +24,16 @@ import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import static kr.ac.chungbuk.harmonize.utility.ErrorResult.*;
@@ -186,5 +199,105 @@ public class UserController {
             }
         }
         return null;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity login(final HttpServletRequest req,
+                                final HttpServletResponse res,
+                                @RequestBody Map<String, String> request) throws Exception {
+        try {
+            log.info("Login attempt: loginId=" + request.get("loginId"));
+
+            String token = userService.tryLogin(request.get("loginId"), request.get("password"));
+            Cookie tokenCookie = createTokenCookie(token, 168 * 60 * 60);
+            res.addCookie(tokenCookie);
+
+            log.info("Login successful, token generated: " + token);
+
+            HashMap<String, Object> result = new HashMap<>();
+            result.put("result", "로그인에 성공하였습니다.");
+            result.put("token", token);
+            return new ResponseEntity(result, HttpStatus.OK);
+
+        } catch(Exception e) {
+            log.error("Login failed: " + e.getMessage());
+
+            Cookie tokenCookie = createTokenCookie(null, 0);
+            res.addCookie(tokenCookie);
+
+            HashMap<String, Object> result = new HashMap<>();
+            result.put("result", "아이디 또는 비밀번호가 잘못되었습니다.");
+            return new ResponseEntity(result, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+
+
+    @GetMapping(path = "/logout")
+    public ResponseEntity logout(final HttpServletRequest req, final HttpServletResponse res) {
+        Cookie tokenCookie = createTokenCookie(null, 0);
+        res.addCookie(tokenCookie);
+
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("result", "로그아웃에 성공하였습니다.");
+        return new ResponseEntity(result, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/auth/currentuser")
+    public ResponseEntity getCurrentUserData() {
+        HashMap<String, Object> result = new HashMap<>();
+
+        String loginId = Security.getCurrentloginId();
+
+        result.put("loginId", loginId);
+        result.put("Authorities", Security.getCurrentUserRole());
+
+        try {
+            User currentUser = (User)userService.loadUserByUsername(loginId);
+            result.put("role", currentUser.getRole());
+            result.put("email", currentUser.getEmail());
+            result.put("loginId", currentUser.getLoginId());
+            result.put("nickname", currentUser.getNickname());
+        } catch (Exception e){
+            // 로그인되지 않았거나 오류난 경우
+        }
+
+        return new ResponseEntity(result, HttpStatus.OK);
+    }
+
+
+    @PostMapping("/register")
+    public ResponseEntity createUser(@RequestBody UserSaveDto userSaveDto) {
+        if( userSaveDto.getLoginId() != null && !userSaveDto.getLoginId().isBlank() &&
+                userSaveDto.getNickname() != null && !userSaveDto.getNickname().isBlank() &&
+                userSaveDto.getPassword() != null && !userSaveDto.getPassword().isBlank() &&
+                userSaveDto.getEmail() != null && !userSaveDto.getEmail().isBlank()) {
+
+            try {
+                userService.create(userSaveDto);
+
+                HashMap<String, Object> result = new HashMap<>();
+                result.put("result", "회원가입에 성공하였습니다.");
+                return new ResponseEntity(result, HttpStatus.CREATED);
+            } catch (Exception e) {
+                HashMap<String, Object> result = new HashMap<>();
+                result.put("result", "회원가입에 실패하였습니다.");
+                return new ResponseEntity(result, HttpStatus.BAD_REQUEST);
+            }
+        } else {
+            HashMap<String, Object> result = new HashMap<>();
+            result.put("result", "회원가입에 실패하였습니다.");
+            return new ResponseEntity(result, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+    private Cookie createTokenCookie(String token, int age) {
+        Cookie cookie = new Cookie("token", token);
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(age);
+        cookie.setPath("/");
+        return cookie;
     }
 }
