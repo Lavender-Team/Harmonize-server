@@ -82,23 +82,6 @@ public class User implements UserDetails {
         this.deletedAt = LocalDateTime.now();
     }
 
-
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "attempt_id")
-    private Attempt attempt;
-
-    /* 관계(Relationships) */
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    List<Bookmark> bookmarks = new ArrayList<>();
-
-    public void addBookmark(Bookmark bookmark) {
-        this.bookmarks.add(bookmark);
-
-        if (bookmark.getUser() != this)
-            bookmark.setUser(this);
-    }
-
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
         authorities.add(new SimpleGrantedAuthority(this.role.name()));
@@ -108,7 +91,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return "";
+        return this.loginId;
     }
 
     @Override
@@ -130,4 +113,22 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return (!isLocked && !isBanned && !isDeleted);
     }
+
+
+    /* 관계(Relationships) */
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "attempt_id")
+    private Attempt attempt;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    List<Bookmark> bookmarks = new ArrayList<>();
+
+    public void addBookmark(Bookmark bookmark) {
+        this.bookmarks.add(bookmark);
+
+        if (bookmark.getUser() != this)
+            bookmark.setUser(this);
+    }
+
 }

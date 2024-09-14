@@ -176,30 +176,6 @@ public class UserController {
         }
     }
 
-    // 아이디 및 이메일 중복 검사
-    private void checkLoginIdAndEmailDuplicate(UserSaveDto userParam, BindingResult bindingResult) {
-        if (userService.existsByLoginId(userParam.getLoginId()))
-            bindingResult.rejectValue("loginId", "duplicated.loginId");
-        if (userService.existsByEmail(userParam.getEmail()))
-            bindingResult.rejectValue("email", "duplicated.email");
-    }
-
-    // 사용자 수정의 검증 결과 확인 메서드 (update와 updateByAdmin에 중복되어 분리)
-    private ResponseEntity<Object> checkErrorsOnUpdate(Long userId, UserUpdateDto userParam, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            ErrorResult errorResult = new ErrorResult(bindingResult, messageSource, Locale.getDefault());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResult);
-        } else {
-            // 이메일 중복 검사
-            if (userParam.getEmail() != null && userService.existsByEmail(userId, userParam.getEmail()))
-                bindingResult.rejectValue("email", "duplicated.email");
-            if (bindingResult.hasErrors()) {
-                ErrorResult errorResult = new ErrorResult(bindingResult, messageSource, Locale.getDefault());
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResult);
-            }
-        }
-        return null;
-    }
 
     @PostMapping("/login")
     public ResponseEntity login(final HttpServletRequest req,
@@ -230,9 +206,6 @@ public class UserController {
             return new ResponseEntity(result, HttpStatus.BAD_REQUEST);
         }
     }
-
-
-
 
     @GetMapping(path = "/logout")
     public ResponseEntity logout(final HttpServletRequest req, final HttpServletResponse res) {
@@ -267,37 +240,36 @@ public class UserController {
     }
 
 
-    @PostMapping("/register")
-    public ResponseEntity createUser(@RequestBody UserSaveDto userSaveDto) {
-        if( userSaveDto.getLoginId() != null && !userSaveDto.getLoginId().isBlank() &&
-                userSaveDto.getNickname() != null && !userSaveDto.getNickname().isBlank() &&
-                userSaveDto.getPassword() != null && !userSaveDto.getPassword().isBlank() &&
-                userSaveDto.getEmail() != null && !userSaveDto.getEmail().isBlank()) {
-
-            try {
-                userService.create(userSaveDto);
-
-                HashMap<String, Object> result = new HashMap<>();
-                result.put("result", "회원가입에 성공하였습니다.");
-                return new ResponseEntity(result, HttpStatus.CREATED);
-            } catch (Exception e) {
-                HashMap<String, Object> result = new HashMap<>();
-                result.put("result", "회원가입에 실패하였습니다.");
-                return new ResponseEntity(result, HttpStatus.BAD_REQUEST);
-            }
-        } else {
-            HashMap<String, Object> result = new HashMap<>();
-            result.put("result", "회원가입에 실패하였습니다.");
-            return new ResponseEntity(result, HttpStatus.BAD_REQUEST);
-        }
-    }
-
-
     private Cookie createTokenCookie(String token, int age) {
         Cookie cookie = new Cookie("token", token);
         cookie.setHttpOnly(true);
         cookie.setMaxAge(age);
         cookie.setPath("/");
         return cookie;
+    }
+
+    // 아이디 및 이메일 중복 검사
+    private void checkLoginIdAndEmailDuplicate(UserSaveDto userParam, BindingResult bindingResult) {
+        if (userService.existsByLoginId(userParam.getLoginId()))
+            bindingResult.rejectValue("loginId", "duplicated.loginId");
+        if (userService.existsByEmail(userParam.getEmail()))
+            bindingResult.rejectValue("email", "duplicated.email");
+    }
+
+    // 사용자 수정의 검증 결과 확인 메서드 (update와 updateByAdmin에 중복되어 분리)
+    private ResponseEntity<Object> checkErrorsOnUpdate(Long userId, UserUpdateDto userParam, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            ErrorResult errorResult = new ErrorResult(bindingResult, messageSource, Locale.getDefault());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResult);
+        } else {
+            // 이메일 중복 검사
+            if (userParam.getEmail() != null && userService.existsByEmail(userId, userParam.getEmail()))
+                bindingResult.rejectValue("email", "duplicated.email");
+            if (bindingResult.hasErrors()) {
+                ErrorResult errorResult = new ErrorResult(bindingResult, messageSource, Locale.getDefault());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResult);
+            }
+        }
+        return null;
     }
 }

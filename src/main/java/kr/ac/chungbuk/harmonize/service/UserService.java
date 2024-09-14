@@ -33,7 +33,7 @@ import java.util.Optional;
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
-    private AttemptRepository attemptRepository;
+    private final AttemptRepository attemptRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -59,26 +59,29 @@ public class UserService implements UserDetailsService {
         user.setPassword(passwordEncoder.encode(userParam.getPassword())); // 비밀번호 암호화
         user.setEmail(userParam.getEmail());
         user.setNickname(userParam.getNickname());
-        user.setGender(Gender.fromString(userParam.getGender()));
-        user.setAge(userParam.getAge());
         user.setRole(Role.USER);
         user.setCreatedAt(LocalDateTime.now());
         user.setIsDeleted(false);
         user.setIsBanned(false);
         user.setIsLocked(false);
 
+        // 관리자 페이지에서 회원가입시에만 실행
+        if (userParam.getGender() != null)
+            user.setGender(Gender.fromString(userParam.getGender()));
+        if (userParam.getAge() != null)
+            user.setAge(userParam.getAge());
+
+        user = userRepository.save(user);
+
         // Attempt 객체도 함께 생성
         Attempt attempt = new Attempt();
         attempt.setUser(user);  // Attempt와 User 간의 연관관계 설정
         user.setAttempt(attempt);
 
-        userRepository.save(user);
         attemptRepository.save(attempt);  // Attempt 저장
 
         return user;
     }
-
-
 
     // 사용자 수정
     @Transactional
@@ -154,6 +157,8 @@ public class UserService implements UserDetailsService {
 
     // 아이디 중복 여부 검사
     public Boolean existsByLoginId(String loginId) {
+        if (loginId.equals("anonymousUser"))
+            return true;
         return userRepository.existsByLoginId(loginId);
     }
 
@@ -215,12 +220,6 @@ public class UserService implements UserDetailsService {
         return JwtTokenProvider.generateToken(authentication);
     }
 
-
-
-
-    public boolean canUseAsloginId(String loginId) {
-        return !userRepository.existsByLoginId(loginId) && !loginId.equals("anonymousUser");
-    }
 
     public void lock(User user) {
         user.setIsLocked(true);

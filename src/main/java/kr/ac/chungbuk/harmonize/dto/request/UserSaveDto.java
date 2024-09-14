@@ -1,9 +1,6 @@
 package kr.ac.chungbuk.harmonize.dto.request;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,9 +26,6 @@ public class UserSaveDto {
     @Size(min = 2, max = 12)
     private String nickname;
 
-    @NotBlank
     private String gender;
-
-    @NotBlank
-    private int age;
+    private Integer age;
 }
