@@ -26,4 +26,6 @@ public class ArtistRequestDto {
 
     @Size(max = 100)
     private String agency;
+
+    private Boolean createSoloGroup;
 }

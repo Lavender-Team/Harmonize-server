@@ -161,6 +161,31 @@ public class FileHandler {
     }
 
     /**
+     * 가수의 프로필 이미지를 복사해 그룹의 프로필 이미지로 파일시스템에 저장할 때 사용합니다.
+     *
+     * @param filepath 복사할 프로필 이미지 파일 경로
+     * @param groupId  그룹 ID
+     */
+    public static String copyArtistProfileImageFile(String filepath, Long groupId, Long artistId) throws IOException {
+        String directoryPath = System.getProperty("user.dir") + "/upload/group/profile/";
+        if (!new File(directoryPath).exists()) {
+            new File(directoryPath).mkdirs();
+        }
+
+        String artistDirectoryPath = System.getProperty("user.dir") + "/upload/profile/";
+        String groupDirectoryPath = System.getProperty("user.dir") + "/upload/group/profile/";
+        String filename = filepath.substring(filepath.indexOf(String.valueOf(artistId)));
+        String fileExtension = StringUtils.getFilenameExtension(filename);
+
+        Files.copy(
+                Paths.get(artistDirectoryPath+filename),
+                Paths.get(groupDirectoryPath+groupId.toString() + "." + fileExtension)
+        );
+
+        return "/api/group/profile/" + groupId + "." + fileExtension;
+    }
+
+    /**
      * 각 음악별로 벌크 업로드 결과를 파일로 작성합니다.
      * 
      * @param title  음악 제목

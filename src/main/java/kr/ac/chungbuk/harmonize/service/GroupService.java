@@ -48,6 +48,20 @@ public class GroupService {
                 throw e;
             }
         }
+        else if (groupParam.getCopyProfileImagePath() != null) {
+            // 기존 가수 프로필 이미지 복사 (솔로 그룹 자동 생성시)
+            try {
+                String imagePath = FileHandler.copyArtistProfileImageFile(
+                        groupParam.getCopyProfileImagePath(),
+                        group.getGroupId(),
+                        groupParam.getArtistIds().get(0)
+                );
+                group.setProfileImage(imagePath);
+            } catch (IOException e) {
+                groupRepository.delete(group);
+                throw e;
+            }
+        }
 
         // 그룹 멤버
         int groupSize = 0;

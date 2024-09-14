@@ -1,9 +1,11 @@
 package kr.ac.chungbuk.harmonize.controller;
 
 import kr.ac.chungbuk.harmonize.dto.request.ArtistRequestDto;
+import kr.ac.chungbuk.harmonize.dto.request.GroupRequestDto;
 import kr.ac.chungbuk.harmonize.dto.response.ArtistDto;
 import kr.ac.chungbuk.harmonize.entity.Artist;
 import kr.ac.chungbuk.harmonize.service.ArtistService;
+import kr.ac.chungbuk.harmonize.service.GroupService;
 import kr.ac.chungbuk.harmonize.utility.ErrorResult;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -36,11 +38,13 @@ import static kr.ac.chungbuk.harmonize.utility.ErrorResult.SimpleErrorReturn;
 public class ArtistController {
 
     private final ArtistService artistService;
+    private final GroupService groupService;
     private final MessageSource messageSource;
 
     @Autowired
-    public ArtistController(ArtistService artistService, MessageSource messageSource) {
+    public ArtistController(ArtistService artistService, GroupService groupService, MessageSource messageSource) {
         this.artistService = artistService;
+        this.groupService = groupService;
         this.messageSource = messageSource;
     }
 
@@ -54,7 +58,12 @@ public class ArtistController {
         }
 
         try {
-            artistService.create(artistParam);
+            Artist created = artistService.create(artistParam);
+
+            // 솔로 그룹을 생성하도록 요청시
+            if (artistParam.getCreateSoloGroup()) {
+                groupService.create(GroupRequestDto.convertFrom(created));
+            }
             return ResponseEntity.status(HttpStatus.CREATED).body(null);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
