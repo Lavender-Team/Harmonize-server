@@ -190,21 +190,28 @@ public class UserService implements UserDetailsService {
         // Attempt 객체가 null일 경우 새로 생성
         if (user.getAttempt() == null) {
             Attempt newAttempt = new Attempt();
+            newAttempt.setUser(user);  // User와 Attempt 간의 연관 관계 설정
             user.setAttempt(newAttempt);
-            attemptRepository.save(newAttempt);  // 새로운 Attempt를 저장
+            attemptRepository.save(newAttempt);
         }
 
         // 비밀번호 검증
         if (!passwordEncoder.matches(password, user.getPassword())) {
             log.error("Password not matched for user: " + loginId);
 
-            int failed = user.getAttempt().getAttempts();  // Attempt 객체의 실패 횟수를 가져옴
-            if (failed + 1 < 100) {
-                user.getAttempt().setAttempts(failed + 1);
-                userRepository.save(user);
-            } else {
+            int failed = user.getAttempt().getAttempts();
+
+            // 실패 시도 증가
+            user.getAttempt().setAttempts(failed + 1);
+
+            // 10회 이상 시 계정 잠금
+            if (user.getAttempt().getAttempts() >= 10) {
                 this.lock(user);  // 계정 잠금
             }
+
+            userRepository.save(user);
+            attemptRepository.save(user.getAttempt());
+
             throw new IllegalArgumentException("Password not matched");
         }
 
@@ -212,12 +219,22 @@ public class UserService implements UserDetailsService {
         if (user.getAttempt().getAttempts() != 0) {
             user.getAttempt().setAttempts(0);
             userRepository.save(user);
+            attemptRepository.save(user.getAttempt());
         }
 
         log.info("User " + loginId + " logged in successfully.");
 
         Authentication authentication = new UserAuthentication(loginId, password, user.getAuthorities());
         return JwtTokenProvider.generateToken(authentication);
+    }
+
+    public User getUserByLoginId(String loginId) {
+        return userRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not present"));
+    }
+
+    public boolean canUseAsloginId(String loginId) {
+        return !userRepository.existsByLoginId(loginId) && !loginId.equals("anonymousUser");
     }
 
 

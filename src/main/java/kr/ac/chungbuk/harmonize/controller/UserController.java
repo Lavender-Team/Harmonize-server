@@ -182,22 +182,32 @@ public class UserController {
                                 final HttpServletResponse res,
                                 @RequestBody Map<String, String> request) throws Exception {
         try {
-            log.info("Login attempt: loginId=" + request.get("loginId"));
-
             String token = userService.tryLogin(request.get("loginId"), request.get("password"));
             Cookie tokenCookie = createTokenCookie(token, 168 * 60 * 60);
             res.addCookie(tokenCookie);
 
-            log.info("Login successful, token generated: " + token);
-
+            // 로그인 성공 응답
             HashMap<String, Object> result = new HashMap<>();
             result.put("result", "로그인에 성공하였습니다.");
-            result.put("token", token);
+            result.put("token", token); // 토큰도 포함하여 응답
             return new ResponseEntity(result, HttpStatus.OK);
 
-        } catch(Exception e) {
-            log.error("Login failed: " + e.getMessage());
+        } catch(IllegalArgumentException e) {
+            // 비밀번호가 틀렸을 때
+            User user = userService.getUserByLoginId(request.get("loginId"));
 
+            int failedAttempts = user.getAttempt().getAttempts();
+            int remainingAttempts = 10 - failedAttempts;
+
+            // 로그인 실패 응답
+            HashMap<String, Object> result = new HashMap<>();
+            result.put("result", "아이디 또는 비밀번호가 잘못되었습니다.");
+            result.put("failedAttempts", failedAttempts);
+            result.put("remainingAttempts", remainingAttempts);
+            return new ResponseEntity(result, HttpStatus.BAD_REQUEST);
+
+        } catch(Exception e) {
+            // 그 외의 오류 처리
             Cookie tokenCookie = createTokenCookie(null, 0);
             res.addCookie(tokenCookie);
 
