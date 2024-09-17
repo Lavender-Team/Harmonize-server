@@ -4,6 +4,7 @@ import kr.ac.chungbuk.harmonize.dto.request.ArtistRequestDto;
 import kr.ac.chungbuk.harmonize.dto.request.GroupRequestDto;
 import kr.ac.chungbuk.harmonize.dto.response.ArtistDto;
 import kr.ac.chungbuk.harmonize.entity.Artist;
+import kr.ac.chungbuk.harmonize.repository.ArtistRepository;
 import kr.ac.chungbuk.harmonize.service.ArtistService;
 import kr.ac.chungbuk.harmonize.service.GroupService;
 import kr.ac.chungbuk.harmonize.utility.ErrorResult;
@@ -27,7 +28,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
 import static kr.ac.chungbuk.harmonize.utility.ErrorResult.SimpleErrorReturn;
@@ -168,5 +171,16 @@ public class ArtistController {
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
         }
+    }
+
+    @Autowired
+    private ArtistRepository artistRepository;
+
+    @GetMapping("/count")
+    public ResponseEntity<Map<String, Integer>> countArtists() {
+        int count = (int) artistRepository.count();
+        Map<String, Integer> response = new HashMap<>();
+        response.put("count", count);
+        return ResponseEntity.ok(response);
     }
 }

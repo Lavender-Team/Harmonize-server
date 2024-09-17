@@ -41,4 +41,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Boolean existsByEmail(String email);
 
     Optional<User> findByNickname(String nickname);
+
+    // 삭제되지 않은 유저의 수를 카운트하는 메서드
+    @Query("SELECT COUNT(u) FROM User u WHERE u.isDeleted = false")
+    int countByIsDeletedFalse();
 }

@@ -6,6 +6,7 @@ import kr.ac.chungbuk.harmonize.dto.response.MusicDto;
 import kr.ac.chungbuk.harmonize.dto.response.MusicListDto;
 import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.entity.Theme;
+import kr.ac.chungbuk.harmonize.repository.MusicRepository;
 import kr.ac.chungbuk.harmonize.service.MusicService;
 import kr.ac.chungbuk.harmonize.utility.ErrorResult;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
@@ -257,4 +258,16 @@ public class MusicController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
+
+    @Autowired
+    private MusicRepository musicRepository;
+
+    @GetMapping("/count")
+    public ResponseEntity<Map<String, Integer>> countMusic() {
+        int count = (int) musicRepository.count();
+        Map<String, Integer> response = new HashMap<>();
+        response.put("count", count);
+        return ResponseEntity.ok(response);
+    }
+
 }
