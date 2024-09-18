@@ -173,12 +173,9 @@ public class ArtistController {
         }
     }
 
-    @Autowired
-    private ArtistRepository artistRepository;
-
     @GetMapping("/count")
     public ResponseEntity<Map<String, Integer>> countArtists() {
-        int count = (int) artistRepository.count();
+        int count = artistService.count();
         Map<String, Integer> response = new HashMap<>();
         response.put("count", count);
         return ResponseEntity.ok(response);

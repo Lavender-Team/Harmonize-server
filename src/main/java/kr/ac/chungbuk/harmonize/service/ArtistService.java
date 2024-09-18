@@ -111,4 +111,8 @@ public class ArtistService {
     public Optional<Artist> findById(Long artistId) {
         return artistRepository.findById(artistId);
     }
+
+    public int count() {
+        return (int) artistRepository.count();
+    }
 }

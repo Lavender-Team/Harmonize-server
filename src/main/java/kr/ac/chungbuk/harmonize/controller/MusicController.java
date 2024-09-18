@@ -259,7 +259,6 @@ public class MusicController {
         }
     }
 
-    @Autowired
     private MusicRepository musicRepository;
 
     @GetMapping("/count")

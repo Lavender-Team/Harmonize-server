@@ -283,7 +283,6 @@ public class UserController {
         return null;
     }
 
-    @Autowired
     private UserRepository userRepository;
 
     @GetMapping("/count")
