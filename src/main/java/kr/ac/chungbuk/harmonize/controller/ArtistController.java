@@ -10,6 +10,7 @@ import kr.ac.chungbuk.harmonize.service.GroupService;
 import kr.ac.chungbuk.harmonize.utility.ErrorResult;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.core.io.FileSystemResource;
@@ -64,7 +65,7 @@ public class ArtistController {
             Artist created = artistService.create(artistParam);
 
             // 솔로 그룹을 생성하도록 요청시
-            if (artistParam.getCreateSoloGroup()) {
+            if (BooleanUtils.isTrue(artistParam.getCreateSoloGroup())) {
                 groupService.create(GroupRequestDto.convertFrom(created));
             }
             return ResponseEntity.status(HttpStatus.CREATED).body(null);
@@ -73,6 +74,7 @@ public class ArtistController {
                     SimpleErrorReturn("io.createFailed.artist", messageSource, Locale.getDefault())
             );
         } catch (Exception e) {
+            log.debug(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     SimpleErrorReturn("createFailed.artist", messageSource, Locale.getDefault())
             );
