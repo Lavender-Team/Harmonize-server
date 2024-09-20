@@ -259,11 +259,9 @@ public class MusicController {
         }
     }
 
-    private MusicRepository musicRepository;
-
     @GetMapping("/count")
     public ResponseEntity<Map<String, Integer>> countMusic() {
-        int count = (int) musicRepository.count();
+        int count = musicService.count();
         Map<String, Integer> response = new HashMap<>();
         response.put("count", count);
         return ResponseEntity.ok(response);

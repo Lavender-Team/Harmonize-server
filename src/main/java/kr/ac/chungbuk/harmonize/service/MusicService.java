@@ -255,6 +255,10 @@ public class MusicService {
         return searchResult;
     }
 
+    public int count() {
+        return (int) musicRepository.count();
+    }
+
     private void saveThemes(List<String> themes, Music music) {
         List<Theme> themeList = new ArrayList<>();
         for (String theme : themes) {

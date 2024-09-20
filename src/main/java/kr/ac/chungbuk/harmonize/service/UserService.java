@@ -237,6 +237,9 @@ public class UserService implements UserDetailsService {
         return !userRepository.existsByLoginId(loginId) && !loginId.equals("anonymousUser");
     }
 
+    public int countByIsDeletedFalse() {
+        return (int) userRepository.countByIsDeletedFalse();
+    }
 
     public void lock(User user) {
         user.setIsLocked(true);

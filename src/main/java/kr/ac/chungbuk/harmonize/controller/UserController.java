@@ -283,11 +283,9 @@ public class UserController {
         return null;
     }
 
-    private UserRepository userRepository;
-
     @GetMapping("/count")
     public ResponseEntity<Map<String, Integer>> countUsers() {
-        int count = userRepository.countByIsDeletedFalse();  // is_deleted = 0 인 회원 카운트
+        int count = userService.countByIsDeletedFalse();  // is_deleted = 0 인 회원 카운트
         Map<String, Integer> response = new HashMap<>();
         response.put("count", count);
         return ResponseEntity.ok(response);
