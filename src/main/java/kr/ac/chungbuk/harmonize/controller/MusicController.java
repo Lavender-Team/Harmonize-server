@@ -192,7 +192,7 @@ public class MusicController {
     @GetMapping("/search")
     @ResponseBody
     public ResponseEntity<Object> search(SearchRequestDto query, BindingResult bindingResult,
-            @PageableDefault(sort = "musicId", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(sort = "musicId", direction = Sort.Direction.DESC, size = 50) Pageable pageable) {
 
         if (bindingResult.hasErrors()) {
             ErrorResult errorResult = new ErrorResult(bindingResult, messageSource, Locale.getDefault());

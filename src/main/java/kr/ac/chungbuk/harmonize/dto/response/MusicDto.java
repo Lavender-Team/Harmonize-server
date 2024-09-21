@@ -2,6 +2,7 @@ package kr.ac.chungbuk.harmonize.dto.response;
 
 import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.entity.Theme;
+import kr.ac.chungbuk.harmonize.enums.Genre;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,7 +20,9 @@ public class MusicDto {
     private Long id;
     private String title;
     private String artist;
+    private GroupDto group;
     private String genre;
+    private String genreName;
     private String karaokeNum;
     private LocalDateTime releaseDate;
     private String albumCover;
@@ -44,8 +47,10 @@ public class MusicDto {
         return MusicDto.builder()
                 .id(music.getMusicId())
                 .title(music.getTitle())
-                .artist((music.getGroup() == null) ? "-" : music.getGroup().getGroupName())
+                .artist(music.getGroup() == null ? "-" : music.getGroup().getGroupName())
+                .group(music.getGroup() == null ? null : GroupDto.build(music.getGroup()))
                 .genre(music.getGenre().name())
+                .genreName(Genre.toString(music.getGenre()))
                 .karaokeNum(music.getKaraokeNum())
                 .releaseDate(music.getReleaseDate())
                 .albumCover(music.getAlbumCover())
