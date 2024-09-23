@@ -197,7 +197,7 @@ public class UserService implements UserDetailsService {
 
         // 비밀번호 검증
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            log.error("Password not matched for user: " + loginId);
+            log.debug("Password not matched for user: " + loginId);
 
             int failed = user.getAttempt().getAttempts();
 
@@ -222,7 +222,7 @@ public class UserService implements UserDetailsService {
             attemptRepository.save(user.getAttempt());
         }
 
-        log.info("User " + loginId + " logged in successfully.");
+        log.debug("User " + loginId + " logged in successfully.");
 
         Authentication authentication = new UserAuthentication(loginId, password, user.getAuthorities());
         return JwtTokenProvider.generateToken(authentication);

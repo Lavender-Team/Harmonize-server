@@ -8,6 +8,7 @@ import kr.ac.chungbuk.harmonize.dto.request.UserUpdateAdminDto;
 import kr.ac.chungbuk.harmonize.dto.request.UserUpdateDto;
 import kr.ac.chungbuk.harmonize.dto.response.UserDto;
 import kr.ac.chungbuk.harmonize.entity.User;
+import kr.ac.chungbuk.harmonize.enums.Gender;
 import kr.ac.chungbuk.harmonize.service.UserService;
 import kr.ac.chungbuk.harmonize.utility.ErrorResult;
 import kr.ac.chungbuk.harmonize.entity.Attempt;
@@ -31,6 +32,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -186,10 +189,21 @@ public class UserController {
             Cookie tokenCookie = createTokenCookie(token, 168 * 60 * 60);
             res.addCookie(tokenCookie);
 
+            User logginedUser = userService.getUserByLoginId(request.get("loginId"));
+
             // 로그인 성공 응답
             HashMap<String, Object> result = new HashMap<>();
             result.put("result", "로그인에 성공하였습니다.");
             result.put("token", token); // 토큰도 포함하여 응답
+
+            // 기타 정보 포함
+            result.put("createdAt", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
+            result.put("userId", logginedUser.getUserId());
+            result.put("nickname", logginedUser.getNickname());
+            result.put("gender", Gender.toString(logginedUser.getGender()));
+            result.put("age", logginedUser.getAge());
+            result.put("genre", logginedUser.getGenre());
+
             return new ResponseEntity(result, HttpStatus.OK);
 
         } catch(IllegalArgumentException e) {
