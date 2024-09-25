@@ -11,12 +11,6 @@ import kr.ac.chungbuk.harmonize.entity.User;
 import kr.ac.chungbuk.harmonize.enums.Gender;
 import kr.ac.chungbuk.harmonize.service.UserService;
 import kr.ac.chungbuk.harmonize.utility.ErrorResult;
-import kr.ac.chungbuk.harmonize.entity.Attempt;
-import kr.ac.chungbuk.harmonize.entity.User;
-import kr.ac.chungbuk.harmonize.repository.AttemptRepository;
-import kr.ac.chungbuk.harmonize.repository.UserRepository;
-import kr.ac.chungbuk.harmonize.security.JwtTokenProvider;
-import kr.ac.chungbuk.harmonize.security.UserAuthentication;
 import kr.ac.chungbuk.harmonize.utility.Security;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +19,6 @@ import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -85,7 +78,7 @@ public class UserController {
     // 사용자 수정 (사용자)
     @PutMapping("/{userId}")
     public ResponseEntity<Object> update(@PathVariable Long userId, @Validated UserUpdateDto userParam,
-                                         BindingResult bindingResult) {
+                                         BindingResult bindingResult/*, @AuthenticationPrincipal User user*/) {
 
         ResponseEntity<Object> BAD_REQUEST = checkErrorsOnUpdate(userId, userParam, bindingResult);
         if (BAD_REQUEST != null) return BAD_REQUEST;

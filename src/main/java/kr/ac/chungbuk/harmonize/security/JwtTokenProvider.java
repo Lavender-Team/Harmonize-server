@@ -3,6 +3,7 @@ package kr.ac.chungbuk.harmonize.security;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
+import kr.ac.chungbuk.harmonize.entity.User;
 import org.springframework.security.core.Authentication;
 
 import java.security.Key;
@@ -29,7 +30,7 @@ public class JwtTokenProvider {
         Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION_MS);
 
         return Jwts.builder()
-                .setSubject((String) authentication.getPrincipal())
+                .setSubject(((User) authentication.getPrincipal()).getLoginId())
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(JWT_SECRET_KEY, SignatureAlgorithm.HS512)

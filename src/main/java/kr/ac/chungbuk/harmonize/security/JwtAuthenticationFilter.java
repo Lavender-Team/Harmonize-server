@@ -42,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             .orElseThrow(() -> new UsernameNotFoundException("User not present"));
 
                     // 인증 객체 생성
-                    UserAuthentication authentication = new UserAuthentication(loginId, null, user.getAuthorities());
+                    UserAuthentication authentication = new UserAuthentication(user, null, user.getAuthorities());
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                     // SecurityContext에 설정
@@ -67,6 +67,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String getJwtFromRequest(HttpServletRequest request) {
+        // 안드로이드에서 요청시 token을 Header에 추가해 요청
+        if (request.getHeader("token") != null) {
+            return request.getHeader("token");
+        }
+
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {

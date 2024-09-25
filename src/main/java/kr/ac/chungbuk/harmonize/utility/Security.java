@@ -1,5 +1,6 @@
 package kr.ac.chungbuk.harmonize.utility;
 
+import kr.ac.chungbuk.harmonize.entity.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,7 +12,7 @@ public class Security {
     public static String getCurrentloginId()
     {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication.getPrincipal().toString();
+        return ((User)authentication.getPrincipal()).getLoginId();
     }
 
     /**

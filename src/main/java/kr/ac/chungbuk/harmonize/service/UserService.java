@@ -224,7 +224,7 @@ public class UserService implements UserDetailsService {
 
         log.debug("User " + loginId + " logged in successfully.");
 
-        Authentication authentication = new UserAuthentication(loginId, password, user.getAuthorities());
+        Authentication authentication = new UserAuthentication(user, password, user.getAuthorities());
         return JwtTokenProvider.generateToken(authentication);
     }
 
