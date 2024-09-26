@@ -5,7 +5,6 @@ import kr.ac.chungbuk.harmonize.dto.request.ArtistRequestDto;
 import kr.ac.chungbuk.harmonize.entity.Artist;
 import kr.ac.chungbuk.harmonize.enums.Gender;
 import kr.ac.chungbuk.harmonize.repository.ArtistRepository;
-import kr.ac.chungbuk.harmonize.repository.GroupRepository;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

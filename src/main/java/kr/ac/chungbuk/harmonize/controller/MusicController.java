@@ -6,6 +6,8 @@ import kr.ac.chungbuk.harmonize.dto.response.MusicDto;
 import kr.ac.chungbuk.harmonize.dto.response.MusicListDto;
 import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.entity.Theme;
+import kr.ac.chungbuk.harmonize.entity.User;
+import kr.ac.chungbuk.harmonize.enums.Role;
 import kr.ac.chungbuk.harmonize.repository.MusicRepository;
 import kr.ac.chungbuk.harmonize.service.MusicService;
 import kr.ac.chungbuk.harmonize.utility.ErrorResult;
@@ -23,6 +25,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -136,12 +139,16 @@ public class MusicController {
         }
     }
 
-    // 음악 상세정보 조회 (어드민)
+    // 음악 상세정보 조회
     @GetMapping("/{musicId}")
     @ResponseBody
-    public MusicDto readByAdmin(@PathVariable Long musicId) {
+    public MusicDto read(@PathVariable Long musicId, @AuthenticationPrincipal User user) {
         try {
-            Music music = musicService.readByAdmin(musicId);
+            boolean countView = true;
+            if (user != null && user.getRole() == Role.ADMIN)
+                countView = false;
+
+            Music music = musicService.read(musicId, countView);
             return MusicDto.build(music);
         } catch (Exception e) {
             log.info(e.getMessage());
@@ -214,6 +221,40 @@ public class MusicController {
 
             return ResponseEntity.status(HttpStatus.OK).body(searchResultDto);
         } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    // 인기곡 순위
+    @GetMapping("/rank")
+    @ResponseBody
+    public Page<MusicListDto> listByRank(@PageableDefault(size = 12) Pageable pageable) {
+        try {
+            Page<Music> list = musicService.listByRank(pageable);
+
+            return new PageImpl<>(
+                    list.getContent().stream().map(MusicListDto::build).toList(),
+                    pageable,
+                    list.getTotalElements());
+        } catch (Exception e) {
+            log.debug(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    // 최신 음악 (1년 이내)
+    @GetMapping("/recent")
+    @ResponseBody
+    public Page<MusicListDto> listReleasedWithinOneYear(@PageableDefault(size = 6) Pageable pageable) {
+        try {
+            Page<Music> list = musicService.listReleasedWithinOneYear(pageable);
+
+            return new PageImpl<>(
+                    list.getContent().stream().map(MusicListDto::build).toList(),
+                    pageable,
+                    list.getTotalElements());
+        } catch (Exception e) {
+            log.debug(e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }

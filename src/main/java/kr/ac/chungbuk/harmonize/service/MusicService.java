@@ -10,7 +10,6 @@ import kr.ac.chungbuk.harmonize.entity.Group;
 import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.entity.MusicAnalysis;
 import kr.ac.chungbuk.harmonize.entity.Theme;
-import kr.ac.chungbuk.harmonize.enums.Gender;
 import kr.ac.chungbuk.harmonize.enums.Genre;
 import kr.ac.chungbuk.harmonize.enums.GroupType;
 import kr.ac.chungbuk.harmonize.repository.GroupRepository;
@@ -205,9 +204,16 @@ public class MusicService {
         csvReader.close();
     }
 
-    // 음악 상세정보 조회 (어드민)
-    public Music readByAdmin(Long musicId) throws Exception {
-        return musicRepository.findById(musicId).orElseThrow();
+    // 음악 상세정보 조회
+    @Transactional
+    public Music read(Long musicId, boolean countView) throws Exception {
+        Music music = musicRepository.findById(musicId).orElseThrow();
+
+        // 조회수를 올려야 하면 (일반 사용자 조회시)
+        if (countView)
+            music.countView();
+
+        return music;
     }
 
     // 음악 목록 조회
@@ -253,6 +259,18 @@ public class MusicService {
         searchResult.put("karaokeNum", musicRepository.searchKaraokeNum(query.getQuery(), groupType, genre, pageable));
 
         return searchResult;
+    }
+    
+    // 인기곡 순위
+    public Page<Music> listByRank(Pageable pageable) {
+        return musicRepository.findAllOrderByRank(pageable);
+    }
+
+    // 최신 음악 (1년 이내)
+    public Page<Music> listReleasedWithinOneYear(Pageable pageable) {
+        LocalDateTime today = LocalDateTime.now();
+        LocalDateTime oneYearAgo = today.minusYears(1);
+        return musicRepository.findReleasedWithinOneYear(oneYearAgo, today, pageable);
     }
 
     public int count() {

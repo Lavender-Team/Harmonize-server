@@ -57,4 +57,8 @@ public class Music {
     @OneToMany(mappedBy = "music", fetch = FetchType.EAGER)
     private List<Theme> themes;
 
+
+    public synchronized void countView() {
+        this.view++;
+    }
 }
