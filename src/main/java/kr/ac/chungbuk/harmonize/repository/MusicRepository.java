@@ -41,10 +41,10 @@ public interface MusicRepository extends JpaRepository<Music, Long> {
             " AND (:genre is null or :genre = m.genre)")
     Page<Music> searchKaraokeNum(String query, GroupType groupType, Genre genre, Pageable pageable);
 
-    @Query("SELECT m FROM Music m ORDER BY m.view DESC, m.likes DESC, m.releaseDate DESC")
+    @Query("SELECT m FROM Music m WHERE m.group IS NOT NULL ORDER BY m.view DESC, m.likes DESC, m.releaseDate DESC")
     Page<Music> findAllOrderByRank(Pageable pageable);
 
-    @Query("SELECT m FROM Music m WHERE m.releaseDate BETWEEN :oneYearAgo AND :today ORDER BY m.releaseDate DESC")
+    @Query("SELECT m FROM Music m WHERE m.group IS NOT NULL AND m.releaseDate BETWEEN :oneYearAgo AND :today ORDER BY m.releaseDate DESC")
     Page<Music> findReleasedWithinOneYear(LocalDateTime oneYearAgo, LocalDateTime today, Pageable pageable);
 
     @Query("SELECT m FROM Music m INNER JOIN Theme t ON m.musicId = t.music.musicId WHERE t.themeName = :themeName")
