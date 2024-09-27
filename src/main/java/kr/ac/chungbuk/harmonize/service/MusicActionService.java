@@ -9,7 +9,11 @@ import kr.ac.chungbuk.harmonize.repository.MusicRepository;
 import kr.ac.chungbuk.harmonize.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.NoSuchElementException;
 
 
 @Service
@@ -56,5 +60,30 @@ public class MusicActionService {
         bookmarkRepository.delete(bookmark);
 
         music.setLikes(bookmarkRepository.countByMusic(music));
+    }
+
+    // 음악 상세정보 조회시 북마크 여부 조회
+    public boolean getIsBookmarked(User user, Long musicId) {
+        if (user == null)
+            return false;
+
+        Music music = musicRepository.findById(musicId).orElseThrow();
+        return bookmarkRepository.existsByUserAndMusic(user, music);
+    }
+
+    // 회원의 북마크한 음악 목록 조회
+    public Page<Music> listBookmarkedMusic(User user, Pageable pageable) {
+        if (user == null)
+            throw new NoSuchElementException("user is null");
+
+        return musicRepository.findAllBookmarkedMusic(user.getUserId(), pageable);
+    }
+
+    // 회원의 북마크한 음악 목록 개수 조회
+    public Long countBookmarkedMusic(User user) {
+        if (user == null)
+            throw new NoSuchElementException("user is null");
+
+        return musicRepository.countAllBookmarkedMusic(user.getUserId());
     }
 }

@@ -29,6 +29,7 @@ public class MusicDto {
     private String playLink;
     private Long view;
     private Long likes;
+    private Boolean isBookmarked;
     private List<String> themes;
     private String audioFile;
     private String lyrics;
@@ -43,7 +44,7 @@ public class MusicDto {
     private Integer steepSlope;
     private Integer level;
 
-    public static MusicDto build(Music music) {
+    public static MusicDto build(Music music, boolean isBookmarked) {
         return MusicDto.builder()
                 .id(music.getMusicId())
                 .title(music.getTitle())
@@ -57,6 +58,7 @@ public class MusicDto {
                 .playLink(music.getPlayLink())
                 .view(music.getView())
                 .likes(music.getLikes())
+                .isBookmarked(isBookmarked)
                 .themes(music.getThemes().stream().map(Theme::getThemeName).toList())
                 .audioFile(music.getAudioFile())
                 .lyrics(music.getLyrics())

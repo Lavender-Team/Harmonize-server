@@ -9,6 +9,7 @@ import kr.ac.chungbuk.harmonize.entity.Theme;
 import kr.ac.chungbuk.harmonize.entity.User;
 import kr.ac.chungbuk.harmonize.enums.Role;
 import kr.ac.chungbuk.harmonize.repository.MusicRepository;
+import kr.ac.chungbuk.harmonize.service.MusicActionService;
 import kr.ac.chungbuk.harmonize.service.MusicService;
 import kr.ac.chungbuk.harmonize.utility.ErrorResult;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
@@ -47,11 +48,14 @@ import static kr.ac.chungbuk.harmonize.utility.ErrorResult.SimpleErrorReturn;
 public class MusicController {
 
     private final MusicService musicService;
+    private final MusicActionService musicActionService;
     private final MessageSource messageSource;
 
     @Autowired
-    public MusicController(MusicService musicService, @Qualifier("messageSource") MessageSource messageSource) {
+    public MusicController(MusicService musicService, MusicActionService musicActionService,
+                           @Qualifier("messageSource") MessageSource messageSource) {
         this.musicService = musicService;
+        this.musicActionService = musicActionService;
         this.messageSource = messageSource;
     }
 
@@ -149,7 +153,7 @@ public class MusicController {
                 countView = false;
 
             Music music = musicService.read(musicId, countView);
-            return MusicDto.build(music);
+            return MusicDto.build(music, musicActionService.getIsBookmarked(user, musicId));
         } catch (Exception e) {
             log.info(e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());

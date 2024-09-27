@@ -1,6 +1,7 @@
 package kr.ac.chungbuk.harmonize.repository;
 
 import kr.ac.chungbuk.harmonize.entity.Music;
+import kr.ac.chungbuk.harmonize.entity.User;
 import kr.ac.chungbuk.harmonize.enums.Genre;
 import kr.ac.chungbuk.harmonize.enums.GroupType;
 import org.springframework.data.domain.Page;
@@ -52,4 +53,10 @@ public interface MusicRepository extends JpaRepository<Music, Long> {
 
     @Query("SELECT m FROM Music m INNER JOIN Theme t ON m.musicId = t.music.musicId WHERE t.themeName = :themeName AND m.title LIKE %:title%")
     Page<Music> findAllByThemeTitleContaining(String title, String themeName, Pageable pageable);
+
+    @Query("SELECT m FROM Music m INNER JOIN Bookmark b ON m = b.music WHERE b.user.userId = :userId")
+    Page<Music> findAllBookmarkedMusic(Long userId, Pageable pageable);
+
+    @Query("SELECT COUNT(m) FROM Music m INNER JOIN Bookmark b ON m = b.music WHERE b.user.userId = :userId")
+    Long countAllBookmarkedMusic(Long userId);
 }
