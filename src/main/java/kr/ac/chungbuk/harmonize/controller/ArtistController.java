@@ -175,6 +175,7 @@ public class ArtistController {
         }
     }
 
+    // 전체 가수 수 조회
     @GetMapping("/count")
     public ResponseEntity<Map<String, Integer>> countArtists() {
         int count = artistService.count();

@@ -172,7 +172,7 @@ public class UserController {
         }
     }
 
-
+    // 로그인
     @PostMapping("/login")
     public ResponseEntity login(final HttpServletRequest req,
                                 final HttpServletResponse res,
@@ -224,6 +224,7 @@ public class UserController {
         }
     }
 
+    // 로그아웃
     @GetMapping(path = "/logout")
     public ResponseEntity logout(final HttpServletRequest req, final HttpServletResponse res) {
         Cookie tokenCookie = createTokenCookie(null, 0);
@@ -234,6 +235,7 @@ public class UserController {
         return new ResponseEntity(result, HttpStatus.OK);
     }
 
+    // 로그인된 사용자 조회
     @GetMapping(path = "/auth/currentuser")
     public ResponseEntity getCurrentUserData() {
         HashMap<String, Object> result = new HashMap<>();
@@ -290,6 +292,7 @@ public class UserController {
         return null;
     }
 
+    // 전체 사용자 수 조회
     @GetMapping("/count")
     public ResponseEntity<Map<String, Integer>> countUsers() {
         int count = userService.countByIsDeletedFalse();  // is_deleted = 0 인 회원 카운트

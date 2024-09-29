@@ -160,22 +160,6 @@ public class MusicController {
         }
     }
 
-    // 음악 앨범커버 파일 다운로드
-    @GetMapping("/albumcover/{filename}")
-    public ResponseEntity<FileSystemResource> getAlbumCover(@PathVariable String filename) throws Exception {
-
-        if (filename.contains(".."))
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Filename cannot contains \"..\"");
-
-        String path = System.getProperty("user.dir") + "/upload/albumcover/" + filename;
-
-        if (new File(path).exists()) {
-            return FileHandler.getFileSystemResource(filename, path);
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
-        }
-    }
-
     // 음악 목록 조회
     @GetMapping
     @ResponseBody
@@ -304,12 +288,29 @@ public class MusicController {
         }
     }
 
+    // 전체 음악 수 조회
     @GetMapping("/count")
     public ResponseEntity<Map<String, Integer>> countMusic() {
         int count = musicService.count();
         Map<String, Integer> response = new HashMap<>();
         response.put("count", count);
         return ResponseEntity.ok(response);
+    }
+
+    // 음악 앨범커버 파일 다운로드
+    @GetMapping("/albumcover/{filename}")
+    public ResponseEntity<FileSystemResource> getAlbumCover(@PathVariable String filename) throws Exception {
+
+        if (filename.contains(".."))
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Filename cannot contains \"..\"");
+
+        String path = System.getProperty("user.dir") + "/upload/albumcover/" + filename;
+
+        if (new File(path).exists()) {
+            return FileHandler.getFileSystemResource(filename, path);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
+        }
     }
 
 }
