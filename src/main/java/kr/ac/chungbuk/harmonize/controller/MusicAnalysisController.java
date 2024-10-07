@@ -190,4 +190,17 @@ public class MusicAnalysisController {
         }
     }
 
+    // Pitch 오디오 파일 다운로드
+    @GetMapping(path = "/pitch/audio/{musicId}")
+    public ResponseEntity<FileSystemResource> getPitchAudioFile(@PathVariable Long musicId) throws IOException {
+
+        String path = System.getProperty("user.dir") + "/upload/audio/" + musicId + "/output_audio.wav";
+
+        if (new File(path).exists()) {
+            return FileHandler.getFileSystemResource("output_audio.wav", path);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
+        }
+    }
+
 }

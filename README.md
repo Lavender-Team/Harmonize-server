@@ -45,73 +45,74 @@
 
 |   Domain   | Index | Method | URI                            | Description         |
 |:----------:|:-----:|--------|--------------------------------|---------------------|
-| /api/music |  14   | POST   | /{musicId}/files               | 음악 및 가사 파일 업로드      |
-|            |  15   | POST   | /bulk/files                    | 앨범커버, 음악, 가사 벌크 업로드 |
-|            |  16   | POST   | /{musicId}/analyze             | 음악 분석 요청            |
-|            |  17   | PUT    | /{musicId}/delete?action=value | Pitch 값 제거 요청       |
-|            |  18   | PUT    | /{musicId}/delete?action=range | Pitch 범위 제거 요청      |
-|            |  19   | GET    | /audio/{filename}              | 음악 파일 다운로드          |
-|            |  20   | GET    | /pitch/{musicId}               | Pitch 그래프 파일 다운로드   |
+| /api/music |  20   | POST   | /{musicId}/files               | 음악 및 가사 파일 업로드      |
+|            |  21   | POST   | /bulk/files                    | 앨범커버, 음악, 가사 벌크 업로드 |
+|            |  22   | POST   | /{musicId}/analyze             | 음악 분석 요청            |
+|            |  23   | PUT    | /{musicId}/delete?action=value | Pitch 값 제거 요청       |
+|            |  24   | PUT    | /{musicId}/delete?action=range | Pitch 범위 제거 요청      |
+|            |  25   | GET    | /audio/{filename}              | 음악 파일 다운로드          |
+|            |  26   | GET    | /pitch/{musicId}               | Pitch 그래프 파일 다운로드   |
+|            |  27   | GET    | /pitch/audio/{musicId}         | Pitch 오디오 파일 다운로드   |
 
 
 ### [MusicActionController](https://github.com/Lavender-Team/Harmonize-server/blob/develop/src/main/java/kr/ac/chungbuk/harmonize/controller/MusicActionController.java)
 
 |   Domain   | Index | Method | URI             | Description   |
 |:----------:|:-----:|--------|-----------------|---------------|
-| /api/music |  21   | POST   | /{musicId}/like | 북마크(좋아요)      |
-|            |  22   | DELETE | /{musicId}/like | 북마크(좋아요) 취소   |
-|            |  23   | GET    | /bookmarked     | 북마크한 음악 목록 조회 |
+| /api/music |  30   | POST   | /{musicId}/like | 북마크(좋아요)      |
+|            |  31   | DELETE | /{musicId}/like | 북마크(좋아요) 취소   |
+|            |  32   | GET    | /bookmarked     | 북마크한 음악 목록 조회 |
 
 
 ### [ArtistController](https://github.com/Lavender-Team/Harmonize-server/blob/develop/src/main/java/kr/ac/chungbuk/harmonize/controller/ArtistController.java)
 
 |   Domain    | Index | Method | URI                 | Description     |
 |:-----------:|:-----:|--------|---------------------|-----------------|
-| /api/artist |  24   | POST   | /                   | 가수 등록           |
-|             |  25   | PUT    | /{artistId}         | 가수 수정           |
-|             |  26   | DELETE | /{artistId}         | 가수 삭제           |
-|             |  27   | GET    | /                   | 가수 목록 조회        |
-|             |  28   | GET    | /{artistId}         | 가수 상세 조회        |
-|             |  29   | GET    | /count              | 전체 가수 수 조회      |
-|             |  30   | GET    | /profile/{filename} | 프로필 이미지 파일 다운로드 |
+| /api/artist |  40   | POST   | /                   | 가수 등록           |
+|             |  41   | PUT    | /{artistId}         | 가수 수정           |
+|             |  42   | DELETE | /{artistId}         | 가수 삭제           |
+|             |  43   | GET    | /                   | 가수 목록 조회        |
+|             |  44   | GET    | /{artistId}         | 가수 상세 조회        |
+|             |  45   | GET    | /count              | 전체 가수 수 조회      |
+|             |  46   | GET    | /profile/{filename} | 프로필 이미지 파일 다운로드 |
 
 
 ### [GroupController](https://github.com/Lavender-Team/Harmonize-server/blob/develop/src/main/java/kr/ac/chungbuk/harmonize/controller/GroupController.java)
 
 |   Domain   | Index | Method | URI                 | Description     |
 |:----------:|:-----:|--------|---------------------|-----------------|
-| /api/group |  31   | POST   | /                   | 그룹 등록           |
-|            |  32   | PUT    | /{groupId}          | 그룹 수정           |
-|            |  33   | DELETE | /{groupId}          | 그룹 삭제           |
-|            |  34   | GET    | /                   | 그룹 목록 조회        |
-|            |  35   | GET    | /{groupId}          | 그룹 상세 조회        |
-|            |  36   | GET    | /profile/{filename} | 프로필 이미지 파일 다운로드 |
+| /api/group |  50   | POST   | /                   | 그룹 등록           |
+|            |  51   | PUT    | /{groupId}          | 그룹 수정           |
+|            |  52   | DELETE | /{groupId}          | 그룹 삭제           |
+|            |  53   | GET    | /                   | 그룹 목록 조회        |
+|            |  54   | GET    | /{groupId}          | 그룹 상세 조회        |
+|            |  55   | GET    | /profile/{filename} | 프로필 이미지 파일 다운로드 |
 
 
 ### [UserController](https://github.com/Lavender-Team/Harmonize-server/blob/develop/src/main/java/kr/ac/chungbuk/harmonize/controller/UserController.java)
 
 |  Domain   | Index | Method | URI               | Description  |
 |:---------:|:-----:|--------|-------------------|--------------|
-| /api/user |  37   | POST   | /                 | 사용자 생성       |
-|           |  38   | PUT    | /{userId}         | 사용자 수정 (사용자) |
-|           |  39   | PUT    | /admin/{userId}   | 사용자 수정 (어드민) |
-|           |  40   | DELETE | /{userId}         | 사용자 삭제       |
-|           |  41   | GET    | /{userId}         | 사용자 상세 조회    |
-|           |  42   | GET    | /                 | 사용자 목록 조회    |
-|           |  43   | POST   | /login            | 로그인          |
-|           |  44   | GET    | /logout           | 로그아웃         |
-|           |  45   | GET    | /auth/currentuser | 로그인된 사용자 조회  |
-|           |  46   | GET    | /count            | 전체 사용자 수 조회  |
+| /api/user |  61   | POST   | /                 | 사용자 생성       |
+|           |  62   | PUT    | /{userId}         | 사용자 수정 (사용자) |
+|           |  63   | PUT    | /admin/{userId}   | 사용자 수정 (어드민) |
+|           |  64   | DELETE | /{userId}         | 사용자 삭제       |
+|           |  65   | GET    | /{userId}         | 사용자 상세 조회    |
+|           |  66   | GET    | /                 | 사용자 목록 조회    |
+|           |  67   | POST   | /login            | 로그인          |
+|           |  68   | GET    | /logout           | 로그아웃         |
+|           |  69   | GET    | /auth/currentuser | 로그인된 사용자 조회  |
+|           |  70   | GET    | /count            | 전체 사용자 수 조회  |
 
 
 ### [LogController](https://github.com/Lavender-Team/Harmonize-server/blob/develop/src/main/java/kr/ac/chungbuk/harmonize/controller/LogController.java)
 
 |  Domain  | Index | Method | URI         | Description        |
 |:--------:|:-----:|--------|-------------|--------------------|
-| /api/log |  47   | GET    | /bulk       | 벌크 업로드 결과 조회       |
-|          |  48   | DELETE | /bulk       | 벌크 업로드 결과 삭제       |
-|          |  49   | GET    | /bulk/files | 파일 벌크 업로드 결과 조회    |
-|          |  50   | DELETE | /bulk/files | 파일 벌크 업로드 결과 로그 삭제 |
+| /api/log |  81   | GET    | /bulk       | 벌크 업로드 결과 조회       |
+|          |  82   | DELETE | /bulk       | 벌크 업로드 결과 삭제       |
+|          |  83   | GET    | /bulk/files | 파일 벌크 업로드 결과 조회    |
+|          |  84   | DELETE | /bulk/files | 파일 벌크 업로드 결과 로그 삭제 |
 
 </details>
 
