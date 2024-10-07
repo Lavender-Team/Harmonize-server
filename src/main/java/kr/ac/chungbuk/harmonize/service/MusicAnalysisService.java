@@ -157,8 +157,31 @@ public class MusicAnalysisService {
                 "command": "delete",
                 "music_id": %d,
                 "time": %f,
-                "path": "%s"
+                "path": "%s",
+                "action": "value"
             }
         """, musicId, time, path));
+    }
+
+    // 음악 분석 특정 Pitch 범위 제거 요청 전송
+    public void deletePitchRange(Long musicId, Double time, String range) throws Exception {
+        Music music = musicRepository.findById(musicId).orElseThrow();
+
+        if (music.getAnalysis().getStatus() != Status.COMPLETE)
+            throw new Exception("Analysis status is not COMPLETE");
+
+        String path = System.getProperty("user.dir") + "/upload/audio/";
+        path = path.replace("\\", "\\\\");
+
+        kafkaTemplate.send("musicAnalysis", String.format("""
+            {
+                "command": "delete",
+                "music_id": %d,
+                "time": %f,
+                "path": "%s",
+                "action": "range",
+                "range": "%s"
+            }
+       """, musicId, time, path, range));
     }
 }

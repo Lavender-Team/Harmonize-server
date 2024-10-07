@@ -11,10 +11,7 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -131,12 +128,31 @@ public class MusicAnalysisController {
     }
 
     // 음악 분석 특정 Pitch 값 제거 요청 전송
-    @PostMapping(path = "/{musicId}/delete")
+    @PutMapping(path = "/{musicId}/delete", params = "action=value")
     public ResponseEntity<Object> deletePitch(@PathVariable Long musicId, Double time) {
         try {
             musicAnalysisService.deletePitch(musicId, time);
             return ResponseEntity.status(HttpStatus.OK).body(null);
+        } catch (Exception e) {
+            log.debug(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    SimpleErrorReturn("deletePitchFailed.analysis", messageSource, Locale.getDefault())
+            );
+        }
+    }
 
+    // 음악 분석 특정 Pitch 범위 제거 요청 전송
+    @PutMapping(path = "/{musicId}/delete", params = "action=range")
+    public ResponseEntity<Object> deletePitch(@PathVariable Long musicId, Double time, String range) {
+        try {
+            if (!range.equals("upper") && !range.equals("lower")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                        SimpleErrorReturn("invalidRange.analysis", messageSource, Locale.getDefault())
+                );
+            }
+
+            musicAnalysisService.deletePitchRange(musicId, time, range);
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (Exception e) {
             log.debug(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
