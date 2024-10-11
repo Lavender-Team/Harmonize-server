@@ -12,9 +12,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -138,6 +136,34 @@ public class MusicAnalysisService {
                 "filename": "%s"
             }
         """, musicId, (confidence != null) ? confidence : 0.8, path, filename));
+
+        music.getAnalysis().setStatus(Status.RUNNING);
+    }
+
+    // 음악 분석 요청 전송
+    @Transactional
+    public void analyzeWithoutModel(Long musicId) throws Exception {
+        Music music = musicRepository.findById(musicId).orElseThrow();
+
+        String path = System.getProperty("user.dir") + "/upload/audio/";
+        path = path.replace("\\", "\\\\");
+
+        int lastIndex = music.getAudioFile().lastIndexOf('/');
+        String filename = music.getAudioFile().substring(lastIndex + 1);
+
+        File xlsxFile = new File(path + musicId + "/pitch.xlsx");
+        if (!xlsxFile.exists()) {
+            throw new FileNotFoundException(musicId + "번 음악 xlsx 파일이 존재하지 않음");
+        }
+
+        kafkaTemplate.send("musicAnalysis", String.format("""
+            {
+                "command": "analysis_offline",
+                "music_id": %d,
+                "path": "%s",
+                "filename": "%s"
+            }
+        """, musicId, path, filename));
 
         music.getAnalysis().setStatus(Status.RUNNING);
     }

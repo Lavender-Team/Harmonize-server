@@ -152,15 +152,15 @@ public class UserController {
     // 사용자 목록 조회
     @GetMapping
     @ResponseBody
-    public Page<UserDto> list(String nickname,
+    public Page<UserDto> list(String query,
                               @PageableDefault(sort = "userId", direction = Sort.Direction.DESC) Pageable pageable) {
         try {
             Page<User> list;
 
-            if (nickname == null || nickname.isEmpty())
+            if (query == null || query.isEmpty())
                 list = userService.list(pageable);
             else
-                list = userService.search(nickname, pageable);
+                list = userService.search(query, pageable);
 
             return new PageImpl<>(
                     list.getContent().stream().map(UserDto::build).toList(),
@@ -188,6 +188,7 @@ public class UserController {
             HashMap<String, Object> result = new HashMap<>();
             result.put("result", "로그인에 성공하였습니다.");
             result.put("token", token); // 토큰도 포함하여 응답
+            result.put("role", logginedUser.getRole());
 
             // 기타 정보 포함
             result.put("createdAt", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));

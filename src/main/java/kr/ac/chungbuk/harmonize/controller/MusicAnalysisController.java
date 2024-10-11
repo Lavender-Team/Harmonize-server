@@ -114,9 +114,17 @@ public class MusicAnalysisController {
 
     // 음악 분석 요청 전송
     @PostMapping(path = "/{musicId}/analyze")
-    public ResponseEntity<Object> analyze(@PathVariable Long musicId, Double confidence) {
+    public ResponseEntity<Object> analyze(@PathVariable Long musicId, Double confidence,
+                                          @RequestParam(defaultValue = "false") boolean analyzeWithoutModel) {
         try {
-            musicAnalysisService.analyze(musicId, confidence);
+            if (analyzeWithoutModel) {
+                // 직접 분석 결과 xlsx 파일 업로드 후 분석만 실행
+                musicAnalysisService.analyzeWithoutModel(musicId);
+            } else {
+                // 모델을 통해 Pitch Estimation 진행 및 분석
+                musicAnalysisService.analyze(musicId, confidence);
+            }
+
             return ResponseEntity.status(HttpStatus.OK).body(null);
 
         } catch (Exception e) {

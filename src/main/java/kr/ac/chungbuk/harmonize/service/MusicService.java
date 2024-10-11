@@ -19,6 +19,7 @@ import kr.ac.chungbuk.harmonize.repository.ThemeRepository;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -164,8 +165,15 @@ public class MusicService {
 
                 if (line[0].isEmpty())
                     continue;
+                
+                // 중복 확인
+                if (musicRepository.existsByTitle(line[0])) {
+                    throw new CsvValidationException("제목 중복 노래 존재");
+                }
+                if (line[0].indexOf('[') != -1) { // 노래명 중복으로 "[가수명]" 포함시 제거
+                    line[0] = line[0].substring(0, line[0].indexOf('['));
+                }
 
-                // TODO 가수 관련 처리 : line[1]
                 LocalDateTime releaseDate = LocalDateTime.parse(
                         (line[4].contains(".") ? line[4].replace('.', '-') : line[4])
                                 + "T00:00:00");
@@ -189,10 +197,22 @@ public class MusicService {
                     throw new CsvValidationException(errors.getFieldError().getField() + " 검증 문제");
                 }
 
+                // 가사
                 Music created = create(musicParam);
                 if (!line[6].isEmpty())
                     created.setLyrics(line[6]);
                 musicRepository.save(created);
+
+                // 가수(그룹)
+                try {
+                    if (!line[1].isBlank()) {
+                        Optional<Group> group = groupRepository.findByGroupName(line[1]);
+                        group.ifPresent(created::setGroup);
+                        musicRepository.save(created);
+                    }
+                } catch (IncorrectResultSizeDataAccessException e) {
+                    FileHandler.writeBulkUploadLog(line[0], "그룹이 존재하지 않거나 두 개 이상 존재", false);
+                }
 
                 FileHandler.writeBulkUploadLog(line[0], "업로드 성공", false);
             } catch (Exception e) {
