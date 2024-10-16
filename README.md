@@ -53,6 +53,7 @@
 |            |  25   | GET    | /audio/{filename}              | 음악 파일 다운로드          |
 |            |  26   | GET    | /pitch/{musicId}               | Pitch 그래프 파일 다운로드   |
 |            |  27   | GET    | /pitch/audio/{musicId}         | Pitch 오디오 파일 다운로드   |
+|            |  28   | POST   | /recsys/content-based          | 콘텐츠 기반 추천 결과 업데이트   |
 
 
 ### [MusicActionController](https://github.com/Lavender-Team/Harmonize-server/blob/develop/src/main/java/kr/ac/chungbuk/harmonize/controller/MusicActionController.java)

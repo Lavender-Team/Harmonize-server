@@ -212,7 +212,7 @@ public class MusicAnalysisService {
     }
 
     // 콘텐츠 기반 추천 결과 업데이트 요청
-    public void requestContentBasedRec() throws Exception {
+    public void requestContentBasedRec() {
         kafkaTemplate.send("musicRecSys", """
             {
                 "command": "content-based"
