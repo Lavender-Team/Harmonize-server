@@ -35,10 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import static kr.ac.chungbuk.harmonize.utility.ErrorResult.SimpleErrorReturn;
 
@@ -120,7 +117,7 @@ public class MusicController {
                     SimpleErrorReturn("notFound.music", messageSource, Locale.getDefault())
             );
         } catch (Exception e) {
-            log.info(e.getMessage());
+            log.debug(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     SimpleErrorReturn("deleteFailed.music", messageSource, Locale.getDefault())
             );
@@ -153,9 +150,11 @@ public class MusicController {
                 countView = false;
 
             Music music = musicService.read(musicId, countView);
-            return MusicDto.build(music, musicActionService.getIsBookmarked(user, musicId));
+            List<Music> similarMusics = musicService.readSimilarMusic(music);
+
+            return MusicDto.build(music, similarMusics, musicActionService.getIsBookmarked(user, musicId));
         } catch (Exception e) {
-            log.info(e.getMessage());
+            log.debug(e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }

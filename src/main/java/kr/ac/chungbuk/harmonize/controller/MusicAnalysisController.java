@@ -211,4 +211,18 @@ public class MusicAnalysisController {
         }
     }
 
+    // 콘텐츠 기반 추천 결과 업데이트 요청
+    @PostMapping(path = "/recsys/content-based")
+    public ResponseEntity<Object> requestContentBasedRec() {
+        try {
+            musicAnalysisService.requestContentBasedRec();
+            return ResponseEntity.status(HttpStatus.OK).body(null);
+        } catch (Exception e) {
+            log.debug(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    SimpleErrorReturn("contentBasedFailed.recsys", messageSource, Locale.getDefault())
+            );
+        }
+    }
+
 }

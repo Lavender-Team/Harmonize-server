@@ -44,7 +44,9 @@ public class MusicDto {
     private Integer steepSlope;
     private Integer level;
 
-    public static MusicDto build(Music music, boolean isBookmarked) {
+    private List<MusicListDto> similarMusics;
+
+    public static MusicDto build(Music music, List<Music> similarMusics, boolean isBookmarked) {
         return MusicDto.builder()
                 .id(music.getMusicId())
                 .title(music.getTitle())
@@ -71,6 +73,7 @@ public class MusicDto {
                 .lowPitchCont(music.getAnalysis().getLowPitchCont())
                 .steepSlope(music.getAnalysis().getSteepSlope())
                 .level(music.getAnalysis().getLevel())
+                .similarMusics(similarMusics.stream().map(MusicListDto::build).toList())
                 .build();
     }
 }

@@ -6,16 +6,10 @@ import com.opencsv.exceptions.CsvValidationException;
 import jakarta.transaction.Transactional;
 import kr.ac.chungbuk.harmonize.dto.request.MusicRequestDto;
 import kr.ac.chungbuk.harmonize.dto.request.SearchRequestDto;
-import kr.ac.chungbuk.harmonize.entity.Group;
-import kr.ac.chungbuk.harmonize.entity.Music;
-import kr.ac.chungbuk.harmonize.entity.MusicAnalysis;
-import kr.ac.chungbuk.harmonize.entity.Theme;
+import kr.ac.chungbuk.harmonize.entity.*;
 import kr.ac.chungbuk.harmonize.enums.Genre;
 import kr.ac.chungbuk.harmonize.enums.GroupType;
-import kr.ac.chungbuk.harmonize.repository.GroupRepository;
-import kr.ac.chungbuk.harmonize.repository.MusicAnalysisRepository;
-import kr.ac.chungbuk.harmonize.repository.MusicRepository;
-import kr.ac.chungbuk.harmonize.repository.ThemeRepository;
+import kr.ac.chungbuk.harmonize.repository.*;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,16 +35,19 @@ public class MusicService {
     private final MusicAnalysisRepository musicAnalysisRepository;
     private final GroupRepository groupRepository;
     private final ThemeRepository themeRepository;
+    private final SimilarMusicRepository similarMusicRepository;
 
     Validator validator;
 
     @Autowired
     public MusicService(MusicRepository musicRepository, MusicAnalysisRepository musicAnalysisRepository,
-            GroupRepository groupRepository, ThemeRepository themeRepository, Validator validator) {
+                        GroupRepository groupRepository, ThemeRepository themeRepository,
+                        SimilarMusicRepository similarMusicRepository, Validator validator) {
         this.musicRepository = musicRepository;
         this.musicAnalysisRepository = musicAnalysisRepository;
         this.groupRepository = groupRepository;
         this.themeRepository = themeRepository;
+        this.similarMusicRepository = similarMusicRepository;
         this.validator = validator;
     }
 
@@ -234,6 +231,13 @@ public class MusicService {
             music.countView();
 
         return music;
+    }
+
+    // 유사한 음악 목록 조회
+    @Transactional
+    public List<Music> readSimilarMusic(Music target) {
+        List<SimilarMusic> similarMusics = similarMusicRepository.findByTarget(target);
+        return similarMusics.stream().map(SimilarMusic::getRecom).toList();
     }
 
     // 음악 목록 조회

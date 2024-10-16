@@ -210,4 +210,13 @@ public class MusicAnalysisService {
             }
        """, musicId, time, path, range));
     }
+
+    // 콘텐츠 기반 추천 결과 업데이트 요청
+    public void requestContentBasedRec() throws Exception {
+        kafkaTemplate.send("musicRecSys", """
+            {
+                "command": "content-based"
+            }
+        """);
+    }
 }
