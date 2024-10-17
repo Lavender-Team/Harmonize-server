@@ -266,8 +266,13 @@ public class MusicService {
     }
 
     // 음악 제목 검색
-    public Page<Music> search(String title, Pageable pageable) {
-        return musicRepository.findByTitleContaining(title, pageable);
+    public Page<Music> search(String title, String genre, Pageable pageable) {
+        if (title != null && genre != null)
+            return musicRepository.findByTitleContainingAndGenre(title, Genre.fromString(genre), pageable);
+        else if (title != null)
+            return musicRepository.findByTitleContaining(title, pageable);
+        else
+            return musicRepository.findByGenre(Genre.fromString(genre), pageable);
     }
 
     // 음악 상세 검색

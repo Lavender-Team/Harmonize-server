@@ -162,15 +162,15 @@ public class MusicController {
     // 음악 목록 조회
     @GetMapping
     @ResponseBody
-    public Page<MusicListDto> list(String title,
+    public Page<MusicListDto> list(String title, String genre,
                                    @PageableDefault(sort = "musicId", direction = Sort.Direction.DESC) Pageable pageable) {
         try {
             Page<Music> list;
 
-            if (title == null || title.isEmpty())
-                list = musicService.list(pageable);
+            if (title != null || genre != null)
+                list = musicService.search(title, genre, pageable);
             else
-                list = musicService.search(title, pageable);
+                list = musicService.list(pageable);
 
             return new PageImpl<>(
                     list.getContent().stream().map(MusicListDto::build).toList(),

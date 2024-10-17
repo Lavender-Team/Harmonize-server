@@ -22,6 +22,10 @@ public interface MusicRepository extends JpaRepository<Music, Long> {
 
     Page<Music> findByTitleContaining(String title, Pageable pageable);
 
+    Page<Music> findByGenre(Genre genre, Pageable pageable);
+
+    Page<Music> findByTitleContainingAndGenre(String title, Genre genre, Pageable pageable);
+
     Boolean existsByTitle(String title);
 
     @Query("SELECT m FROM Music m WHERE (:query is null or m.title LIKE %:query% or m.group.groupName LIKE %:query% or m.karaokeNum LIKE %:query%)" +
