@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.NoSuchElementException;
+import java.util.concurrent.TimeoutException;
 
 import static kr.ac.chungbuk.harmonize.utility.ErrorResult.SimpleErrorReturn;
 
@@ -221,6 +222,28 @@ public class MusicAnalysisController {
             log.debug(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     SimpleErrorReturn("contentBasedFailed.recsys", messageSource, Locale.getDefault())
+            );
+        }
+    }
+
+    // 회원 대상 추천 결과 업데이트 요청
+    @PostMapping(path = "/recsys/collaborative")
+    public ResponseEntity<Object> requestCollaborativeRec(Long userId) {
+        try {
+            if (userId == null)
+                musicAnalysisService.requestCollaborativeRec();
+            else
+                musicAnalysisService.requestCollaborativeRecOne(userId);
+
+            return ResponseEntity.status(HttpStatus.OK).body(null);
+        } catch (TimeoutException e) {
+            return ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body(
+                    SimpleErrorReturn("collaborativeTimeout.recsys", messageSource, Locale.getDefault())
+            );
+        } catch (Exception e) {
+            log.debug(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    SimpleErrorReturn("collaborativeFailed.recsys", messageSource, Locale.getDefault())
             );
         }
     }

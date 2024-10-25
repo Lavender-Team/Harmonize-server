@@ -3,6 +3,8 @@ package kr.ac.chungbuk.harmonize.controller;
 import kr.ac.chungbuk.harmonize.dto.response.MusicListDto;
 import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.entity.User;
+import kr.ac.chungbuk.harmonize.enums.EventType;
+import kr.ac.chungbuk.harmonize.service.LogService;
 import kr.ac.chungbuk.harmonize.service.MusicActionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +32,14 @@ import static kr.ac.chungbuk.harmonize.utility.ErrorResult.SimpleErrorReturn;
 public class MusicActionController {
 
     private final MusicActionService musicActionService;
+    private final LogService logService;
     private final MessageSource messageSource;
 
     @Autowired
-    public MusicActionController(MusicActionService musicActionService, MessageSource messageSource) {
+    public MusicActionController(MusicActionService musicActionService, LogService logService,
+                                 MessageSource messageSource) {
         this.musicActionService = musicActionService;
+        this.logService = logService;
         this.messageSource = messageSource;
     }
 
@@ -42,6 +47,8 @@ public class MusicActionController {
     @PostMapping("/{musicId}/like")
     public ResponseEntity<Object> createBookmark(@PathVariable Long musicId, @AuthenticationPrincipal User user) {
         try {
+            logService.save(user, musicId, EventType.bookmarkMusic);
+
             musicActionService.createBookmark(user.getUserId(), musicId);
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
         } catch (NoSuchElementException e) {
@@ -59,6 +66,8 @@ public class MusicActionController {
     @DeleteMapping("/{musicId}/like")
     public ResponseEntity<Object> deleteBookmark(@PathVariable Long musicId, @AuthenticationPrincipal User user) {
         try {
+            logService.save(user, musicId, EventType.unbookmarkMusic);
+
             musicActionService.deleteBookmark(user.getUserId(), musicId);
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
         } catch (NoSuchElementException e) {
@@ -90,4 +99,30 @@ public class MusicActionController {
         }
     }
 
+    // 추천에 대한 피드백
+    @PostMapping("/{musicId}/feedback")
+    public ResponseEntity<Object> feedback(@PathVariable Long musicId, Boolean isPositive,
+                                           @AuthenticationPrincipal User user) {
+        try {
+            if (user == null)
+                throw new NoSuchElementException();
+            if (isPositive == null)
+                throw new Exception();
+
+            if (isPositive)
+                logService.save(user, musicId, EventType.feedbackPositive);
+            else
+                logService.save(user, musicId, EventType.feedbackNegative);
+
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    SimpleErrorReturn("notFound.feedback", messageSource, Locale.getDefault())
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    SimpleErrorReturn("failed.feedback", messageSource, Locale.getDefault())
+            );
+        }
+    }
 }

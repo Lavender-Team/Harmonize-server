@@ -36,6 +36,12 @@ public class MusicAnalysis {
     private Integer level;
 
     @Column(nullable = true)
+    private Double pitchAverage;
+
+    @Column(nullable = true)
+    private String pitchStat;
+
+    @Column(nullable = true)
     private String pitchFile;
 
     public MusicAnalysis(Long musicId) {

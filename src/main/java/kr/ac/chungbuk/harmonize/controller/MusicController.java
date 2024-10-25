@@ -7,8 +7,10 @@ import kr.ac.chungbuk.harmonize.dto.response.MusicListDto;
 import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.entity.Theme;
 import kr.ac.chungbuk.harmonize.entity.User;
+import kr.ac.chungbuk.harmonize.enums.EventType;
 import kr.ac.chungbuk.harmonize.enums.Role;
 import kr.ac.chungbuk.harmonize.repository.MusicRepository;
+import kr.ac.chungbuk.harmonize.service.LogService;
 import kr.ac.chungbuk.harmonize.service.MusicActionService;
 import kr.ac.chungbuk.harmonize.service.MusicService;
 import kr.ac.chungbuk.harmonize.utility.ErrorResult;
@@ -46,13 +48,15 @@ public class MusicController {
 
     private final MusicService musicService;
     private final MusicActionService musicActionService;
+    private final LogService logService;
     private final MessageSource messageSource;
 
     @Autowired
     public MusicController(MusicService musicService, MusicActionService musicActionService,
-                           @Qualifier("messageSource") MessageSource messageSource) {
+                           LogService logService, @Qualifier("messageSource") MessageSource messageSource) {
         this.musicService = musicService;
         this.musicActionService = musicActionService;
+        this.logService = logService;
         this.messageSource = messageSource;
     }
 
@@ -145,9 +149,10 @@ public class MusicController {
     @ResponseBody
     public MusicDto read(@PathVariable Long musicId, @AuthenticationPrincipal User user) {
         try {
-            boolean countView = true;
-            if (user != null && user.getRole() == Role.ADMIN)
-                countView = false;
+            boolean countView = user == null || user.getRole() != Role.ADMIN;
+
+            if (user != null && user.getRole() != Role.ADMIN)
+                logService.save(user, musicId, EventType.viewMusicDetail);
 
             Music music = musicService.read(musicId, countView);
             List<Music> similarMusics = musicService.readSimilarMusic(music);

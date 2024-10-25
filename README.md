@@ -54,15 +54,19 @@
 |            |  26   | GET    | /pitch/{musicId}               | Pitch 그래프 파일 다운로드   |
 |            |  27   | GET    | /pitch/audio/{musicId}         | Pitch 오디오 파일 다운로드   |
 |            |  28   | POST   | /recsys/content-based          | 콘텐츠 기반 추천 결과 업데이트   |
+|            |  29   | POST   | /recsys/collaborative          | 회원 대상 추천 결과 업데이트    |
+
 
 
 ### [MusicActionController](https://github.com/Lavender-Team/Harmonize-server/blob/develop/src/main/java/kr/ac/chungbuk/harmonize/controller/MusicActionController.java)
 
-|   Domain   | Index | Method | URI             | Description   |
-|:----------:|:-----:|--------|-----------------|---------------|
-| /api/music |  30   | POST   | /{musicId}/like | 북마크(좋아요)      |
-|            |  31   | DELETE | /{musicId}/like | 북마크(좋아요) 취소   |
-|            |  32   | GET    | /bookmarked     | 북마크한 음악 목록 조회 |
+|   Domain   | Index | Method | URI                 | Description   |
+|:----------:|:-----:|--------|---------------------|---------------|
+| /api/music |  30   | POST   | /{musicId}/like     | 북마크(좋아요)      |
+|            |  31   | DELETE | /{musicId}/like     | 북마크(좋아요) 취소   |
+|            |  32   | GET    | /bookmarked         | 북마크한 음악 목록 조회 |
+|            |  33   | POST   | /{musicId}/feedback | 추천에 대한 피드백    |
+
 
 
 ### [ArtistController](https://github.com/Lavender-Team/Harmonize-server/blob/develop/src/main/java/kr/ac/chungbuk/harmonize/controller/ArtistController.java)

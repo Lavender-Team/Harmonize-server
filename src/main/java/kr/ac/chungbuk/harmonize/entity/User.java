@@ -67,6 +67,11 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Boolean isLocked = false; // 계정 잠금 여부
 
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "userId", nullable = false)
+    private List<UserAnalysis> analysis;     // 회원 분석 결과
+
+
     public User() {
     }
 

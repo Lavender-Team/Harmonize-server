@@ -2,30 +2,43 @@ package kr.ac.chungbuk.harmonize.service;
 
 import jakarta.transaction.Transactional;
 import kr.ac.chungbuk.harmonize.entity.Music;
+import kr.ac.chungbuk.harmonize.entity.User;
 import kr.ac.chungbuk.harmonize.enums.Status;
-import kr.ac.chungbuk.harmonize.repository.MusicAnalysisRepository;
 import kr.ac.chungbuk.harmonize.repository.MusicRepository;
+import kr.ac.chungbuk.harmonize.repository.UserRepository;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
 import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
+import org.springframework.kafka.requestreply.RequestReplyMessageFuture;
+import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.messaging.support.MessageBuilder;
 
 import java.io.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 @Service
 public class MusicAnalysisService {
 
     private final MusicRepository musicRepository;
+    private final UserRepository userRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ReplyingKafkaTemplate<String, String, String> replyingKafkaTemplate;
 
     @Autowired
-    public MusicAnalysisService(MusicRepository musicRepository, KafkaTemplate<String, String> kafkaTemplate,
-                                MusicAnalysisRepository musicAnalysisRepository) {
+    public MusicAnalysisService(MusicRepository musicRepository, UserRepository userRepository,
+                                KafkaTemplate<String, String> kafkaTemplate,
+                                ReplyingKafkaTemplate<String, String, String> replyingKafkaTemplate) {
         this.musicRepository = musicRepository;
+        this.userRepository = userRepository;
         this.kafkaTemplate = kafkaTemplate;
+        this.replyingKafkaTemplate = replyingKafkaTemplate;
     }
 
     // 음악 파일 및 가사 파일 업로드
@@ -219,4 +232,40 @@ public class MusicAnalysisService {
             }
         """);
     }
+
+    // 전체 회원 대상 추천 결과 업데이트 요청
+    public Object requestCollaborativeRec() throws ExecutionException, InterruptedException, TimeoutException {
+
+        var msg = MessageBuilder.withPayload("""
+            {
+                "command": "collaborative_all"
+            }
+        """).setHeader(KafkaHeaders.TOPIC, "musicRecSys").build();
+
+        // 메시지 전송 및 응답 대기
+        RequestReplyMessageFuture<String, String> replyFuture = replyingKafkaTemplate.sendAndReceive(msg);
+
+        // 응답을 10초 동안 대기 (타임아웃 설정)
+        return replyFuture.get(20, TimeUnit.SECONDS).getPayload();
+    }
+
+    // 한 명의 회원 대상 추천 결과 업데이트 요청
+    public Object requestCollaborativeRecOne(Long userId)throws ExecutionException, InterruptedException, TimeoutException {
+        User user = userRepository.findById(userId).orElseThrow();
+
+        var msg = MessageBuilder.withPayload(String.format("""
+            {
+                "command": "collaborative_one",
+                "user_id": %d
+            }
+        """, user.getUserId())).setHeader(KafkaHeaders.TOPIC, "musicRecSys").build();
+
+        // 메시지 전송 및 응답 대기
+        RequestReplyMessageFuture<String, String> replyFuture = replyingKafkaTemplate.sendAndReceive(msg);
+
+        // 응답을 10초 동안 대기 (타임아웃 설정)
+        return replyFuture.get(20, TimeUnit.SECONDS).getPayload();
+    }
+
+
 }
