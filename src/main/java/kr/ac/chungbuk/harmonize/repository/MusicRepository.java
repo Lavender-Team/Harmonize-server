@@ -65,4 +65,9 @@ public interface MusicRepository extends JpaRepository<Music, Long> {
 
     @Query("SELECT COUNT(m) FROM Music m INNER JOIN Bookmark b ON m = b.music WHERE b.user.userId = :userId")
     Long countAllBookmarkedMusic(Long userId);
+
+    // 최초 추천 평가 노래 목록
+    @Query(value = "SELECT m FROM Music m WHERE m.musicId IN (386, 384, 385, 193, 392, 195, 174, 179, 183) ORDER BY FUNCTION('RAND') LIMIT 5",
+        countQuery = "SELECT count(*) FROM Music m WHERE m.musicId IN (386, 384, 385, 193, 392, 195, 174, 179, 183) ORDER BY FUNCTION('RAND') LIMIT 5")
+    Page<Music> findFirstFeedbackList(Pageable pageable);
 }

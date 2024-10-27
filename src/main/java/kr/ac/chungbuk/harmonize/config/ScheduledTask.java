@@ -21,4 +21,14 @@ public class ScheduledTask {
         musicAnalysisService.requestContentBasedRec();
     }
 
+    @Scheduled(cron = "0 10 * * * ?")
+    public void runCollaborativeFiltering() {
+        // 매 시간 10분마다 배치 작업 실행
+        /*try {
+            musicAnalysisService.requestCollaborativeRec();
+        } catch (Exception e) {
+            ;
+        }*/
+    }
+
 }

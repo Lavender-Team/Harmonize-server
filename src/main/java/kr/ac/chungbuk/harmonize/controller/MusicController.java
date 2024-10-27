@@ -21,10 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -217,6 +214,32 @@ public class MusicController {
         }
     }
 
+    // 개인 음악 추천 목록 조회
+    @GetMapping("/recommend")
+    @ResponseBody
+    public Page<MusicListDto> recommend(Long userId, String genre, Pageable pageable) {
+        try {
+            Page<Music> list;
+
+            if (genre == null)
+                list = musicService.recommend(userId, pageable);
+            else
+                list = musicService.recommend(userId, genre, pageable);
+
+            return new PageImpl<>(
+                    list.getContent().stream().map(MusicListDto::build).toList(),
+                    pageable,
+                    list.getTotalElements());
+        }
+        catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+        catch (Exception e) {
+            log.debug(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
     // 인기곡 순위
     @GetMapping("/rank")
     @ResponseBody
@@ -240,6 +263,23 @@ public class MusicController {
     public Page<MusicListDto> listReleasedWithinOneYear(@PageableDefault(size = 6) Pageable pageable) {
         try {
             Page<Music> list = musicService.listReleasedWithinOneYear(pageable);
+
+            return new PageImpl<>(
+                    list.getContent().stream().map(MusicListDto::build).toList(),
+                    pageable,
+                    list.getTotalElements());
+        } catch (Exception e) {
+            log.debug(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    // 최초 추천 평가 노래 목록
+    @GetMapping("/first-feedback")
+    @ResponseBody
+    public Page<MusicListDto> listFirstFeedback(@PageableDefault(size = 5) Pageable pageable) {
+        try {
+            Page<Music> list = musicService.listFirstFeedback(pageable);
 
             return new PageImpl<>(
                     list.getContent().stream().map(MusicListDto::build).toList(),

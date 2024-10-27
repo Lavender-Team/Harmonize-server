@@ -11,9 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Getter
@@ -92,6 +90,15 @@ public class User implements UserDetails {
         authorities.add(new SimpleGrantedAuthority(this.role.name()));
 
         return authorities;
+    }
+
+    public Optional<UserAnalysis> getLatestAnalysis() {
+        return this.analysis.stream()
+                .max(Comparator.comparing(UserAnalysis::getAnalysisDate));
+    }
+
+    public void updateAnalysis(UserAnalysis analysis) {
+        this.analysis.add(analysis);
     }
 
     @Override

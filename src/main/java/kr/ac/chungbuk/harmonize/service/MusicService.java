@@ -36,19 +36,24 @@ public class MusicService {
     private final GroupRepository groupRepository;
     private final ThemeRepository themeRepository;
     private final SimilarMusicRepository similarMusicRepository;
+    private final RecomMusicRepository recomMusicRepository;
+    private final UserRepository userRepository;
 
     Validator validator;
 
     @Autowired
     public MusicService(MusicRepository musicRepository, MusicAnalysisRepository musicAnalysisRepository,
                         GroupRepository groupRepository, ThemeRepository themeRepository,
-                        SimilarMusicRepository similarMusicRepository, Validator validator) {
+                        SimilarMusicRepository similarMusicRepository, RecomMusicRepository recomMusicRepository,
+                        Validator validator, UserRepository userRepository) {
         this.musicRepository = musicRepository;
         this.musicAnalysisRepository = musicAnalysisRepository;
         this.groupRepository = groupRepository;
         this.themeRepository = themeRepository;
         this.similarMusicRepository = similarMusicRepository;
+        this.recomMusicRepository = recomMusicRepository;
         this.validator = validator;
+        this.userRepository = userRepository;
     }
 
     // 음악 생성
@@ -243,6 +248,29 @@ public class MusicService {
     // 음악 목록 조회
     public Page<Music> list(Pageable pageable) {
         return musicRepository.findAll(pageable);
+    }
+    
+    // 개인 음악 추천 목록 조회
+    @Transactional
+    public Page<Music> recommend(Long userId, Pageable pageable) {
+        User user = userRepository.findById(userId).orElseThrow();
+
+        Page<RecomMusic> recomMusics = recomMusicRepository.findByUser(user, pageable);
+        return recomMusics.map(RecomMusic::getRecomMusic);
+    }
+
+    // 개인 음악 장르별 추천 목록 조회
+    @Transactional
+    public Page<Music> recommend(Long userId, String genre, Pageable pageable) {
+        User user = userRepository.findById(userId).orElseThrow();
+
+        Page<RecomMusic> recomMusics = recomMusicRepository.findByUserAndGenre(user, Genre.fromString(genre), pageable);
+        return recomMusics.map(RecomMusic::getRecomMusic);
+    }
+
+    // 최초 추천 평가 노래 목록
+    public Page<Music> listFirstFeedback(Pageable pageable) {
+        return musicRepository.findFirstFeedbackList(pageable);
     }
 
     // 전체 테마 목록 조회

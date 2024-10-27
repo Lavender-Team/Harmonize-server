@@ -23,22 +23,23 @@
 
 ### [MusicController](https://github.com/Lavender-Team/Harmonize-server/blob/develop/src/main/java/kr/ac/chungbuk/harmonize/controller/MusicController.java)
 
-|   Domain   | Index | Method | URI                     | Description     |
-|:----------:|:-----:|--------|-------------------------|-----------------|
-| /api/music |   1   | POST   | /                       | 음악 생성           |
-|            |   2   | PUT    | /{musicId}              | 음악 수정           |
-|            |   3   | DELETE | /{musicId}              | 음악 삭제           |
-|            |   4   | POST   | /bulk                   | 음악 벌크 업로드       |
-|            |   5   | GET    | /{musicId}              | 음악 상세 조회        |
-|            |   5   | GET    | /{musicId}              | 음악 상세 조회        |
-|            |   6   | GET    | /                       | 음악 목록 조회        |
-|            |   7   | GET    | /search                 | 음악 상세 검색        |
-|            |   8   | GET    | /rank                   | 인기곡 목록 조회       |
-|            |   9   | GET    | /recent                 | 최신 음악 목록 조회     |
-|            |  10   | GET    | /theme                  | 전체 테마 목록 조회     |
-|            |  11   | GET    | /theme/music            | 특정 테마의 음악 목록 조회 |
-|            |  12   | GET    | /count                  | 전체 음악 수 조회      |
-|            |  13   | GET    | /albumcover/{filename}  | 앨범커버 파일 다운로드    |
+|   Domain   | Index | Method | URI                     | Description      |
+|:----------:|:-----:|--------|-------------------------|------------------|
+| /api/music |   1   | POST   | /                       | 음악 생성            |
+|            |   2   | PUT    | /{musicId}              | 음악 수정            |
+|            |   3   | DELETE | /{musicId}              | 음악 삭제            |
+|            |   4   | POST   | /bulk                   | 음악 벌크 업로드        |
+|            |   5   | GET    | /{musicId}              | 음악 상세 조회         |
+|            |   5   | GET    | /{musicId}              | 음악 상세 조회         |
+|            |   6   | GET    | /                       | 음악 목록 조회         |
+|            |   7   | GET    | /search                 | 음악 상세 검색         |
+|            |   8   | GET    | /rank                   | 인기곡 목록 조회        |
+|            |   9   | GET    | /recent                 | 최신 음악 목록 조회      |
+|            |  10   | GET    | /first-feedback         | 최초 추천 평가 노래 목록   |
+|            |  11   | GET    | /theme                  | 전체 테마 목록 조회      |
+|            |  12   | GET    | /theme/music            | 특정 테마의 음악 목록 조회  |
+|            |  13   | GET    | /count                  | 전체 음악 수 조회       |
+|            |  14   | GET    | /albumcover/{filename}  | 앨범커버 파일 다운로드     |
 
 
 ### [MusicAnalysisController](https://github.com/Lavender-Team/Harmonize-server/blob/develop/src/main/java/kr/ac/chungbuk/harmonize/controller/MusicAnalysisController.java)
@@ -110,14 +111,21 @@
 |           |  70   | GET    | /count            | 전체 사용자 수 조회  |
 
 
+### [UserAnalysisController](https://github.com/Lavender-Team/Harmonize-server/blob/develop/src/main/java/kr/ac/chungbuk/harmonize/controller/UserAnalysisController.java)
+
+|  Domain   | Index | Method | URI       | Description    |
+|:---------:|:-----:|--------|-----------|----------------|
+| /api/user |  81   | POST   | /analysis | 음역대 분석 결과 업로드  |
+
+
 ### [LogController](https://github.com/Lavender-Team/Harmonize-server/blob/develop/src/main/java/kr/ac/chungbuk/harmonize/controller/LogController.java)
 
 |  Domain  | Index | Method | URI         | Description        |
 |:--------:|:-----:|--------|-------------|--------------------|
-| /api/log |  81   | GET    | /bulk       | 벌크 업로드 결과 조회       |
-|          |  82   | DELETE | /bulk       | 벌크 업로드 결과 삭제       |
-|          |  83   | GET    | /bulk/files | 파일 벌크 업로드 결과 조회    |
-|          |  84   | DELETE | /bulk/files | 파일 벌크 업로드 결과 로그 삭제 |
+| /api/log |  91   | GET    | /bulk       | 벌크 업로드 결과 조회       |
+|          |  92   | DELETE | /bulk       | 벌크 업로드 결과 삭제       |
+|          |  93   | GET    | /bulk/files | 파일 벌크 업로드 결과 조회    |
+|          |  94   | DELETE | /bulk/files | 파일 벌크 업로드 결과 로그 삭제 |
 
 </details>
 
