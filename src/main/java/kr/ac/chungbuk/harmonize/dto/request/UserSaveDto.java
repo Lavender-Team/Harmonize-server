@@ -13,9 +13,9 @@ public class UserSaveDto {
     private String loginId;
 
     @NotBlank
-    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d@$!%*?&]{8,100}|" +
-            "(?=.*[A-Za-z])(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,100}|" +
-            "(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,100}$")
+    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d@$!%*?&#]{8,100}|" +
+            "(?=.*[A-Za-z])(?=.*[@$!%*?&#])[A-Za-z\\d@$!%*?&#]{8,100}|" +
+            "(?=.*\\d)(?=.*[@$!%*?&#])[A-Za-z\\d@$!%*?&#]{8,100}$")
     private String password;
 
     @NotBlank

@@ -150,12 +150,18 @@ public class ArtistController {
     // 가수 상세정보 조회
     @GetMapping("/{artistId}")
     @ResponseBody
-    public ArtistDto readByAdmin(@PathVariable Long artistId) {
+    public ResponseEntity<Object> readByAdmin(@PathVariable Long artistId) {
         try {
             Artist artist = artistService.findById(artistId).orElseThrow();
-            return ArtistDto.build(artist);
+            return ResponseEntity.ok(ArtistDto.build(artist));
+        } catch (java.util.NoSuchElementException e) {
+            log.info("Artist not found - artistId: {}", artistId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(SimpleErrorReturn("notFound.artist", messageSource, Locale.getDefault()));
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+            log.error("Error retrieving artist details - artistId: {}, error: {}", artistId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(SimpleErrorReturn("internalError", messageSource, Locale.getDefault()));
         }
     }
 

@@ -10,6 +10,7 @@ import kr.ac.chungbuk.harmonize.dto.response.UserDto;
 import kr.ac.chungbuk.harmonize.entity.User;
 import kr.ac.chungbuk.harmonize.entity.UserAnalysis;
 import kr.ac.chungbuk.harmonize.enums.Gender;
+import kr.ac.chungbuk.harmonize.enums.Role;
 import kr.ac.chungbuk.harmonize.service.UserService;
 import kr.ac.chungbuk.harmonize.utility.ErrorResult;
 import kr.ac.chungbuk.harmonize.utility.Security;
@@ -152,13 +153,25 @@ public class UserController {
     // 사용자 상세정보 조회 (본인 또는 어드민)
     @GetMapping("/{userId}")
     @ResponseBody
-    public UserDto readByAdmin(@PathVariable Long userId) {
+    public ResponseEntity<Object> readByAdmin(@PathVariable Long userId, User user) {
+        // 권한 검증
+        if (!Objects.equals(user.getUserId(), userId) && user.getRole() != Role.ADMIN) {
+            log.warn("Unauthorized access attempt - User: {}, Requested userId: {}", user.getUserId(), userId);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(SimpleErrorReturn("unauthorized.access", messageSource, Locale.getDefault()));
+        }
+
         try {
-            User user = userService.read(userId);
-            return UserDto.build(user);
+            User readUser = userService.read(userId);
+            return ResponseEntity.ok(UserDto.build(readUser));
+        } catch (NoSuchElementException e) {
+            log.info("User not found - userId: {}", userId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(SimpleErrorReturn("notFound.user", messageSource, Locale.getDefault()));
         } catch (Exception e) {
-            log.info(e.getMessage());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+            log.error("Error retrieving user details - userId: {}, error: {}", userId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(SimpleErrorReturn("internalError", messageSource, Locale.getDefault()));
         }
     }
 
