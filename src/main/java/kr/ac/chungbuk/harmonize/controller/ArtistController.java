@@ -54,7 +54,7 @@ public class ArtistController {
 
     // 가수 등록
     @PostMapping
-    public ResponseEntity<Object> create(@Validated ArtistRequestDto artistParam, BindingResult bindingResult) {
+    public ResponseEntity<Object> create(@Validated @ModelAttribute ArtistRequestDto artistParam, BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
             ErrorResult errorResult = new ErrorResult(bindingResult, messageSource, Locale.getDefault());
@@ -126,7 +126,7 @@ public class ArtistController {
     // 가수 수정
     @PutMapping("/{artistId}")
     public ResponseEntity<Object> update(@PathVariable Long artistId,
-                                         @Validated ArtistRequestDto artistParam, BindingResult bindingResult) {
+                                         @Validated @ModelAttribute ArtistRequestDto artistParam, BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
             ErrorResult errorResult = new ErrorResult(bindingResult, messageSource, Locale.getDefault());

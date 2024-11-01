@@ -48,6 +48,7 @@ class ArtistControllerTest {
                         .param("activityPeriod", "")
                         .param("nation", "대한민국")
                         .param("agency", "소속사엔터사")
+                        .param("createSoloGroup", "false")
         ).andExpect(status().isCreated());
     }
 
@@ -110,9 +111,9 @@ class ArtistControllerTest {
         FileInputStream fileInputStream = new FileInputStream(filePath);
 
         MockMultipartFile profileImage = new MockMultipartFile(
-                "profileImage",
+                "images",
                 filename,
-                "image/jpeg",
+                "jpg",
                 fileInputStream
         );
         return profileImage;
