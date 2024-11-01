@@ -40,6 +40,14 @@ jobs:
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
+        
+        # SMTP 환경 변수 설정
+    - name: Set SMTP Environment Variables
+      env:
+        SMTP_HOST: smtp.example.com
+        SMTP_PORT: '587'
+        SMTP_USER: ${{ secrets.SMTP_USER }}
+        SMTP_PASS: ${{ secrets.SMTP_PASS }}
 
     - name: Build with Gradle Wrapper
       run: ./gradlew build -x test
