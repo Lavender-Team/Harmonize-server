@@ -109,6 +109,10 @@
 |           |  68   | GET    | /logout           | 로그아웃         |
 |           |  69   | GET    | /auth/currentuser | 로그인된 사용자 조회  |
 |           |  70   | GET    | /count            | 전체 사용자 수 조회  |
+|           |  71   | POST   | /find-id          | 전체 사용자 수 조회  |
+|           |  72   | POST   | /reset-password   | 전체 사용자 수 조회  |
+|           |  74   | GET    | /reset-password   | 전체 사용자 수 조회  |
+|           |  75   | GET    | /get-user-by-token| 전체 사용자 수 조회  |
 
 
 ### [UserAnalysisController](https://github.com/Lavender-Team/Harmonize-server/blob/develop/src/main/java/kr/ac/chungbuk/harmonize/controller/UserAnalysisController.java)
