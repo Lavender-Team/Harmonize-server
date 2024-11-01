@@ -16,10 +16,18 @@ public class PasswordResetToken {
     private Long id;
 
     private String token;
-
     private LocalDateTime expiryDate;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(nullable = false, name = "user_id")
     private User user;
+
+    // 만료 시간을 10분으로 설정
+    public PasswordResetToken() {
+        this.expiryDate = LocalDateTime.now().plusMinutes(10);
+    }
+
+    public boolean isExpired() {
+        return LocalDateTime.now().isAfter(this.expiryDate);
+    }
 }

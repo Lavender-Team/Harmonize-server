@@ -361,19 +361,26 @@ public class UserController {
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
         String loginId = request.get("loginId");
         String email = request.get("email");
+
         try {
-            userService.sendPasswordResetLink(loginId, email);
-            return ResponseEntity.ok().build();
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Collections.singletonMap("message", "아이디와 이메일이 일치하지 않습니다."));
+            User user = userService.findByLoginIdAndEmail(loginId, email); // 서비스에서 사용자 조회
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Collections.singletonMap("message", "아이디와 이메일이 일치하지 않습니다."));
+            }
+
+            // 토큰 생성 및 이메일 전송
+            String token = passwordResetService.createToken(user);
+            emailService.sendPasswordResetLink(email, token);
+
+            return ResponseEntity.ok(Collections.singletonMap("message", "비밀번호 재설정 링크가 이메일로 전송되었습니다."));
         } catch (Exception e) {
-            // 예외 스택 트레이스 로그 출력
-            e.printStackTrace(); // 또는 로거를 사용하여 로그에 기록
+            log.error("비밀번호 재설정 요청 중 오류", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Collections.singletonMap("message", "비밀번호 재설정 요청 중 오류가 발생했습니다."));
         }
     }
+
 
     // 비밀번호 재설정 처리
     @PostMapping("/reset-password/confirm")
@@ -389,6 +396,16 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Collections.singletonMap("message", "비밀번호 재설정 중 오류가 발생했습니다."));
+        }
+    }
+
+    @GetMapping("/get-user-by-token/{token}")
+    public ResponseEntity<?> getUserByToken(@PathVariable String token) {
+        try {
+            User user = passwordResetService.getUserByToken(token);
+            return ResponseEntity.ok(Collections.singletonMap("loginId", user.getLoginId()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.singletonMap("message", e.getMessage()));
         }
     }
 }

@@ -93,6 +93,10 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.POST, "/api/user").permitAll();
                     auth.requestMatchers(HttpMethod.POST, "/api/user/find-id").permitAll();
                     auth.requestMatchers(HttpMethod.POST, "/api/user/reset-password").permitAll();
+                    auth.requestMatchers(HttpMethod.POST, "/api/user/reset-password/confirm").permitAll();
+                    auth.requestMatchers(HttpMethod.POST, "/api/user/reset-password/**").permitAll();
+                    auth.requestMatchers(HttpMethod.GET, "/api/user/reset-password/**").permitAll();
+                    auth.requestMatchers(HttpMethod.GET, "/api/user/get-user-by-token/**").permitAll();
                     auth.requestMatchers(HttpMethod.PUT, "/api/user/{userId}").permitAll();
                     auth.requestMatchers(HttpMethod.PUT, "/api/user/admin/{userId}").hasAuthority("ADMIN");
                     auth.requestMatchers(HttpMethod.DELETE, "/api/user/{userId}").hasAuthority("ADMIN");
