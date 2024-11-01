@@ -23,9 +23,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import kr.ac.chungbuk.harmonize.service.EmailService;
+import kr.ac.chungbuk.harmonize.service.PasswordResetService;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -35,14 +38,18 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final AttemptRepository attemptRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+    private final PasswordResetService passwordResetService;
 
     @Autowired
     public UserService(UserRepository userRepository,
                        AttemptRepository attemptRepository,
-                       PasswordEncoder passwordEncoder){
+                       PasswordEncoder passwordEncoder, EmailService emailService, PasswordResetService passwordResetService){
         this.userRepository = userRepository;
         this.attemptRepository = attemptRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
+        this.passwordResetService = passwordResetService;
     }
 
     @Override
@@ -249,5 +256,30 @@ public class UserService implements UserDetailsService {
     public void ban(User user) {
         user.setIsBanned(true);
         userRepository.save(user);
+    }
+
+    // 이메일로 사용자 조회
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException("해당 이메일로 사용자를 찾을 수 없습니다."));
+    }
+
+    // 아이디와 이메일로 사용자 조회
+    public User findByLoginIdAndEmail(String loginId, String email) {
+        return userRepository.findByLoginIdAndEmail(loginId, email)
+                .orElseThrow(() -> new NoSuchElementException("아이디와 이메일이 일치하는 사용자를 찾을 수 없습니다."));
+    }
+
+    // 이메일로 아이디 전송
+    public void sendIdByEmail(String email) {
+        User user = findByEmail(email);
+        emailService.sendId(email, user.getLoginId());
+    }
+
+    // 비밀번호 재설정 링크 전송
+    public void sendPasswordResetLink(String loginId, String email) {
+        User user = findByLoginIdAndEmail(loginId, email);
+        String token = passwordResetService.createToken(user);
+        emailService.sendPasswordResetLink(email, token);
     }
 }

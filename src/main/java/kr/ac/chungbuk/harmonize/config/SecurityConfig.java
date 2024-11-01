@@ -91,14 +91,17 @@ public class SecurityConfig {
 
                     // UserController
                     auth.requestMatchers(HttpMethod.POST, "/api/user").permitAll();
-                    auth.requestMatchers(HttpMethod.PUT, "/api/user/{userId}").hasAnyAuthority("USER", "ADMIN");
+                    auth.requestMatchers(HttpMethod.POST, "/api/user/find-id").permitAll();
+                    auth.requestMatchers(HttpMethod.POST, "/api/user/reset-password").permitAll();
+                    auth.requestMatchers(HttpMethod.PUT, "/api/user/{userId}").permitAll();
                     auth.requestMatchers(HttpMethod.PUT, "/api/user/admin/{userId}").hasAuthority("ADMIN");
                     auth.requestMatchers(HttpMethod.DELETE, "/api/user/{userId}").hasAuthority("ADMIN");
-                    auth.requestMatchers(HttpMethod.GET, "/api/user/{userId}").hasAnyAuthority("USER", "ADMIN");
+                    auth.requestMatchers(HttpMethod.GET, "/api/user/{userId}").permitAll();
                     auth.requestMatchers(HttpMethod.GET, "/api/user").hasAuthority("ADMIN");
                     auth.requestMatchers(HttpMethod.POST, "/api/user/login").permitAll();
-                    auth.requestMatchers(HttpMethod.GET, "/api/user/logout").hasAnyAuthority("USER", "ADMIN");
-                    auth.requestMatchers(HttpMethod.GET, "/api/user/auth/currentuser").hasAnyAuthority("USER", "ADMIN");
+                    auth.requestMatchers(HttpMethod.GET, "/api/user/logout").permitAll();
+                    auth.requestMatchers(HttpMethod.GET, "/api/user/auth/currentuser").permitAll();
+                    auth.requestMatchers(HttpMethod.GET, "/api/user/count").hasAuthority("ADMIN");
                     auth.requestMatchers(HttpMethod.GET, "/api/user/count").hasAuthority("ADMIN");
 
                     // UserAnalysisController

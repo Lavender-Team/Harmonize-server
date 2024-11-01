@@ -11,6 +11,8 @@ import kr.ac.chungbuk.harmonize.entity.User;
 import kr.ac.chungbuk.harmonize.entity.UserAnalysis;
 import kr.ac.chungbuk.harmonize.enums.Gender;
 import kr.ac.chungbuk.harmonize.enums.Role;
+import kr.ac.chungbuk.harmonize.service.EmailService;
+import kr.ac.chungbuk.harmonize.service.PasswordResetService;
 import kr.ac.chungbuk.harmonize.service.UserService;
 import kr.ac.chungbuk.harmonize.utility.ErrorResult;
 import kr.ac.chungbuk.harmonize.utility.Security;
@@ -40,11 +42,15 @@ public class UserController {
 
     private final UserService userService;
     private final MessageSource messageSource;
+    private final EmailService emailService;
+    private final PasswordResetService passwordResetService;
 
     @Autowired
-    public UserController(UserService userService, MessageSource messageSource) {
+    public UserController(UserService userService, MessageSource messageSource, EmailService emailService, PasswordResetService passwordResetService) {
         this.userService = userService;
         this.messageSource = messageSource;
+        this.emailService = emailService;
+        this.passwordResetService = passwordResetService;
     }
 
     // 사용자 생성
@@ -334,4 +340,55 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    // 아이디 찾기
+    @PostMapping("/find-id")
+    public ResponseEntity<?> findId(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        try {
+            userService.sendIdByEmail(email);
+            return ResponseEntity.ok().build();
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Collections.singletonMap("message", "등록되지 않은 이메일입니다."));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("message", "아이디 찾기 중 오류가 발생했습니다."));
+        }
+    }
+
+    // 비밀번호 재설정 요청
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+        String loginId = request.get("loginId");
+        String email = request.get("email");
+        try {
+            userService.sendPasswordResetLink(loginId, email);
+            return ResponseEntity.ok().build();
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Collections.singletonMap("message", "아이디와 이메일이 일치하지 않습니다."));
+        } catch (Exception e) {
+            // 예외 스택 트레이스 로그 출력
+            e.printStackTrace(); // 또는 로거를 사용하여 로그에 기록
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("message", "비밀번호 재설정 요청 중 오류가 발생했습니다."));
+        }
+    }
+
+    // 비밀번호 재설정 처리
+    @PostMapping("/reset-password/confirm")
+    public ResponseEntity<?> confirmResetPassword(@RequestBody Map<String, String> request) {
+        String token = request.get("token");
+        String newPassword = request.get("newPassword");
+        try {
+            passwordResetService.resetPassword(token, newPassword);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Collections.singletonMap("message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("message", "비밀번호 재설정 중 오류가 발생했습니다."));
+        }
+    }
 }
