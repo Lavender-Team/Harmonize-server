@@ -126,9 +126,9 @@ class GroupControllerTest {
         FileInputStream fileInputStream = new FileInputStream(filePath);
 
         MockMultipartFile profileImage = new MockMultipartFile(
-                "images",
+                "profileImage",
                 filename,
-                "jpg",
+                "image/jpeg",
                 fileInputStream
         );
         return profileImage;
