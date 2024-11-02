@@ -1,5 +1,6 @@
 package kr.ac.chungbuk.harmonize.dto.response;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.entity.Theme;
 import kr.ac.chungbuk.harmonize.enums.Genre;
@@ -36,9 +37,11 @@ public class MusicDto {
 
     private String status;
     private Double highestPitch;
+    private Double lowestPitch;
+    private PitchStatDto pitchStat;
+
     private Double highPitchRatio;
     private Double highPitchCont;
-    private Double lowestPitch;
     private Double lowPitchRatio;
     private Double lowPitchCont;
     private Integer steepSlope;
@@ -46,7 +49,16 @@ public class MusicDto {
 
     private List<MusicListDto> similarMusics;
 
-    public static MusicDto build(Music music, List<Music> similarMusics, boolean isBookmarked) {
+    public static MusicDto build(Music music, ObjectMapper objectMapper, List<Music> similarMusics, boolean isBookmarked) {
+
+        PitchStatDto pitchStat = null;
+        try {
+            pitchStat = objectMapper.readValue(
+                    music.getAnalysis().getPitchStat().replace("'", "\"").toLowerCase(),
+                    PitchStatDto.class
+            );
+        } catch (Exception ignored) { }
+
         return MusicDto.builder()
                 .id(music.getMusicId())
                 .title(music.getTitle())
@@ -66,9 +78,10 @@ public class MusicDto {
                 .lyrics(music.getLyrics())
                 .status(music.getAnalysis().getStatus().name())
                 .highestPitch(music.getAnalysis().getHighestPitch())
+                .lowestPitch(music.getAnalysis().getLowestPitch())
+                .pitchStat(pitchStat)
                 .highPitchRatio(music.getAnalysis().getHighPitchRatio())
                 .highPitchCont(music.getAnalysis().getHighPitchCont())
-                .lowestPitch(music.getAnalysis().getLowestPitch())
                 .lowPitchRatio(music.getAnalysis().getLowPitchRatio())
                 .lowPitchCont(music.getAnalysis().getLowPitchCont())
                 .steepSlope(music.getAnalysis().getSteepSlope())

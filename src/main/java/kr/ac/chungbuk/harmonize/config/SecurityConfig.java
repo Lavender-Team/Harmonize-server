@@ -64,7 +64,7 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.GET, "/api/music/pitch/{musicId}").permitAll();
                     auth.requestMatchers(HttpMethod.GET, "/api/music/pitch/audio/{musicId}").permitAll();
                     auth.requestMatchers(HttpMethod.POST, "/api/music/recsys/content-based").hasAuthority("ADMIN");
-                    auth.requestMatchers(HttpMethod.POST, "/api/music/recsys/collaborative").hasAuthority("ADMIN");
+                    auth.requestMatchers(HttpMethod.POST, "/api/music/recsys/collaborative").hasAnyAuthority("ADMIN", "USER");
 
                     // MusicActionController
                     auth.requestMatchers(HttpMethod.POST, "/api/music/{musicId}/like").hasAuthority("USER");
@@ -105,7 +105,6 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.POST, "/api/user/login").permitAll();
                     auth.requestMatchers(HttpMethod.GET, "/api/user/logout").permitAll();
                     auth.requestMatchers(HttpMethod.GET, "/api/user/auth/currentuser").permitAll();
-                    auth.requestMatchers(HttpMethod.GET, "/api/user/count").hasAuthority("ADMIN");
                     auth.requestMatchers(HttpMethod.GET, "/api/user/count").hasAuthority("ADMIN");
 
                     // UserAnalysisController

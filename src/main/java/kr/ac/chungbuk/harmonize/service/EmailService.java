@@ -26,7 +26,7 @@ public class EmailService {
     // 비밀번호 재설정 링크 전송 메서드
     public void sendPasswordResetLink(String email, String token) {
         String subject = "하모나이즈 비밀번호 재설정";
-        String resetLink = "http://localhost:3000/reset-password/" + token;
+        String resetLink = "http://localhost:7070/reset-password/" + token;
         String text = "안녕하세요,\n\n아래 링크를 클릭하여 비밀번호를 재설정하세요:\n" + resetLink + "\n\n감사합니다.";
         sendEmail(email, subject, text);
     }
@@ -35,7 +35,7 @@ public class EmailService {
     private void sendEmail(String to, String subject, String text){
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
-        message.setFrom("harmonize2024@haemonize.com");
+        message.setFrom("noreply.harmonize@gmail.com");
         message.setSubject(subject);
         message.setText(text);
         mailSender.send(message);

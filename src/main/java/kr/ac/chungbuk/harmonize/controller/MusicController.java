@@ -1,5 +1,6 @@
 package kr.ac.chungbuk.harmonize.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.ac.chungbuk.harmonize.dto.request.MusicRequestDto;
 import kr.ac.chungbuk.harmonize.dto.request.SearchRequestDto;
 import kr.ac.chungbuk.harmonize.dto.response.MusicDto;
@@ -47,14 +48,17 @@ public class MusicController {
     private final MusicActionService musicActionService;
     private final LogService logService;
     private final MessageSource messageSource;
+    private final ObjectMapper objectMapper;
 
     @Autowired
     public MusicController(MusicService musicService, MusicActionService musicActionService,
-                           LogService logService, @Qualifier("messageSource") MessageSource messageSource) {
+                           LogService logService, @Qualifier("messageSource") MessageSource messageSource,
+                           ObjectMapper objectMapper) {
         this.musicService = musicService;
         this.musicActionService = musicActionService;
         this.logService = logService;
         this.messageSource = messageSource;
+        this.objectMapper = objectMapper;
     }
 
     // 음악 생성
@@ -154,7 +158,7 @@ public class MusicController {
             Music music = musicService.read(musicId, countView);
             List<Music> similarMusics = musicService.readSimilarMusic(music);
 
-            return MusicDto.build(music, similarMusics, musicActionService.getIsBookmarked(user, musicId));
+            return MusicDto.build(music, objectMapper, similarMusics, musicActionService.getIsBookmarked(user, musicId));
         } catch (Exception e) {
             log.debug(e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());

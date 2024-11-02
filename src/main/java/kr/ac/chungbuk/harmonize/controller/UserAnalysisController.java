@@ -8,19 +8,19 @@ import kr.ac.chungbuk.harmonize.utility.ErrorResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import static kr.ac.chungbuk.harmonize.utility.ErrorResult.SimpleErrorReturn;
@@ -55,5 +55,36 @@ public class UserAnalysisController {
                     SimpleErrorReturn("createFailed.userAnalysis", messageSource, Locale.getDefault())
             );
         }
+    }
+
+    // 음역대 분석 요청 (임시)
+    @GetMapping("/send-name")
+    public Map<String, Object> sendNameToFlask(@RequestParam String name) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        // 요청 데이터 설정
+        Map<String, String> requestData = new HashMap<>();
+        requestData.put("name", name);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(requestData, headers);
+
+        // Flask로 POST 요청
+        ResponseEntity<Map> response = restTemplate.exchange("http://localhost:5000/process-name", HttpMethod.POST, requestEntity, Map.class);
+        // 응답 데이터 출력
+
+        Map<String, Object> responseBody = response.getBody();
+        if (responseBody != null) {
+            System.out.println("Response from Flask:");
+            System.out.println("Percent: " + responseBody.get("percent"));
+            System.out.println("singer: " + responseBody.get("singer"));
+            System.out.println("Max Pitch: " + responseBody.get("max_pitch"));
+            System.out.println("Min Pitch: " + responseBody.get("min_pitch"));
+        }
+
+        // 응답 처리
+        return responseBody;
     }
 }
