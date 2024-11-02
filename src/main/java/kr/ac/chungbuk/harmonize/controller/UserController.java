@@ -22,6 +22,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -341,8 +342,8 @@ public class UserController {
     }
 
     // 아이디 찾기
-    @PostMapping("/find-id")
-    public ResponseEntity<?> findId(@RequestBody Map<String, String> request) {
+    @PostMapping(value = "/find-id")
+    public ResponseEntity<?> findId(@RequestParam Map<String, String> request) {
         String email = request.get("email");
         try {
             userService.sendIdByEmail(email);
@@ -358,7 +359,7 @@ public class UserController {
 
     // 비밀번호 재설정 요청
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+    public ResponseEntity<?> resetPassword(@RequestParam Map<String, String> request) {
         String loginId = request.get("loginId");
         String email = request.get("email");
 
