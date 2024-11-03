@@ -247,7 +247,7 @@ public class MusicAnalysisService {
         // 메시지 전송 및 응답 대기
         RequestReplyMessageFuture<String, String> replyFuture = replyingKafkaTemplate.sendAndReceive(msg);
 
-        // 응답을 10초 동안 대기 (타임아웃 설정)
+        // 응답을 20초 동안 대기 (타임아웃 설정)
         return replyFuture.get(20, TimeUnit.SECONDS).getPayload();
     }
 

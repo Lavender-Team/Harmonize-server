@@ -116,7 +116,7 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.DELETE, "/api/log/bulk").hasAuthority("ADMIN");
                     auth.requestMatchers(HttpMethod.GET, "/api/log/bulk/files").hasAuthority("ADMIN");
                     auth.requestMatchers(HttpMethod.DELETE, "/api/log/bulk/files").hasAuthority("ADMIN");
-                    auth.requestMatchers(HttpMethod.GET, "/api/log/count").hasAuthority("ADMIN");
+                    auth.requestMatchers(HttpMethod.GET, "/api/log/count").permitAll();
 
                     // 기타 모든 요청 차단
                     auth.anyRequest().denyAll();

@@ -5,7 +5,9 @@ import kr.ac.chungbuk.harmonize.dto.request.MusicRequestDto;
 import kr.ac.chungbuk.harmonize.dto.request.SearchRequestDto;
 import kr.ac.chungbuk.harmonize.dto.response.MusicDto;
 import kr.ac.chungbuk.harmonize.dto.response.MusicListDto;
+import kr.ac.chungbuk.harmonize.dto.response.RecomMusicListDto;
 import kr.ac.chungbuk.harmonize.entity.Music;
+import kr.ac.chungbuk.harmonize.entity.RecomMusic;
 import kr.ac.chungbuk.harmonize.entity.Theme;
 import kr.ac.chungbuk.harmonize.entity.User;
 import kr.ac.chungbuk.harmonize.enums.EventType;
@@ -221,9 +223,9 @@ public class MusicController {
     // 개인 음악 추천 목록 조회
     @GetMapping("/recommend")
     @ResponseBody
-    public Page<MusicListDto> recommend(Long userId, String genre, Pageable pageable) {
+    public Page<RecomMusicListDto> recommend(Long userId, String genre, Pageable pageable) {
         try {
-            Page<Music> list;
+            Page<RecomMusic> list;
 
             if (genre == null)
                 list = musicService.recommend(userId, pageable);
@@ -231,7 +233,7 @@ public class MusicController {
                 list = musicService.recommend(userId, genre, pageable);
 
             return new PageImpl<>(
-                    list.getContent().stream().map(MusicListDto::build).toList(),
+                    list.getContent().stream().map(RecomMusicListDto::build).toList(),
                     pageable,
                     list.getTotalElements());
         }

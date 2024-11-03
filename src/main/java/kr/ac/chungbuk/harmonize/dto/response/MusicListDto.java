@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
@@ -16,16 +17,16 @@ import java.util.List;
 @Builder
 public class MusicListDto {
 
-    private Long id;
-    private String title;
-    private String artist;
-    private String genre;
-    private String genreName;
-    private String status;
-    private String albumCover;
-    private Long view;
-    private Long likes;
-    private List<String> themes;
+    protected Long id;
+    protected String title;
+    protected String artist;
+    protected String genre;
+    protected String genreName;
+    protected String status;
+    protected String albumCover;
+    protected Long view;
+    protected Long likes;
+    protected List<String> themes;
 
     public static MusicListDto build(Music music) {
         return MusicListDto.builder()
@@ -40,5 +41,20 @@ public class MusicListDto {
                 .likes(music.getLikes())
                 .themes(music.getThemes().stream().map(Theme::getThemeName).toList())
                 .build();
+    }
+
+    public static MusicListDto build(MusicListDto dto, Music music) {
+        dto.setId(music.getMusicId());
+        dto.setTitle(music.getTitle());
+        dto.setArtist((music.getGroup() == null) ? "-" : music.getGroup().getGroupName());
+        dto.setGenre(music.getGenre().name());
+        dto.setGenreName(Genre.toString(music.getGenre()));
+        dto.setStatus(music.getAnalysis().getStatus().name());
+        dto.setAlbumCover(music.getAlbumCover());
+        dto.setView(music.getView());
+        dto.setLikes(music.getLikes());
+        dto.setThemes(music.getThemes().stream().map(Theme::getThemeName).toList());
+
+        return dto;
     }
 }

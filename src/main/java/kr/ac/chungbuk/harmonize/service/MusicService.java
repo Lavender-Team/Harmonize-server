@@ -252,20 +252,18 @@ public class MusicService {
     
     // 개인 음악 추천 목록 조회
     @Transactional
-    public Page<Music> recommend(Long userId, Pageable pageable) {
+    public Page<RecomMusic> recommend(Long userId, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow();
 
-        Page<RecomMusic> recomMusics = recomMusicRepository.findByUser(user, pageable);
-        return recomMusics.map(RecomMusic::getRecomMusic);
+        return recomMusicRepository.findByUser(user, pageable);
     }
 
     // 개인 음악 장르별 추천 목록 조회
     @Transactional
-    public Page<Music> recommend(Long userId, String genre, Pageable pageable) {
+    public Page<RecomMusic> recommend(Long userId, String genre, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow();
 
-        Page<RecomMusic> recomMusics = recomMusicRepository.findByUserAndGenre(user, Genre.fromString(genre), pageable);
-        return recomMusics.map(RecomMusic::getRecomMusic);
+        return recomMusicRepository.findByUserAndGenre(user, Genre.fromString(genre), pageable);
     }
 
     // 최초 추천 평가 노래 목록
