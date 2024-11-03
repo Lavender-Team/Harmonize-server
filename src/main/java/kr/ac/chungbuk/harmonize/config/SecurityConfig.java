@@ -65,6 +65,7 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.GET, "/api/music/pitch/audio/{musicId}").permitAll();
                     auth.requestMatchers(HttpMethod.POST, "/api/music/recsys/content-based").hasAuthority("ADMIN");
                     auth.requestMatchers(HttpMethod.POST, "/api/music/recsys/collaborative").hasAnyAuthority("ADMIN", "USER");
+                    auth.requestMatchers(HttpMethod.POST, "/api/music/status").hasAuthority("ADMIN");
 
                     // MusicActionController
                     auth.requestMatchers(HttpMethod.POST, "/api/music/{musicId}/like").hasAuthority("USER");

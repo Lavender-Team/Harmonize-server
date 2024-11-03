@@ -18,6 +18,11 @@ public class KafkaTopicConfig {
     }
 
     @Bean
+    public NewTopic musicAnalysisReply() {
+        return new NewTopic("musicAnalysisReply", 1, (short) 1);
+    }
+
+    @Bean
     public NewTopic musicRecSys() {
         return new NewTopic("musicRecSys", 1, (short) 1);
     }
@@ -39,7 +44,6 @@ public class KafkaTopicConfig {
             ConsumerFactory<String, String> consumerFactory) {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
-        return factory.createContainer("musicRecSysReply");
+        return factory.createContainer("musicRecSysReply", "musicAnalysisReply");
     }
-
 }

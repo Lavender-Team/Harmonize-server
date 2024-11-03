@@ -18,6 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.messaging.support.MessageBuilder;
 
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -250,7 +252,7 @@ public class MusicAnalysisService {
     }
 
     // 한 명의 회원 대상 추천 결과 업데이트 요청
-    public Object requestCollaborativeRecOne(Long userId)throws ExecutionException, InterruptedException, TimeoutException {
+    public Object requestCollaborativeRecOne(Long userId) throws ExecutionException, InterruptedException, TimeoutException {
         User user = userRepository.findById(userId).orElseThrow();
 
         var msg = MessageBuilder.withPayload(String.format("""
@@ -263,9 +265,51 @@ public class MusicAnalysisService {
         // 메시지 전송 및 응답 대기
         RequestReplyMessageFuture<String, String> replyFuture = replyingKafkaTemplate.sendAndReceive(msg);
 
-        // 응답을 10초 동안 대기 (타임아웃 설정)
+        // 응답을 20초 동안 대기 (타임아웃 설정)
         return replyFuture.get(20, TimeUnit.SECONDS).getPayload();
     }
 
+    // 모델 상태 확인
+    public Map<String, Boolean> checkSystemStatus() throws ExecutionException, InterruptedException, TimeoutException {
+        boolean isMusicAnalysisIdle = true;
+        boolean isRecSysIdle = true;
+
+        try {
+            var msg = MessageBuilder.withPayload("""
+                {
+                    "command": "ping"
+                }
+            """).setHeader(KafkaHeaders.TOPIC, "musicAnalysis").build();
+
+            // 메시지 전송 및 응답 대기
+            RequestReplyMessageFuture<String, String> replyFuture = replyingKafkaTemplate.sendAndReceive(msg);
+
+            // 응답을 3초 동안 대기 (타임아웃 설정)
+            replyFuture.get(2, TimeUnit.SECONDS).getPayload();
+        } catch (TimeoutException e) {
+            isMusicAnalysisIdle = false;
+        }
+
+        try {
+            var msg = MessageBuilder.withPayload("""
+                {
+                    "command": "ping"
+                }
+            """).setHeader(KafkaHeaders.TOPIC, "musicRecSys").build();
+
+            // 메시지 전송 및 응답 대기
+            RequestReplyMessageFuture<String, String> replyFuture = replyingKafkaTemplate.sendAndReceive(msg);
+
+            // 응답을 3초 동안 대기 (타임아웃 설정)
+            replyFuture.get(2, TimeUnit.SECONDS).getPayload();
+        } catch (TimeoutException e) {
+            isRecSysIdle = false;
+        }
+
+        Map<String, Boolean> status = new HashMap<>();
+        status.put("musicAnalysis", isMusicAnalysisIdle);
+        status.put("recSys", isRecSysIdle);
+        return status;
+    }
 
 }

@@ -17,7 +17,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeoutException;
 
@@ -246,6 +248,16 @@ public class MusicAnalysisController {
                     SimpleErrorReturn("collaborativeFailed.recsys", messageSource, Locale.getDefault())
             );
         }
+    }
+
+    // 모델 상태 확인
+    @GetMapping(path = "/status")
+    public ResponseEntity<Map<String, Boolean>> countArtists() {
+        Map<String, Boolean> response = new HashMap<>();
+        try {
+            response = musicAnalysisService.checkSystemStatus();
+        } catch (Exception ignored) { }
+        return ResponseEntity.ok(response);
     }
 
 }
