@@ -1,7 +1,10 @@
 package kr.ac.chungbuk.harmonize.controller;
 
+import kr.ac.chungbuk.harmonize.repository.LogRepository;
+import kr.ac.chungbuk.harmonize.service.LogService;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -13,12 +16,21 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Controller
 @RequestMapping("/api/log")
 public class LogController {
+
+    private final LogService logService;
+
+    @Autowired
+    public LogController(LogService logService) {
+        this.logService = logService;
+    }
 
     // 벌크 업로드 결과 조회
     @GetMapping("/bulk")
@@ -69,5 +81,14 @@ public class LogController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("벌크 파일 업로드 로그 삭제 중 오류가 발생하였습니다.");
         }
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
+    }
+
+    // 금일 생성된 로그 수 조회
+    @GetMapping("/count")
+    public ResponseEntity<Map<String, Long>> countLogCreatedToday() {
+        long count = logService.countCreatedToday();
+        Map<String, Long> response = new HashMap<>();
+        response.put("count", count);
+        return ResponseEntity.ok(response);
     }
 }

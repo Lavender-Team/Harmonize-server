@@ -9,6 +9,10 @@ import kr.ac.chungbuk.harmonize.repository.MusicRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
 @Service
 public class LogService {
 
@@ -25,5 +29,11 @@ public class LogService {
         Music music = musicRepository.findById(musicId).orElseThrow();
         Log log = new Log(user, music, event);
         logRepository.save(log);
+    }
+
+    public long countCreatedToday() {
+        LocalDateTime startOfDay = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
+        LocalDateTime endOfDay = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
+        return logRepository.countCreatedToday(startOfDay, endOfDay);
     }
 }

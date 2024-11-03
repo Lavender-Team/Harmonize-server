@@ -97,22 +97,22 @@
 
 ### [UserController](https://github.com/Lavender-Team/Harmonize-server/blob/develop/src/main/java/kr/ac/chungbuk/harmonize/controller/UserController.java)
 
-|  Domain   | Index | Method | URI               | Description  |
-|:---------:|:-----:|--------|-------------------|--------------|
-| /api/user |  61   | POST   | /                 | 사용자 생성       |
-|           |  62   | PUT    | /{userId}         | 사용자 수정 (사용자) |
-|           |  63   | PUT    | /admin/{userId}   | 사용자 수정 (어드민) |
-|           |  64   | DELETE | /{userId}         | 사용자 삭제       |
-|           |  65   | GET    | /{userId}         | 사용자 상세 조회    |
-|           |  66   | GET    | /                 | 사용자 목록 조회    |
-|           |  67   | POST   | /login            | 로그인          |
-|           |  68   | GET    | /logout           | 로그아웃         |
-|           |  69   | GET    | /auth/currentuser | 로그인된 사용자 조회 |
-|           |  70   | GET    | /count            | 전체 사용자 수 조회  |
-|           |  71   | POST   | /find-id          | 아이디 조회          |
-|           |  72   | POST   | /reset-password   | 비밀번호 재설정      |
-|           |  74   | GET    | /reset-password   | 비밀번호 재설정      |
-|           |  75   | GET    | /get-user-by-token| ID 토큰 발급        |
+|  Domain   | Index | Method | URI                 | Description      |
+|:---------:|:-----:|--------|---------------------|------------------|
+| /api/user |  61   | POST   | /                   | 사용자 생성           |
+|           |  62   | PUT    | /{userId}           | 사용자 수정 (사용자)     |
+|           |  63   | PUT    | /admin/{userId}     | 사용자 수정 (어드민)     |
+|           |  64   | DELETE | /{userId}           | 사용자 삭제           |
+|           |  65   | GET    | /{userId}           | 사용자 상세 조회        |
+|           |  66   | GET    | /                   | 사용자 목록 조회        |
+|           |  67   | POST   | /login              | 로그인              |
+|           |  68   | GET    | /logout             | 로그아웃             |
+|           |  69   | GET    | /auth/currentuser   | 로그인된 사용자 조회      |
+|           |  70   | GET    | /count              | 전체 사용자 수 조회      |
+|           |  71   | POST   | /find-id            | 아이디 조회           |
+|           |  72   | POST   | /reset-password     | 비밀번호 재설정         |
+|           |  74   | GET    | /reset-password     | 비밀번호 재설정         |
+|           |  75   | GET    | /get-user-by-token  | ID 토큰 발급         |
 
 
 ### [UserAnalysisController](https://github.com/Lavender-Team/Harmonize-server/blob/develop/src/main/java/kr/ac/chungbuk/harmonize/controller/UserAnalysisController.java)
@@ -130,6 +130,7 @@
 |          |  92   | DELETE | /bulk       | 벌크 업로드 결과 삭제       |
 |          |  93   | GET    | /bulk/files | 파일 벌크 업로드 결과 조회    |
 |          |  94   | DELETE | /bulk/files | 파일 벌크 업로드 결과 로그 삭제 |
+|          |  95   | GET    | /count      | 금일 생성된 로그 수 조회     |
 
 </details>
 
