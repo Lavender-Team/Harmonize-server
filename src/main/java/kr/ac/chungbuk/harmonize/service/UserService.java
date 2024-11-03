@@ -157,9 +157,9 @@ public class UserService implements UserDetailsService {
         return userRepository.findAll(pageable);
     }
 
-    // 사용자 닉네임 검색
-    public Page<User> search(String nickname, Pageable pageable) {
-        return userRepository.findByNicknameContaining(nickname, pageable);
+    // 사용자 아이디 검색
+    public Page<User> search(String loginId, Pageable pageable) {
+        return userRepository.findByLoginIdContaining(loginId, pageable);
     }
 
     // 아이디 중복 여부 검사
