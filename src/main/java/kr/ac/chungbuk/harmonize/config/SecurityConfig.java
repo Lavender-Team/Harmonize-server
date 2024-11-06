@@ -49,7 +49,7 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.GET, "/api/music/search").permitAll();
                     auth.requestMatchers(HttpMethod.GET, "/api/music/rank").permitAll();
                     auth.requestMatchers(HttpMethod.GET, "/api/music/recent").permitAll();
-                    auth.requestMatchers(HttpMethod.GET, "/api/music/first-feedback").hasAuthority("USER");
+                    auth.requestMatchers(HttpMethod.GET, "/api/music/first-feedback").hasAnyAuthority("USER", "ADMIN");
                     auth.requestMatchers(HttpMethod.GET, "/api/music/theme").permitAll();
                     auth.requestMatchers(HttpMethod.GET, "/api/music/theme/music").permitAll();
                     auth.requestMatchers(HttpMethod.GET, "/api/music/count").permitAll();
@@ -68,10 +68,10 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.POST, "/api/music/status").hasAuthority("ADMIN");
 
                     // MusicActionController
-                    auth.requestMatchers(HttpMethod.POST, "/api/music/{musicId}/like").hasAuthority("USER");
-                    auth.requestMatchers(HttpMethod.DELETE, "/api/music/{musicId}/like").hasAuthority("USER");
-                    auth.requestMatchers(HttpMethod.GET, "/api/music/bookmarked").hasAuthority("USER");
-                    auth.requestMatchers(HttpMethod.POST, "/api/music/{musicId}/feedback").hasAuthority("USER");
+                    auth.requestMatchers(HttpMethod.POST, "/api/music/{musicId}/like").hasAnyAuthority("USER", "ADMIN");
+                    auth.requestMatchers(HttpMethod.DELETE, "/api/music/{musicId}/like").hasAnyAuthority("USER", "ADMIN");
+                    auth.requestMatchers(HttpMethod.GET, "/api/music/bookmarked").hasAnyAuthority("USER", "ADMIN");
+                    auth.requestMatchers(HttpMethod.POST, "/api/music/{musicId}/feedback").hasAnyAuthority("USER", "ADMIN");
 
                     // ArtistController
                     auth.requestMatchers(HttpMethod.POST, "/api/artist").hasAuthority("ADMIN");
@@ -109,7 +109,7 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.GET, "/api/user/count").hasAuthority("ADMIN");
 
                     // UserAnalysisController
-                    auth.requestMatchers(HttpMethod.POST, "/api/user/analysis").hasAuthority("USER");
+                    auth.requestMatchers(HttpMethod.POST, "/api/user/analysis").hasAnyAuthority("USER", "ADMIN");
 
                     // LogController
                     auth.requestMatchers(HttpMethod.GET, "/api/log/bulk").hasAuthority("ADMIN");
