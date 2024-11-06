@@ -109,7 +109,8 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.GET, "/api/user/count").hasAuthority("ADMIN");
 
                     // UserAnalysisController
-                    auth.requestMatchers(HttpMethod.POST, "/api/user/analysis").hasAnyAuthority("USER", "ADMIN");
+                    auth.requestMatchers(HttpMethod.POST, "/api/user/{userId}/analysis").hasAnyAuthority("USER", "ADMIN");
+                    auth.requestMatchers(HttpMethod.POST, "/api/user/uasys/analyze").hasAnyAuthority("USER", "ADMIN");
 
                     // LogController
                     auth.requestMatchers(HttpMethod.GET, "/api/log/bulk").hasAuthority("ADMIN");

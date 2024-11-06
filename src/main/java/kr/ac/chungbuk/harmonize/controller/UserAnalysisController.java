@@ -12,10 +12,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
@@ -40,8 +37,8 @@ public class UserAnalysisController {
     }
 
     // 음역대 분석 결과 업로드
-    @PostMapping("/analysis")
-    public ResponseEntity<Object> create(Long userId, Double highestPitch, Double lowestPitch) {
+    @PostMapping("/{userId}/analysis")
+    public ResponseEntity<Object> create(@PathVariable Long userId, Double highestPitch, Double lowestPitch) {
 
         try {
             userAnalysisService.save(userId, highestPitch, lowestPitch);
@@ -58,8 +55,8 @@ public class UserAnalysisController {
     }
 
     // 음역대 분석 요청 (임시)
-    @GetMapping("/send-name")
-    public Map<String, Object> sendNameToFlask(@RequestParam String name) {
+    @PostMapping("/uasys/analyze")
+    public Map<String, Object> analyze(@RequestParam String name) {
         RestTemplate restTemplate = new RestTemplate();
 
         // 요청 데이터 설정

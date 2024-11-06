@@ -118,9 +118,10 @@
 
 ### [UserAnalysisController](https://github.com/Lavender-Team/Harmonize-server/blob/develop/src/main/java/kr/ac/chungbuk/harmonize/controller/UserAnalysisController.java)
 
-|  Domain   | Index | Method | URI       | Description    |
-|:---------:|:-----:|--------|-----------|----------------|
-| /api/user |  91   | POST   | /analysis | 음역대 분석 결과 업로드  |
+|  Domain   | Index | Method | URI                | Description   |
+|:---------:|:-----:|--------|--------------------|---------------|
+| /api/user |  91   | POST   | /uasys/analyze     | 음역대 분석 요청     |
+| /api/user |  92   | POST   | /{userId}/analysis | 음역대 분석 결과 업로드 |
 
 
 ### [LogController](https://github.com/Lavender-Team/Harmonize-server/blob/develop/src/main/java/kr/ac/chungbuk/harmonize/controller/LogController.java)
