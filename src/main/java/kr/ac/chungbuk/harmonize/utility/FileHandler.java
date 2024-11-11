@@ -224,6 +224,28 @@ public class FileHandler {
         writer.close();
     }
 
+    /**
+     * 사용자의 목소리 녹음 파일을 파일시스템에 저장할 때 사용합니다.
+     *
+     * @param file     저장할 프로필 이미지 파일
+     * @param userId   유저 ID
+     */
+    public static String saveVoiceRecordingFile(MultipartFile file, Long userId) throws IOException {
+        String directoryPath = System.getProperty("user.dir") + "/upload/voice_recording/";
+        if (!new File(directoryPath).exists()) {
+            new File(directoryPath).mkdirs();
+        }
+
+        String fileExtension = StringUtils.getFilenameExtension(file.getOriginalFilename());
+        String filePath = directoryPath + "/" + Objects.requireNonNull(Objects.toString(userId)) + "."
+                + fileExtension;
+
+        File destFile = new File(filePath);
+        file.transferTo(destFile);
+
+        return "/upload/voice_recording/" + userId + "." + fileExtension;
+    }
+
     public static ResponseEntity<FileSystemResource> getFileSystemResource(String filename, String path) throws IOException {
         FileSystemResource resource = new FileSystemResource(path);
 
