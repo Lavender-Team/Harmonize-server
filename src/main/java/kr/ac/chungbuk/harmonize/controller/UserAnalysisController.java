@@ -5,6 +5,7 @@ import kr.ac.chungbuk.harmonize.entity.User;
 import kr.ac.chungbuk.harmonize.service.UserAnalysisService;
 import kr.ac.chungbuk.harmonize.service.UserService;
 import kr.ac.chungbuk.harmonize.utility.ErrorResult;
+import kr.ac.chungbuk.harmonize.utility.FileHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -14,7 +15,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -54,34 +57,49 @@ public class UserAnalysisController {
         }
     }
 
-    // 음역대 분석 요청 (임시)
+    // 음역대 분석 요청
     @PostMapping("/uasys/analyze")
-    public Map<String, Object> analyze(@RequestParam String name) {
+    @ResponseBody
+    public Object analyze(Long userId, MultipartFile file) {
+
+        try {
+            FileHandler.saveVoiceRecordingFile(file, userId);
+
         RestTemplate restTemplate = new RestTemplate();
 
         // 요청 데이터 설정
         Map<String, String> requestData = new HashMap<>();
-        requestData.put("name", name);
+        requestData.put("name", userId.toString());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(requestData, headers);
 
-        // Flask로 POST 요청
+        // Flask로 POST 요청 (임시)
         ResponseEntity<Map> response = restTemplate.exchange("http://localhost:5000/process-name", HttpMethod.POST, requestEntity, Map.class);
-        // 응답 데이터 출력
 
+        // 응답
         Map<String, Object> responseBody = response.getBody();
         if (responseBody != null) {
-            System.out.println("Response from Flask:");
-            System.out.println("Percent: " + responseBody.get("percent"));
-            System.out.println("singer: " + responseBody.get("singer"));
-            System.out.println("Max Pitch: " + responseBody.get("max_pitch"));
-            System.out.println("Min Pitch: " + responseBody.get("min_pitch"));
+            log.debug("Response from Flask:");
+            log.debug("Percent: " + responseBody.get("percent"));
+            log.debug("singer: " + responseBody.get("singer"));
+            log.debug("Max Pitch: " + responseBody.get("max_pitch"));
+            log.debug("Min Pitch: " + responseBody.get("min_pitch"));
         }
 
         // 응답 처리
         return responseBody;
+        
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    SimpleErrorReturn("io.saveFailed.userAnalysis", messageSource, Locale.getDefault())
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    SimpleErrorReturn("analyzeFailed.userAnalysis", messageSource, Locale.getDefault())
+            );
+        }
     }
 }

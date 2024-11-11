@@ -175,10 +175,12 @@ public class MusicController {
         try {
             Page<Music> list;
 
-            if (title != null || genre != null)
+            if (title != null || genre != null) {
                 list = musicService.search(title, genre, pageable);
-            else
+            }
+            else {
                 list = musicService.list(pageable);
+            }
 
             return new PageImpl<>(
                     list.getContent().stream().map(MusicListDto::build).toList(),
