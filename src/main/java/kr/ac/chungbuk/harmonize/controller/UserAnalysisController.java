@@ -85,8 +85,8 @@ public class UserAnalysisController {
             log.debug("Response from Flask:");
             log.debug("Percent: " + responseBody.get("percent"));
             log.debug("singer: " + responseBody.get("singer"));
-            log.debug("Max Pitch: " + responseBody.get("max_pitch"));
-            log.debug("Min Pitch: " + responseBody.get("min_pitch"));
+            log.debug("Max Pitch: " + responseBody.get("maxPitch"));
+            log.debug("Min Pitch: " + responseBody.get("minPitch"));
         }
 
         // 응답 처리
