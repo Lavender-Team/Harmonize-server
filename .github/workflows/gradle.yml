@@ -15,6 +15,18 @@ jobs:
       checks: write
       pull-requests: write
 
+    services:
+      mariadb:
+        image: mariadb:latest
+        ports:
+          - 3306:3306
+        env:
+          MARIADB_ROOT_PASSWORD: '<password>'
+          MARIADB_DATABASE: 'harmonize_test'
+          MARIADB_USER: test_user
+          MARIADB_PASSWORD: test_password
+        options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
+
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17
