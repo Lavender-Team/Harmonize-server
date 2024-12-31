@@ -6,12 +6,10 @@ import kr.ac.chungbuk.harmonize.dto.response.ArtistDto;
 import kr.ac.chungbuk.harmonize.entity.Artist;
 import kr.ac.chungbuk.harmonize.service.ArtistService;
 import kr.ac.chungbuk.harmonize.service.GroupService;
-import kr.ac.chungbuk.harmonize.exception.ErrorResult;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -21,7 +19,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -29,88 +26,44 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
-
-import static kr.ac.chungbuk.harmonize.exception.ErrorResult.SimpleErrorReturn;
 
 @Slf4j
+@RequiredArgsConstructor
 @Controller
 @RequestMapping("/api/artist")
 public class ArtistController {
 
     private final ArtistService artistService;
     private final GroupService groupService;
-    private final MessageSource messageSource;
-
-    @Autowired
-    public ArtistController(ArtistService artistService, GroupService groupService, MessageSource messageSource) {
-        this.artistService = artistService;
-        this.groupService = groupService;
-        this.messageSource = messageSource;
-    }
 
     // 가수 등록
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public ResponseEntity<Object> create(@Validated @ModelAttribute ArtistRequestDto artistParam, BindingResult bindingResult) {
+    public void createArtist(@Validated ArtistRequestDto artistParam) throws IOException {
+        Artist created = artistService.create(artistParam);
 
-        if (bindingResult.hasErrors()) {
-            ErrorResult errorResult = new ErrorResult(bindingResult, messageSource, Locale.getDefault());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResult);
-        }
-
-        try {
-            Artist created = artistService.create(artistParam);
-
-            // 솔로 그룹을 생성하도록 요청시
-            if (BooleanUtils.isTrue(artistParam.getCreateSoloGroup())) {
-                groupService.create(GroupRequestDto.convertFrom(created));
-            }
-            return ResponseEntity.status(HttpStatus.CREATED).body(null);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    SimpleErrorReturn("io.createFailed.artist", messageSource, Locale.getDefault())
-            );
-        } catch (Exception e) {
-            log.debug(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    SimpleErrorReturn("createFailed.artist", messageSource, Locale.getDefault())
-            );
+        // 솔로 그룹을 생성하도록 요청시
+        if (BooleanUtils.isTrue(artistParam.getCreateSoloGroup())) {
+            groupService.create(GroupRequestDto.convertFrom(created));
         }
     }
 
     // 가수 삭제
+    @ResponseStatus(HttpStatus.ACCEPTED)
     @DeleteMapping("/{artistId}")
-    public ResponseEntity<Object> delete(@PathVariable Long artistId) {
-        Optional<Artist> artist = artistService.findById(artistId);
-        if (artist.isPresent()) {
-            try {
-                artistService.delete(artistId);
-                return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
-            } catch (IOException e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                        SimpleErrorReturn("io.deleteFailed.artist", messageSource, Locale.getDefault())
-                );
-            } catch (Exception e) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                        SimpleErrorReturn("deleteFailed.artist", messageSource, Locale.getDefault())
-                );
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    SimpleErrorReturn("notFound.artist", messageSource, Locale.getDefault())
-            );
-        }
+    public void deleteArtist(@PathVariable Long artistId) throws IOException {
+        artistService.delete(artistId);
     }
 
     // 가수 목록 조회
-    @GetMapping
     @ResponseBody
-    public Page<ArtistDto> list(String artistName,
-                                @PageableDefault(sort = "artistId", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<Artist> list;
+    @GetMapping
+    public Page<ArtistDto> listArtist(
+            String artistName,
+            @PageableDefault(sort = "artistId", direction = Sort.Direction.DESC) Pageable pageable) {
 
+        Page<Artist> list;
         if (artistName == null || artistName.isEmpty())
             list = artistService.list(pageable);
         else
@@ -123,45 +76,20 @@ public class ArtistController {
     }
 
     // 가수 수정
+    @ResponseStatus(HttpStatus.ACCEPTED)
     @PutMapping("/{artistId}")
-    public ResponseEntity<Object> update(@PathVariable Long artistId,
-                                         @Validated @ModelAttribute ArtistRequestDto artistParam, BindingResult bindingResult) {
-
-        if (bindingResult.hasErrors()) {
-            ErrorResult errorResult = new ErrorResult(bindingResult, messageSource, Locale.getDefault());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResult);
-        }
-
-        try {
-            artistService.update(artistId, artistParam);
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    SimpleErrorReturn("io.updateFailed.artist", messageSource, Locale.getDefault())
-            );
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    SimpleErrorReturn("updateFailed.artist", messageSource, Locale.getDefault())
-            );
-        }
+    public void updateArtist(@PathVariable Long artistId,
+                                         @Validated ArtistRequestDto artistParam) throws IOException {
+        artistService.update(artistId, artistParam);
     }
 
     // 가수 상세정보 조회
-    @GetMapping("/{artistId}")
     @ResponseBody
-    public ResponseEntity<Object> readByAdmin(@PathVariable Long artistId) {
-        try {
-            Artist artist = artistService.findById(artistId).orElseThrow();
-            return ResponseEntity.ok(ArtistDto.build(artist));
-        } catch (java.util.NoSuchElementException e) {
-            log.info("Artist not found - artistId: {}", artistId);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(SimpleErrorReturn("notFound.artist", messageSource, Locale.getDefault()));
-        } catch (Exception e) {
-            log.error("Error retrieving artist details - artistId: {}, error: {}", artistId, e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(SimpleErrorReturn("internalError", messageSource, Locale.getDefault()));
-        }
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/{artistId}")
+    public ArtistDto readArtist(@PathVariable Long artistId) {
+        Artist artist = artistService.read(artistId);
+        return ArtistDto.build(artist);
     }
 
     // 가수 프로필 이미지 파일 다운로드
@@ -171,21 +99,23 @@ public class ArtistController {
         if (filename.contains(".."))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Filename cannot contains \"..\"");
 
-        String path = System.getProperty("user.dir") + "/upload/profile/" + filename;
+            String path = System.getProperty("user.dir") + "/upload/profile/" + filename;
 
-        if (new File(path).exists()) {
-            return FileHandler.getFileSystemResource(filename, path);
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
+            if (new File(path).exists()) {
+                return FileHandler.getFileSystemResource(filename, path);
+            } else {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
         }
     }
 
     // 전체 가수 수 조회
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/count")
-    public ResponseEntity<Map<String, Integer>> countArtists() {
+    public Map<String, Integer> countArtists() {
         int count = artistService.count();
         Map<String, Integer> response = new HashMap<>();
         response.put("count", count);
-        return ResponseEntity.ok(response);
+        return response;
     }
 }

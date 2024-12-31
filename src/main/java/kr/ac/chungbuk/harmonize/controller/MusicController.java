@@ -45,7 +45,6 @@ public class MusicController {
     private final MusicService musicService;
     private final MusicActionService musicActionService;
     private final LogService logService;
-    private final MessageSource messageSource;
     private final ObjectMapper objectMapper;
 
 

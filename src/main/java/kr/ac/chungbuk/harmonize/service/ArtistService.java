@@ -93,7 +93,7 @@ public class ArtistService {
     }
 
     // 가수 상세정보 조회
-    public Artist readByAdmin(Long artistId) {
+    public Artist read(Long artistId) {
         return artistRepository.findById(artistId).orElseThrow();
     }
 

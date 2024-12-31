@@ -1,11 +1,10 @@
 package kr.ac.chungbuk.harmonize.exception;
 
-import kr.ac.chungbuk.harmonize.controller.MusicController;
+import kr.ac.chungbuk.harmonize.controller.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.HandlerMethod;
 
 import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 
@@ -20,7 +20,13 @@ import static kr.ac.chungbuk.harmonize.exception.ErrorResult.SimpleErrorReturn;
 
 @Slf4j
 @RequiredArgsConstructor
-@RestControllerAdvice(assignableTypes = MusicController.class)
+@RestControllerAdvice(assignableTypes = {
+        MusicController.class,
+        ArtistController.class,
+        GroupController.class,
+        MusicActionController.class,
+        LogController.class
+})
 public class ExControllerAdvice {
 
     private final MessageSource messageSource;
@@ -32,6 +38,16 @@ public class ExControllerAdvice {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ErrorResult handleException(IllegalArgumentException ex, HandlerMethod handlerMethod) {
+        return SimpleErrorReturn(
+                getErrorCode("illegalArgument", getMethodName(handlerMethod), getClassName(handlerMethod)),
+                messageSource,
+                Locale.getDefault()
+        );
+    }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(IOException.class)
     public ErrorResult handleException(IOException ex, HandlerMethod handlerMethod) {
 
@@ -52,7 +68,17 @@ public class ExControllerAdvice {
         );
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(NoSuchFileException.class)
+    public ErrorResult handleException(NoSuchFileException ex, HandlerMethod handlerMethod) {
+        return SimpleErrorReturn(
+                getErrorCode("notFound", getMethodName(handlerMethod), getClassName(handlerMethod)),
+                messageSource,
+                Locale.getDefault()
+        );
+    }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public ErrorResult handleException(Exception ex, HandlerMethod handlerMethod) {
         return SimpleErrorReturn(

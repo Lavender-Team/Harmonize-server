@@ -1,40 +1,33 @@
 package kr.ac.chungbuk.harmonize.controller;
 
-import kr.ac.chungbuk.harmonize.repository.LogRepository;
 import kr.ac.chungbuk.harmonize.service.LogService;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
+@RequiredArgsConstructor
 @Controller
 @RequestMapping("/api/log")
 public class LogController {
 
     private final LogService logService;
 
-    @Autowired
-    public LogController(LogService logService) {
-        this.logService = logService;
-    }
-
     // 벌크 업로드 결과 조회
-    @GetMapping("/bulk")
     @ResponseBody
+    @GetMapping("/bulk")
     public List<String> getBulkUploadLog() throws Exception {
         String path = System.getProperty("user.dir") + "/upload/bulk_log.txt";
         File log = new File(path);
@@ -46,49 +39,42 @@ public class LogController {
     }
 
     // 벌크 업로드 결과 로그 지우기
+    @ResponseStatus(HttpStatus.ACCEPTED)
     @DeleteMapping("/bulk")
-    public ResponseEntity<String> clearBulkUploadLog() {
-        try {
-            FileHandler.clearBulkUploadLog(false);
-        } catch (Exception e) {
-            log.info(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("벌크 업로드 로그 삭제 중 오류가 발생하였습니다.");
-        }
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
+    public void clearBulkUploadLog() throws IOException {
+        FileHandler.clearBulkUploadLog(false);
     }
 
 
     // 파일 벌크 업로드 결과 조회
-    @GetMapping("/bulk/files")
     @ResponseBody
+    @GetMapping("/bulk/files")
     public List<String> getBulkFileUploadLog() throws Exception {
         String path = System.getProperty("user.dir") + "/upload/bulk_file_log.txt";
+
         File log = new File(path);
-        if (log.exists()) {
-            return Files.readAllLines(log.toPath());
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
+        if (!log.exists()) {
+            throw new NoSuchFileException("bulk_file_log.txt");
         }
+
+        return Files.readAllLines(log.toPath());
     }
 
     // 파일 벌크 업로드 결과 로그 지우기
+    @ResponseStatus(HttpStatus.ACCEPTED)
     @DeleteMapping("/bulk/files")
-    public ResponseEntity<String> clearBulkFileUploadLog() {
-        try {
-            FileHandler.clearBulkUploadLog(true);
-        } catch (Exception e) {
-            log.info(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("벌크 파일 업로드 로그 삭제 중 오류가 발생하였습니다.");
-        }
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
+    public void clearBulkFileUploadLog() throws IOException {
+        FileHandler.clearBulkUploadLog(true);
     }
 
     // 금일 생성된 로그 수 조회
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/count")
-    public ResponseEntity<Map<String, Long>> countLogCreatedToday() {
+    public Map<String, Long> countLogCreatedToday() {
         long count = logService.countCreatedToday();
         Map<String, Long> response = new HashMap<>();
         response.put("count", count);
-        return ResponseEntity.ok(response);
+        return response;
     }
 }
