@@ -2,9 +2,9 @@ name: Build And Test
 
 on:
   push:
-    branches: [ "develop", "main" ]
+    branches: [ "develop", "main", "refactor" ]
   pull_request:
-    branches: [ "develop", "main" ]
+    branches: [ "develop", "main", "refactor" ]
 
 jobs:
   build_and_test:
@@ -22,7 +22,7 @@ jobs:
           - 3306:3306
         env:
           MARIADB_ROOT_PASSWORD: '<password>'
-          MARIADB_DATABASE: 'harmonize'
+          MARIADB_DATABASE: 'harmonize_test'
           MARIADB_USER: test_user
           MARIADB_PASSWORD: test_password
         options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3

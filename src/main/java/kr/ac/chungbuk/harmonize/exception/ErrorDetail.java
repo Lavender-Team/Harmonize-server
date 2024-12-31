@@ -1,4 +1,4 @@
-package kr.ac.chungbuk.harmonize.utility;
+package kr.ac.chungbuk.harmonize.exception;
 
 import lombok.Getter;
 import org.springframework.context.MessageSource;

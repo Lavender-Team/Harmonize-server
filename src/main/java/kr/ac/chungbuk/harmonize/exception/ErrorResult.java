@@ -1,4 +1,4 @@
-package kr.ac.chungbuk.harmonize.utility;
+package kr.ac.chungbuk.harmonize.exception;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -38,7 +38,18 @@ public class ErrorResult {
         ErrorResult errorResult = new ErrorResult();
         errorResult.objectErrors = new ArrayList<>();
         errorResult.objectErrors.add(new ErrorDetail(
-                new ObjectError("controller", new String[] { errorCode }, new Object[]{ }, null),
+                new ObjectError("controller", new String[] { errorCode }, new Object[]{ }, ""),
+                messageSource, locale
+        ));
+
+        return errorResult;
+    }
+
+    public static ErrorResult SimpleErrorReturn(String[] errorCodes, MessageSource messageSource, Locale locale) {
+        ErrorResult errorResult = new ErrorResult();
+        errorResult.objectErrors = new ArrayList<>();
+        errorResult.objectErrors.add(new ErrorDetail(
+                new ObjectError("controller", errorCodes, new Object[]{ }, ""),
                 messageSource, locale
         ));
 

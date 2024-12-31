@@ -45,7 +45,9 @@ public class MusicAnalysisService {
 
     // 음악 파일 및 가사 파일 업로드
     @Transactional
-    public void updateFiles(Long musicId, MultipartFile audioFile, MultipartFile lyricFile) throws Exception {
+    public void updateFiles(Long musicId, MultipartFile audioFile, MultipartFile lyricFile)
+            throws IOException, SizeLimitExceededException {
+
         Music music = musicRepository.findById(musicId).orElseThrow();
 
         // 음악 파일
@@ -117,7 +119,7 @@ public class MusicAnalysisService {
         FileHandler.writeBulkUploadLog("[가사] " + musicTitle, "업로드 성공", true);
     }
 
-    private void saveLyric(MultipartFile lyricFile, Music music) throws Exception {
+    private void saveLyric(MultipartFile lyricFile, Music music) throws IOException, SizeLimitExceededException {
         if (lyricFile.getSize() > 10000) {
             throw new SizeLimitExceededException("Too heavy lyricFile", lyricFile.getSize(), 10000);
         }
@@ -130,11 +132,11 @@ public class MusicAnalysisService {
 
     // 음악 분석 요청 전송
     @Transactional
-    public void analyze(Long musicId, Double confidence) throws Exception {
+    public void analyze(Long musicId, Double confidence) throws FileNotFoundException {
         Music music = musicRepository.findById(musicId).orElseThrow();
 
         if (music.getAudioFile() == null)
-            throw new Exception("Audio file not uploaded");
+            throw new FileNotFoundException("Audio file not uploaded");
 
         String path = System.getProperty("user.dir") + "/upload/audio/";
         path = path.replace("\\", "\\\\");
@@ -157,7 +159,7 @@ public class MusicAnalysisService {
 
     // 음악 분석 요청 전송
     @Transactional
-    public void analyzeWithoutModel(Long musicId) throws Exception {
+    public void analyzeWithoutModel(Long musicId) throws FileNotFoundException {
         Music music = musicRepository.findById(musicId).orElseThrow();
 
         String path = System.getProperty("user.dir") + "/upload/audio/";
