@@ -4,7 +4,7 @@ import kr.ac.chungbuk.harmonize.dto.response.GroupDto;
 import kr.ac.chungbuk.harmonize.dto.request.GroupRequestDto;
 import kr.ac.chungbuk.harmonize.entity.Group;
 import kr.ac.chungbuk.harmonize.service.GroupService;
-import kr.ac.chungbuk.harmonize.utility.ErrorResult;
+import kr.ac.chungbuk.harmonize.exception.ErrorResult;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ import java.io.File;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 
-import static kr.ac.chungbuk.harmonize.utility.ErrorResult.SimpleErrorReturn;
+import static kr.ac.chungbuk.harmonize.exception.ErrorResult.SimpleErrorReturn;
 
 @Slf4j
 @Controller

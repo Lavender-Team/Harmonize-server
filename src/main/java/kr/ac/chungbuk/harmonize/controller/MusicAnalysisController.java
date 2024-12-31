@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeoutException;
 
-import static kr.ac.chungbuk.harmonize.utility.ErrorResult.SimpleErrorReturn;
+import static kr.ac.chungbuk.harmonize.exception.ErrorResult.SimpleErrorReturn;
 
 @Slf4j
 @Controller

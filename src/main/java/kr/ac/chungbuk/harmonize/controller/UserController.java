@@ -14,7 +14,7 @@ import kr.ac.chungbuk.harmonize.enums.Role;
 import kr.ac.chungbuk.harmonize.service.EmailService;
 import kr.ac.chungbuk.harmonize.service.PasswordResetService;
 import kr.ac.chungbuk.harmonize.service.UserService;
-import kr.ac.chungbuk.harmonize.utility.ErrorResult;
+import kr.ac.chungbuk.harmonize.exception.ErrorResult;
 import kr.ac.chungbuk.harmonize.utility.Security;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -34,7 +33,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import static kr.ac.chungbuk.harmonize.utility.ErrorResult.*;
+import static kr.ac.chungbuk.harmonize.exception.ErrorResult.*;
 
 @Slf4j
 @Controller

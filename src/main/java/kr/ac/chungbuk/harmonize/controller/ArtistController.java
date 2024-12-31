@@ -4,10 +4,9 @@ import kr.ac.chungbuk.harmonize.dto.request.ArtistRequestDto;
 import kr.ac.chungbuk.harmonize.dto.request.GroupRequestDto;
 import kr.ac.chungbuk.harmonize.dto.response.ArtistDto;
 import kr.ac.chungbuk.harmonize.entity.Artist;
-import kr.ac.chungbuk.harmonize.repository.ArtistRepository;
 import kr.ac.chungbuk.harmonize.service.ArtistService;
 import kr.ac.chungbuk.harmonize.service.GroupService;
-import kr.ac.chungbuk.harmonize.utility.ErrorResult;
+import kr.ac.chungbuk.harmonize.exception.ErrorResult;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
@@ -34,7 +33,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-import static kr.ac.chungbuk.harmonize.utility.ErrorResult.SimpleErrorReturn;
+import static kr.ac.chungbuk.harmonize.exception.ErrorResult.SimpleErrorReturn;
 
 @Slf4j
 @Controller

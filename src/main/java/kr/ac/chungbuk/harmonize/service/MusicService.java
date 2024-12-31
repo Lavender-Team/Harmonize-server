@@ -57,7 +57,8 @@ public class MusicService {
     }
 
     // 음악 생성
-    public Music create(MusicRequestDto musicParam) throws Exception {
+    public Music create(MusicRequestDto musicParam) throws IOException {
+
         // 음악 객체
         Music music = new Music();
         music.setTitle(musicParam.getTitle());
@@ -142,7 +143,7 @@ public class MusicService {
 
     // 음악 삭제
     @Transactional
-    public void delete(Long musicId) throws Exception {
+    public void delete(Long musicId) throws IOException {
         Music music = musicRepository.findById(musicId).orElseThrow();
         MusicAnalysis analysis = musicAnalysisRepository.findById(music.getMusicId()).orElseThrow();
 
@@ -228,7 +229,7 @@ public class MusicService {
 
     // 음악 상세정보 조회
     @Transactional
-    public Music read(Long musicId, boolean countView) throws Exception {
+    public Music read(Long musicId, boolean countView) {
         Music music = musicRepository.findById(musicId).orElseThrow();
 
         // 조회수를 올려야 하면 (일반 사용자 조회시)

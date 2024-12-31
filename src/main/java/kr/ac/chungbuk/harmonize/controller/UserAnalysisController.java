@@ -1,18 +1,12 @@
 package kr.ac.chungbuk.harmonize.controller;
 
-import kr.ac.chungbuk.harmonize.dto.request.UserSaveDto;
-import kr.ac.chungbuk.harmonize.entity.User;
 import kr.ac.chungbuk.harmonize.service.UserAnalysisService;
-import kr.ac.chungbuk.harmonize.service.UserService;
-import kr.ac.chungbuk.harmonize.utility.ErrorResult;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,7 +17,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import static kr.ac.chungbuk.harmonize.utility.ErrorResult.SimpleErrorReturn;
+import static kr.ac.chungbuk.harmonize.exception.ErrorResult.SimpleErrorReturn;
 
 @Slf4j
 @Controller

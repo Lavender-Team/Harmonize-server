@@ -23,7 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 
-import static kr.ac.chungbuk.harmonize.utility.ErrorResult.SimpleErrorReturn;
+import static kr.ac.chungbuk.harmonize.exception.ErrorResult.SimpleErrorReturn;
 
 @Slf4j
 @Controller
