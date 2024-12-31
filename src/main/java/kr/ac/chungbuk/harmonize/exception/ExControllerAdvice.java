@@ -3,7 +3,9 @@ package kr.ac.chungbuk.harmonize.exception;
 import kr.ac.chungbuk.harmonize.controller.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
 import org.springframework.context.MessageSource;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -11,10 +13,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.HandlerMethod;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.util.Locale;
 import java.util.NoSuchElementException;
+import java.util.concurrent.TimeoutException;
 
 import static kr.ac.chungbuk.harmonize.exception.ErrorResult.SimpleErrorReturn;
 
@@ -22,9 +26,10 @@ import static kr.ac.chungbuk.harmonize.exception.ErrorResult.SimpleErrorReturn;
 @RequiredArgsConstructor
 @RestControllerAdvice(assignableTypes = {
         MusicController.class,
+        MusicActionController.class,
+        MusicAnalysisController.class,
         ArtistController.class,
         GroupController.class,
-        MusicActionController.class,
         LogController.class
 })
 public class ExControllerAdvice {
@@ -47,10 +52,39 @@ public class ExControllerAdvice {
         );
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(SizeLimitExceededException.class)
+    public ErrorResult handleException(SizeLimitExceededException ex, HandlerMethod handlerMethod) {
+        return SimpleErrorReturn(
+                getErrorCode("sizeLimitFailed", getMethodName(handlerMethod), getClassName(handlerMethod)),
+                messageSource,
+                Locale.getDefault()
+        );
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(IncorrectResultSizeDataAccessException.class)
+    public ErrorResult handleException(IncorrectResultSizeDataAccessException ex, HandlerMethod handlerMethod) {
+        return SimpleErrorReturn(
+                getErrorCode("duplicatedNameFailed", getMethodName(handlerMethod), getClassName(handlerMethod)),
+                messageSource,
+                Locale.getDefault()
+        );
+    }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(TimeoutException.class)
+    public ErrorResult handleException(TimeoutException ex, HandlerMethod handlerMethod) {
+        return SimpleErrorReturn(
+                getErrorCode("timeout", getMethodName(handlerMethod), getClassName(handlerMethod)),
+                messageSource,
+                Locale.getDefault()
+        );
+    }
+
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(IOException.class)
     public ErrorResult handleException(IOException ex, HandlerMethod handlerMethod) {
-
         return SimpleErrorReturn(
                 getErrorCode("ioFailed", getMethodName(handlerMethod), getClassName(handlerMethod)),
                 messageSource,
@@ -73,6 +107,16 @@ public class ExControllerAdvice {
     public ErrorResult handleException(NoSuchFileException ex, HandlerMethod handlerMethod) {
         return SimpleErrorReturn(
                 getErrorCode("notFound", getMethodName(handlerMethod), getClassName(handlerMethod)),
+                messageSource,
+                Locale.getDefault()
+        );
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(FileNotFoundException.class)
+    public ErrorResult handleException(FileNotFoundException ex, HandlerMethod handlerMethod) {
+        return SimpleErrorReturn(
+                getErrorCode("fileNotFound", getMethodName(handlerMethod), getClassName(handlerMethod)),
                 messageSource,
                 Locale.getDefault()
         );
