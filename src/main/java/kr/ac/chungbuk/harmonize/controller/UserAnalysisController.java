@@ -2,9 +2,8 @@ package kr.ac.chungbuk.harmonize.controller;
 
 import kr.ac.chungbuk.harmonize.service.UserAnalysisService;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -13,51 +12,29 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
-import java.util.NoSuchElementException;
-
-import static kr.ac.chungbuk.harmonize.exception.ErrorResult.SimpleErrorReturn;
 
 @Slf4j
+@RequiredArgsConstructor
 @Controller
 @RequestMapping("/api/user")
 public class UserAnalysisController {
 
     private final UserAnalysisService userAnalysisService;
-    private final MessageSource messageSource;
-
-    @Autowired
-    public UserAnalysisController(UserAnalysisService userAnalysisService, MessageSource messageSource) {
-        this.userAnalysisService = userAnalysisService;
-        this.messageSource = messageSource;
-    }
 
     // 음역대 분석 결과 업로드
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/{userId}/analysis")
-    public ResponseEntity<Object> create(@PathVariable Long userId, Double highestPitch, Double lowestPitch) {
-
-        try {
-            userAnalysisService.save(userId, highestPitch, lowestPitch);
-            return ResponseEntity.status(HttpStatus.CREATED).body(null);
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    SimpleErrorReturn("notFound.userAnalysis", messageSource, Locale.getDefault())
-            );
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    SimpleErrorReturn("createFailed.userAnalysis", messageSource, Locale.getDefault())
-            );
-        }
+    public void uploadResult(@PathVariable Long userId, Double highestPitch, Double lowestPitch) {
+        userAnalysisService.save(userId, highestPitch, lowestPitch);
     }
 
     // 음역대 분석 요청
-    @PostMapping("/uasys/analyze")
     @ResponseBody
-    public Object analyze(Long userId, MultipartFile file) {
+    @PostMapping("/uasys/analyze")
+    public Object analyze(Long userId, MultipartFile file) throws IOException {
 
-        try {
-            FileHandler.saveVoiceRecordingFile(file, userId);
+        FileHandler.saveVoiceRecordingFile(file, userId);
 
         RestTemplate restTemplate = new RestTemplate();
 
@@ -85,15 +62,5 @@ public class UserAnalysisController {
 
         // 응답 처리
         return responseBody;
-        
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    SimpleErrorReturn("io.saveFailed.userAnalysis", messageSource, Locale.getDefault())
-            );
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    SimpleErrorReturn("analyzeFailed.userAnalysis", messageSource, Locale.getDefault())
-            );
-        }
     }
 }

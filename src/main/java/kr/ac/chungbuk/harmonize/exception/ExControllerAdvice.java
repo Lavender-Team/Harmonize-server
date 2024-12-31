@@ -24,14 +24,7 @@ import static kr.ac.chungbuk.harmonize.exception.ErrorResult.SimpleErrorReturn;
 
 @Slf4j
 @RequiredArgsConstructor
-@RestControllerAdvice(assignableTypes = {
-        MusicController.class,
-        MusicActionController.class,
-        MusicAnalysisController.class,
-        ArtistController.class,
-        GroupController.class,
-        LogController.class
-})
+@RestControllerAdvice(basePackages = "kr.ac.chungbuk.harmonize.controller")
 public class ExControllerAdvice {
 
     private final MessageSource messageSource;
@@ -47,6 +40,16 @@ public class ExControllerAdvice {
     public ErrorResult handleException(IllegalArgumentException ex, HandlerMethod handlerMethod) {
         return SimpleErrorReturn(
                 getErrorCode("illegalArgument", getMethodName(handlerMethod), getClassName(handlerMethod)),
+                messageSource,
+                Locale.getDefault()
+        );
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(IllegalAccessException.class)
+    public ErrorResult handleException(IllegalAccessException ex, HandlerMethod handlerMethod) {
+        return SimpleErrorReturn(
+                getErrorCode("illegalAccess", getMethodName(handlerMethod), getClassName(handlerMethod)),
                 messageSource,
                 Locale.getDefault()
         );
