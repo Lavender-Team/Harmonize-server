@@ -3,10 +3,12 @@ package kr.ac.chungbuk.harmonize.entity;
 import jakarta.persistence.*;
 import kr.ac.chungbuk.harmonize.enums.GroupType;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
-@Entity
 @Data
+@Entity
 @Table(name = "`groups`")
 public class Group {
 
