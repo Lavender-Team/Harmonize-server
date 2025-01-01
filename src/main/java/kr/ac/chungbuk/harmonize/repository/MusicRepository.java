@@ -34,23 +34,31 @@ public interface MusicRepository extends JpaRepository<Music, Long> {
 
     @Query("SELECT m FROM Music m WHERE (:query is null or m.title LIKE %:query% or m.group.groupName LIKE %:query% or m.karaokeNum LIKE %:query%)" +
             " AND (:groupType is null or :groupType = m.group.groupType)" +
-            " AND (:genre is null or :genre = m.genre)")
-    Page<Music> searchAll(String query, GroupType groupType, Genre genre, Pageable pageable);
+            " AND (:genre is null or :genre = m.genre)" +
+            " AND (:highestPitch is null or (m.analysis IS NOT NULL AND :highestPitch >= m.analysis.highestPitch))" +
+            " AND (:lowestPitch is null or (m.analysis IS NOT NULL AND :lowestPitch <= m.analysis.lowestPitch))")
+    Page<Music> searchAll(String query, GroupType groupType, Genre genre, Double highestPitch, Double lowestPitch, Pageable pageable);
 
     @Query("SELECT m FROM Music m WHERE (:query is null or m.title LIKE %:query%)" +
             " AND (:groupType is null or :groupType = m.group.groupType)" +
-            " AND (:genre is null or :genre = m.genre)")
-    Page<Music> searchTitle(String query, GroupType groupType, Genre genre, Pageable pageable);
+            " AND (:genre is null or :genre = m.genre)" +
+            " AND (:highestPitch is null or (m.analysis IS NOT NULL AND :highestPitch >= m.analysis.highestPitch))" +
+            " AND (:lowestPitch is null or (m.analysis IS NOT NULL AND :lowestPitch <= m.analysis.lowestPitch))")
+    Page<Music> searchTitle(String query, GroupType groupType, Genre genre, Double highestPitch, Double lowestPitch, Pageable pageable);
 
     @Query("SELECT m FROM Music m WHERE (:query is null or m.group.groupName LIKE %:query%)" +
             " AND (:groupType is null or :groupType = m.group.groupType)" +
-            " AND (:genre is null or :genre = m.genre)")
-    Page<Music> searchGroupName(String query, GroupType groupType, Genre genre, Pageable pageable);
+            " AND (:genre is null or :genre = m.genre)" +
+            " AND (:highestPitch is null or (m.analysis IS NOT NULL AND :highestPitch >= m.analysis.highestPitch))" +
+            " AND (:lowestPitch is null or (m.analysis IS NOT NULL AND :lowestPitch <= m.analysis.lowestPitch))")
+    Page<Music> searchGroupName(String query, GroupType groupType, Genre genre, Double highestPitch, Double lowestPitch, Pageable pageable);
 
     @Query("SELECT m FROM Music m WHERE (:query is null or m.karaokeNum LIKE %:query%)" +
             " AND (:groupType is null or :groupType = m.group.groupType)" +
-            " AND (:genre is null or :genre = m.genre)")
-    Page<Music> searchKaraokeNum(String query, GroupType groupType, Genre genre, Pageable pageable);
+            " AND (:genre is null or :genre = m.genre)" +
+            " AND (:highestPitch is null or (m.analysis IS NOT NULL AND :highestPitch >= m.analysis.highestPitch))" +
+            " AND (:lowestPitch is null or (m.analysis IS NOT NULL AND :lowestPitch <= m.analysis.lowestPitch))")
+    Page<Music> searchKaraokeNum(String query, GroupType groupType, Genre genre, Double highestPitch, Double lowestPitch, Pageable pageable);
 
     @Query("SELECT m FROM Music m WHERE m.group IS NOT NULL ORDER BY m.view DESC, m.likes DESC, m.releaseDate DESC")
     Page<Music> findAllOrderByRank(Pageable pageable);

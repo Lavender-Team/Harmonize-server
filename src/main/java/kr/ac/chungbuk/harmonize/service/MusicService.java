@@ -299,10 +299,18 @@ public class MusicService {
         GroupType groupType = query.getGroupType() != null ? GroupType.fromString(query.getGroupType()) : null;
         Genre genre = query.getGenre() != null ? Genre.fromString(query.getGenre()) : null;
 
-        searchResult.put("all", musicRepository.searchAll(query.getQuery(), groupType, genre, pageable));
-        searchResult.put("title", musicRepository.searchTitle(query.getQuery(), groupType, genre, pageable));
-        searchResult.put("artist", musicRepository.searchGroupName(query.getQuery(), groupType, genre, pageable));
-        searchResult.put("karaokeNum", musicRepository.searchKaraokeNum(query.getQuery(), groupType, genre, pageable));
+        searchResult.put("all", musicRepository.searchAll(
+                query.getQuery(), groupType, genre, query.getHighestPitch(), query.getLowestPitch(), pageable
+        ));
+        searchResult.put("title", musicRepository.searchTitle(
+                query.getQuery(), groupType, genre, query.getHighestPitch(), query.getLowestPitch(), pageable
+        ));
+        searchResult.put("artist", musicRepository.searchGroupName(
+                query.getQuery(), groupType, genre, query.getHighestPitch(), query.getLowestPitch(), pageable
+        ));
+        searchResult.put("karaokeNum", musicRepository.searchKaraokeNum(
+                query.getQuery(), groupType, genre, query.getHighestPitch(), query.getLowestPitch(), pageable
+        ));
 
         return searchResult;
     }
