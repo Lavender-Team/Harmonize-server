@@ -7,6 +7,7 @@ import kr.ac.chungbuk.harmonize.enums.Status;
 import kr.ac.chungbuk.harmonize.repository.MusicRepository;
 import kr.ac.chungbuk.harmonize.repository.UserRepository;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
+import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -25,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Service
 public class MusicAnalysisService {
 
@@ -32,16 +34,7 @@ public class MusicAnalysisService {
     private final UserRepository userRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ReplyingKafkaTemplate<String, String, String> replyingKafkaTemplate;
-
-    @Autowired
-    public MusicAnalysisService(MusicRepository musicRepository, UserRepository userRepository,
-                                KafkaTemplate<String, String> kafkaTemplate,
-                                ReplyingKafkaTemplate<String, String, String> replyingKafkaTemplate) {
-        this.musicRepository = musicRepository;
-        this.userRepository = userRepository;
-        this.kafkaTemplate = kafkaTemplate;
-        this.replyingKafkaTemplate = replyingKafkaTemplate;
-    }
+    private final FileHandler fileHandler;
 
     // 음악 파일 및 가사 파일 업로드
     @Transactional
@@ -53,9 +46,9 @@ public class MusicAnalysisService {
         // 음악 파일
         if (audioFile != null) {
             if (music.getAudioFile() != null)
-                FileHandler.deleteAudioFile(music.getAudioFile(), music.getMusicId());
+                fileHandler.deleteAudioFile(music.getAudioFile(), music.getMusicId());
 
-            String audioFilePath = FileHandler.saveAudioFile(audioFile, music.getMusicId());
+            String audioFilePath = fileHandler.saveAudioFile(audioFile, music.getMusicId());
             music.setAudioFile(audioFilePath);
         }
 
@@ -77,11 +70,11 @@ public class MusicAnalysisService {
         Music music = musicRepository.findByTitle(musicTitle).orElseThrow();
 
         if (music.getAlbumCover() != null)
-            FileHandler.deleteAlbumCoverFile(music.getAlbumCover(), music.getMusicId()); // 기존 파일 삭제
-        String albumCoverPath = FileHandler.saveAlbumCoverFile(albumCover, music.getMusicId()); // 새 파일 저장
+            fileHandler.deleteAlbumCoverFile(music.getAlbumCover(), music.getMusicId()); // 기존 파일 삭제
+        String albumCoverPath = fileHandler.saveAlbumCoverFile(albumCover, music.getMusicId()); // 새 파일 저장
         music.setAlbumCover(albumCoverPath);
 
-        FileHandler.writeBulkUploadLog("[앨범 커버] " + musicTitle, "업로드 성공", true);
+        fileHandler.writeBulkUploadLog("[앨범 커버] " + musicTitle, "업로드 성공", true);
     }
 
     // 음악 파일 업로드 (벌크 업로드)
@@ -96,12 +89,12 @@ public class MusicAnalysisService {
         Music music = musicRepository.findByTitle(musicTitle).orElseThrow();
 
         if (music.getAudioFile() != null)
-            FileHandler.deleteAudioFile(music.getAudioFile(), music.getMusicId());
+            fileHandler.deleteAudioFile(music.getAudioFile(), music.getMusicId());
 
-        String audioFilePath = FileHandler.saveAudioFile(audioFile, music.getMusicId());
+        String audioFilePath = fileHandler.saveAudioFile(audioFile, music.getMusicId());
         music.setAudioFile(audioFilePath);
 
-        FileHandler.writeBulkUploadLog("[음악] " + musicTitle, "업로드 성공", true);
+        fileHandler.writeBulkUploadLog("[음악] " + musicTitle, "업로드 성공", true);
     }
 
     // 가사 파일 업로드 (벌크 업로드)
@@ -116,7 +109,7 @@ public class MusicAnalysisService {
         Music music = musicRepository.findByTitle(musicTitle).orElseThrow();
 
         saveLyric(lyricFile, music);
-        FileHandler.writeBulkUploadLog("[가사] " + musicTitle, "업로드 성공", true);
+        fileHandler.writeBulkUploadLog("[가사] " + musicTitle, "업로드 성공", true);
     }
 
     private void saveLyric(MultipartFile lyricFile, Music music) throws IOException, SizeLimitExceededException {
@@ -138,7 +131,7 @@ public class MusicAnalysisService {
         if (music.getAudioFile() == null)
             throw new FileNotFoundException("Audio file not uploaded");
 
-        String path = System.getProperty("user.dir") + "/upload/audio/";
+        String path = fileHandler.getAudioDirectoryPath();
         path = path.replace("\\", "\\\\");
 
         int lastIndex = music.getAudioFile().lastIndexOf('/');
@@ -162,7 +155,7 @@ public class MusicAnalysisService {
     public void analyzeWithoutModel(Long musicId) throws FileNotFoundException {
         Music music = musicRepository.findById(musicId).orElseThrow();
 
-        String path = System.getProperty("user.dir") + "/upload/audio/";
+        String path = fileHandler.getAudioDirectoryPath();
         path = path.replace("\\", "\\\\");
 
         int lastIndex = music.getAudioFile().lastIndexOf('/');
@@ -192,7 +185,7 @@ public class MusicAnalysisService {
         if (music.getAnalysis().getStatus() != Status.COMPLETE)
             throw new Exception("Analysis status is not COMPLETE");
 
-        String path = System.getProperty("user.dir") + "/upload/audio/";
+        String path = fileHandler.getAudioDirectoryPath();;
         path = path.replace("\\", "\\\\");
 
         kafkaTemplate.send("musicAnalysis", String.format("""
@@ -213,7 +206,7 @@ public class MusicAnalysisService {
         if (music.getAnalysis().getStatus() != Status.COMPLETE)
             throw new Exception("Analysis status is not COMPLETE");
 
-        String path = System.getProperty("user.dir") + "/upload/audio/";
+        String path = fileHandler.getAudioDirectoryPath();;
         path = path.replace("\\", "\\\\");
 
         kafkaTemplate.send("musicAnalysis", String.format("""

@@ -24,12 +24,13 @@ import java.util.Map;
 public class LogController {
 
     private final LogService logService;
+    private final FileHandler fileHandler;
 
     // 벌크 업로드 결과 조회
     @ResponseBody
     @GetMapping("/bulk")
     public List<String> getBulkUploadLog() throws Exception {
-        String path = System.getProperty("user.dir") + "/upload/bulk_log.txt";
+        String path = fileHandler.getUploadDirectoryPath() + "bulk_log.txt";
         File log = new File(path);
         if (log.exists()) {
             return Files.readAllLines(log.toPath());
@@ -42,7 +43,7 @@ public class LogController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     @DeleteMapping("/bulk")
     public void clearBulkUploadLog() throws IOException {
-        FileHandler.clearBulkUploadLog(false);
+        fileHandler.clearBulkUploadLog(false);
     }
 
 
@@ -50,7 +51,7 @@ public class LogController {
     @ResponseBody
     @GetMapping("/bulk/files")
     public List<String> getBulkFileUploadLog() throws Exception {
-        String path = System.getProperty("user.dir") + "/upload/bulk_file_log.txt";
+        String path = fileHandler.getUploadDirectoryPath() + "bulk_file_log.txt";
 
         File log = new File(path);
         if (!log.exists()) {
@@ -64,7 +65,7 @@ public class LogController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     @DeleteMapping("/bulk/files")
     public void clearBulkFileUploadLog() throws IOException {
-        FileHandler.clearBulkUploadLog(true);
+        fileHandler.clearBulkUploadLog(true);
     }
 
     // 금일 생성된 로그 수 조회

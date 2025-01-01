@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +22,7 @@ import java.util.Map;
 public class UserAnalysisController {
 
     private final UserAnalysisService userAnalysisService;
+    private final FileHandler fileHandler;
 
     // 음역대 분석 결과 업로드
     @ResponseStatus(HttpStatus.CREATED)
@@ -34,7 +36,7 @@ public class UserAnalysisController {
     @PostMapping("/uasys/analyze")
     public Object analyze(Long userId, MultipartFile file) throws IOException {
 
-        FileHandler.saveVoiceRecordingFile(file, userId);
+        fileHandler.saveVoiceRecordingFile(file, userId);
 
         RestTemplate restTemplate = new RestTemplate();
 

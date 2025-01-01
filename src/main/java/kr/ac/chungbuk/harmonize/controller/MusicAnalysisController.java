@@ -30,6 +30,7 @@ import java.util.concurrent.TimeoutException;
 public class MusicAnalysisController {
 
     private final MusicAnalysisService musicAnalysisService;
+    private final FileHandler fileHandler;
 
     // 음악 파일 및 가사 파일 업로드
     @ResponseStatus(HttpStatus.ACCEPTED)
@@ -60,16 +61,16 @@ public class MusicAnalysisController {
             }
 
         } catch (NoSuchElementException e) {
-            FileHandler.writeBulkUploadLog("[이름오류] " + musicTitle, "제목이 일치하는 곡이 없음", true);
+            fileHandler.writeBulkUploadLog("[이름오류] " + musicTitle, "제목이 일치하는 곡이 없음", true);
             throw e;
         } catch (IncorrectResultSizeDataAccessException e) {
-            FileHandler.writeBulkUploadLog("[이름오류] " + musicTitle, "같은 제목 곡 두 개 이상", true);
+            fileHandler.writeBulkUploadLog("[이름오류] " + musicTitle, "같은 제목 곡 두 개 이상", true);
             throw e;
         } catch (SizeLimitExceededException e) {
-            FileHandler.writeBulkUploadLog(musicTitle, "가사 용량 너무 큼", true);
+            fileHandler.writeBulkUploadLog(musicTitle, "가사 용량 너무 큼", true);
             throw e;
         } catch (Exception e) {
-            FileHandler.writeBulkUploadLog(musicTitle, "파일 관련 오류 발생", true);
+            fileHandler.writeBulkUploadLog(musicTitle, "파일 관련 오류 발생", true);
             throw e;
         }
     }
@@ -120,39 +121,39 @@ public class MusicAnalysisController {
         if (filename.contains(".."))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Filename cannot contains \"..\"");
 
-        String path = System.getProperty("user.dir") + "/upload/audio/" + filename;
+        String path = fileHandler.getAudioDirectoryPath() + filename;
 
         if (!(new File(path).exists())) {
             throw new FileNotFoundException(filename);
         }
 
-        return FileHandler.getFileSystemResource(filename, path);
+        return fileHandler.getFileSystemResource(filename, path);
     }
 
     // Pitch 그래프 파일 다운로드
     @GetMapping(path = "/pitch/{musicId}")
     public ResponseEntity<FileSystemResource> getPitchGraphFile(@PathVariable Long musicId) throws IOException {
 
-        String path = System.getProperty("user.dir") + "/upload/audio/" + musicId + "/pitch.xlsx";
+        String path = fileHandler.getAudioDirectoryPath() + musicId + "/pitch.xlsx";
 
         if (!(new File(path).exists())) {
             throw new FileNotFoundException("pitch.xlsx");
         }
 
-        return FileHandler.getFileSystemResource("pitch.xlsx", path);
+        return fileHandler.getFileSystemResource("pitch.xlsx", path);
     }
 
     // Pitch 오디오 파일 다운로드
     @GetMapping(path = "/pitch/audio/{musicId}")
     public ResponseEntity<FileSystemResource> getPitchAudioFile(@PathVariable Long musicId) throws IOException {
 
-        String path = System.getProperty("user.dir") + "/upload/audio/" + musicId + "/output_audio.wav";
+        String path = fileHandler.getAudioDirectoryPath() + musicId + "/output_audio.wav";
 
         if (!(new File(path).exists())) {
             throw new FileNotFoundException("output_audio.wav");
         }
 
-        return FileHandler.getFileSystemResource("output_audio.wav", path);
+        return fileHandler.getFileSystemResource("output_audio.wav", path);
     }
 
     // 콘텐츠 기반 추천 결과 업데이트 요청

@@ -46,6 +46,7 @@ public class MusicController {
     private final MusicActionService musicActionService;
     private final LogService logService;
     private final ObjectMapper objectMapper;
+    private final FileHandler fileHandler;
 
 
     // 음악 생성
@@ -242,10 +243,10 @@ public class MusicController {
         if (filename.contains(".."))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Filename cannot contains \"..\"");
 
-        String path = System.getProperty("user.dir") + "/upload/albumcover/" + filename;
+        String path = fileHandler.getAlbumcoverDirectoryPath() + filename;
 
         if (new File(path).exists()) {
-            return FileHandler.getFileSystemResource(filename, path);
+            return fileHandler.getFileSystemResource(filename, path);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
         }

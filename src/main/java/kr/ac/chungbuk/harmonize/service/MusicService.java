@@ -3,7 +3,6 @@ package kr.ac.chungbuk.harmonize.service;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvValidationException;
-import jakarta.transaction.Transactional;
 import kr.ac.chungbuk.harmonize.dto.request.MusicRequestDto;
 import kr.ac.chungbuk.harmonize.dto.request.SearchRequestDto;
 import kr.ac.chungbuk.harmonize.entity.*;
@@ -11,12 +10,14 @@ import kr.ac.chungbuk.harmonize.enums.Genre;
 import kr.ac.chungbuk.harmonize.enums.GroupType;
 import kr.ac.chungbuk.harmonize.repository.*;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,8 +28,10 @@ import java.io.Reader;
 import java.time.LocalDateTime;
 import java.util.*;
 
-@Service
 @Slf4j
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
+@Service
 public class MusicService {
 
     private final MusicRepository musicRepository;
@@ -39,35 +42,24 @@ public class MusicService {
     private final RecomMusicRepository recomMusicRepository;
     private final UserRepository userRepository;
 
-    Validator validator;
+    private final FileHandler fileHandler;
+    private final Validator validator;
 
-    @Autowired
-    public MusicService(MusicRepository musicRepository, MusicAnalysisRepository musicAnalysisRepository,
-                        GroupRepository groupRepository, ThemeRepository themeRepository,
-                        SimilarMusicRepository similarMusicRepository, RecomMusicRepository recomMusicRepository,
-                        Validator validator, UserRepository userRepository) {
-        this.musicRepository = musicRepository;
-        this.musicAnalysisRepository = musicAnalysisRepository;
-        this.groupRepository = groupRepository;
-        this.themeRepository = themeRepository;
-        this.similarMusicRepository = similarMusicRepository;
-        this.recomMusicRepository = recomMusicRepository;
-        this.validator = validator;
-        this.userRepository = userRepository;
-    }
 
     // 음악 생성
+    @Transactional
     public Music create(MusicRequestDto musicParam) throws IOException {
 
         // 음악 객체
-        Music music = new Music();
-        music.setTitle(musicParam.getTitle());
-        music.setGenre(Genre.fromString(musicParam.getGenre()));
-        music.setKaraokeNum(musicParam.getKaraokeNum());
-        music.setReleaseDate(musicParam.getReleaseDate());
-        music.setPlayLink(musicParam.getPlayLink());
-        music.setView(0L);
-        music.setLikes(0L);
+        Music music = Music.builder()
+                .title(musicParam.getTitle())
+                .genre(Genre.fromString(musicParam.getGenre()))
+                .karaokeNum(musicParam.getKaraokeNum())
+                .releaseDate(musicParam.getReleaseDate())
+                .playLink(musicParam.getPlayLink())
+                .view(0L)
+                .likes(0L)
+                .build();
 
         music = musicRepository.save(music);
 
@@ -88,7 +80,7 @@ public class MusicService {
         // 앨범 커버 파일 저장
         if (musicParam.getAlbumCover() != null) {
             try {
-                String albumCoverPath = FileHandler.saveAlbumCoverFile(musicParam.getAlbumCover(), music.getMusicId());
+                String albumCoverPath = fileHandler.saveAlbumCoverFile(musicParam.getAlbumCover(), music.getMusicId());
                 music.setAlbumCover(albumCoverPath);
             } catch (IOException e) {
                 musicRepository.delete(music);
@@ -101,7 +93,7 @@ public class MusicService {
 
     // 음악 수정
     @Transactional
-    public void update(Long musicId, MusicRequestDto musicParam) throws IOException {
+    public Music update(Long musicId, MusicRequestDto musicParam) throws IOException {
 
         // 음악 객체
         Music music = musicRepository.findById(musicId).orElseThrow();
@@ -131,14 +123,14 @@ public class MusicService {
         if (musicParam.getAlbumCover() != null) {
             try {
                 if (music.getAlbumCover() != null)
-                    FileHandler.deleteAlbumCoverFile(music.getAlbumCover(), music.getMusicId()); // 기존 파일 삭제
-                String albumCoverPath = FileHandler.saveAlbumCoverFile(musicParam.getAlbumCover(), music.getMusicId()); // 새 파일 저장
+                    fileHandler.deleteAlbumCoverFile(music.getAlbumCover(), music.getMusicId()); // 기존 파일 삭제
+                String albumCoverPath = fileHandler.saveAlbumCoverFile(musicParam.getAlbumCover(), music.getMusicId()); // 새 파일 저장
                 music.setAlbumCover(albumCoverPath);
             } catch (IOException e) {
                 throw e;
             }
         }
-        musicRepository.save(music);
+        return musicRepository.save(music);
     }
 
     // 음악 삭제
@@ -148,13 +140,14 @@ public class MusicService {
         MusicAnalysis analysis = musicAnalysisRepository.findById(music.getMusicId()).orElseThrow();
 
         if (music.getAlbumCover() != null && !music.getAlbumCover().isEmpty())
-            FileHandler.deleteAlbumCoverFile(music.getAlbumCover(), music.getMusicId());
+            fileHandler.deleteAlbumCoverFile(music.getAlbumCover(), music.getMusicId());
         themeRepository.deleteAllByMusic(music);
         musicRepository.delete(music);
         musicAnalysisRepository.delete(analysis);
     }
 
     // 음악 벌크 업로드
+    @Transactional
     public void createBulk(MultipartFile bulkFile, String charset) throws IOException, CsvValidationException {
         Reader reader = new InputStreamReader(bulkFile.getInputStream(), charset);
         CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1).build();
@@ -214,12 +207,12 @@ public class MusicService {
                         musicRepository.save(created);
                     }
                 } catch (IncorrectResultSizeDataAccessException e) {
-                    FileHandler.writeBulkUploadLog(line[0], "그룹이 존재하지 않거나 두 개 이상 존재", false);
+                    fileHandler.writeBulkUploadLog(line[0], "그룹이 존재하지 않거나 두 개 이상 존재", false);
                 }
 
-                FileHandler.writeBulkUploadLog(line[0], "업로드 성공", false);
+                fileHandler.writeBulkUploadLog(line[0], "업로드 성공", false);
             } catch (Exception e) {
-                FileHandler.writeBulkUploadLog(line[0], e.getMessage(), false);
+                fileHandler.writeBulkUploadLog(line[0], e.getMessage(), false);
                 log.debug(e.getMessage());
             }
         }
@@ -240,7 +233,6 @@ public class MusicService {
     }
 
     // 유사한 음악 목록 조회
-    @Transactional
     public List<Music> readSimilarMusic(Music target) {
         List<SimilarMusic> similarMusics = similarMusicRepository.findByTarget(target);
         return similarMusics.stream().map(SimilarMusic::getRecom).toList();
@@ -252,7 +244,6 @@ public class MusicService {
     }
     
     // 개인 음악 추천 목록 조회
-    @Transactional
     public Page<RecomMusic> recommend(Long userId, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow();
 
@@ -260,7 +251,6 @@ public class MusicService {
     }
 
     // 개인 음악 장르별 추천 목록 조회
-    @Transactional
     public Page<RecomMusic> recommend(Long userId, String genre, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow();
 

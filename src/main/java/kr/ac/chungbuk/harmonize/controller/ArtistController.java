@@ -36,6 +36,7 @@ public class ArtistController {
 
     private final ArtistService artistService;
     private final GroupService groupService;
+    private final FileHandler fileHandler;
 
     // 가수 등록
     @ResponseStatus(HttpStatus.CREATED)
@@ -99,11 +100,11 @@ public class ArtistController {
         if (filename.contains(".."))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Filename cannot contains \"..\"");
 
-            String path = System.getProperty("user.dir") + "/upload/profile/" + filename;
+        String path = fileHandler.getProfileDirectoryPath() + filename;
 
-            if (new File(path).exists()) {
-                return FileHandler.getFileSystemResource(filename, path);
-            } else {
+        if (new File(path).exists()) {
+            return fileHandler.getFileSystemResource(filename, path);
+        } else {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
         }
     }
