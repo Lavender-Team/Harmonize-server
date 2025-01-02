@@ -26,12 +26,13 @@ public class ArtistService {
     // 가수 생성
     public Artist create(ArtistRequestDto artistParam) throws IOException {
         // 가수 객체
-        Artist artist = new Artist();
-        artist.setArtistName(artistParam.getArtistName());
-        artist.setGender(Gender.valueOf(artistParam.getGender()));
-        artist.setActivityPeriod(artistParam.getActivityPeriod());
-        artist.setNation(artistParam.getNation());
-        artist.setAgency(artistParam.getAgency());
+        Artist artist = Artist.builder()
+                .artistName(artistParam.getArtistName())
+                .gender(Gender.valueOf(artistParam.getGender()))
+                .activityPeriod(artistParam.getActivityPeriod())
+                .nation(artistParam.getNation())
+                .agency(artistParam.getAgency())
+                .build();
 
         artist = artistRepository.save(artist);
 
@@ -51,7 +52,7 @@ public class ArtistService {
 
     // 가수 수정
     @Transactional
-    public void update(Long artistId, ArtistRequestDto artistParam) throws IOException {
+    public Artist update(Long artistId, ArtistRequestDto artistParam) throws IOException {
         // 가수 객체
         Artist artist = artistRepository.findById(artistId).orElseThrow();
         artist.setArtistName(artistParam.getArtistName());
@@ -77,7 +78,7 @@ public class ArtistService {
                 throw e;
             }
         }
-        artistRepository.save(artist);
+        return artistRepository.save(artist);
     }
 
     // 가수 삭제

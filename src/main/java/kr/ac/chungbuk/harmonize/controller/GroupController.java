@@ -78,7 +78,7 @@ public class GroupController {
     @ResponseBody
     @GetMapping("/{groupId}")
     public GroupDto readGroup(@PathVariable Long groupId) {
-        Group group = groupService.findById(groupId);
+        Group group = groupService.read(groupId);
         return GroupDto.build(group);
     }
 

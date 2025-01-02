@@ -40,7 +40,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.groups.Tuple.tuple;
 
 @SpringBootTest
 class MusicServiceTest {
@@ -53,6 +52,8 @@ class MusicServiceTest {
     MusicAnalysisRepository musicAnalysisRepository;
     @Autowired
     GroupService groupService;
+    @Autowired
+    GroupRepository groupRepository;
     @Autowired
     ArtistRepository artistRepository;
     @Autowired
@@ -69,8 +70,7 @@ class MusicServiceTest {
 
     @Value("${file.dir}")
     String fileDir;
-    @Autowired
-    private GroupRepository groupRepository;
+
 
     @BeforeEach
     void setUp() throws IOException {

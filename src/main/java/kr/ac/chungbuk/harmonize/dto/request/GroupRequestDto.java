@@ -49,10 +49,12 @@ public class GroupRequestDto {
 
 
     @Builder
-    public GroupRequestDto(String groupName, String groupType, String agency, List<Long> artistIds) {
+    public GroupRequestDto(String groupName, String groupType, String agency, MultipartFile profileImage,
+                           List<Long> artistIds) {
         this.groupName = groupName;
         this.groupType = groupType;
         this.agency = agency;
+        this.profileImage = profileImage;
         this.artistIds = artistIds;
     }
 }

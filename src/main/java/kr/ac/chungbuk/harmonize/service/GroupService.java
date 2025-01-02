@@ -8,13 +8,14 @@ import kr.ac.chungbuk.harmonize.repository.ArtistRepository;
 import kr.ac.chungbuk.harmonize.repository.GroupRepository;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class GroupService {
@@ -25,12 +26,16 @@ public class GroupService {
 
 
     @Transactional
-    public void create(GroupRequestDto groupParam) throws IOException {
-        Group group = new Group();
-        group.setGroupName(groupParam.getGroupName());
-        group.setGroupSize(groupParam.getArtistIds().size());
-        group.setGroupType(GroupType.fromString(groupParam.getGroupType()));
-        group.setAgency(groupParam.getAgency());
+    public Group create(GroupRequestDto groupParam) throws IOException {
+
+        log.info("size={}", groupParam.getArtistIds().size());
+
+        Group group = Group.builder()
+                .groupName(groupParam.getGroupName())
+                .groupSize(groupParam.getArtistIds().size())
+                .groupType(GroupType.fromString(groupParam.getGroupType()))
+                .agency(groupParam.getAgency())
+                .build();
         group = groupRepository.save(group);
 
         // 그룹 프로필 이미지
@@ -72,10 +77,12 @@ public class GroupService {
             }
         }
         group.setGroupSize(groupSize);
+
+        return groupRepository.save(group);
     }
 
     @Transactional
-    public void update(Long groupId, GroupRequestDto groupParam) throws IOException {
+    public Group update(Long groupId, GroupRequestDto groupParam) throws IOException {
         Group group = groupRepository.findById(groupId).orElseThrow();
 
         group.setGroupName(groupParam.getGroupName());
@@ -111,6 +118,8 @@ public class GroupService {
             }
         }
         group.setGroupSize(groupSize);
+
+        return groupRepository.save(group);
     }
 
     // 그룹 삭제
@@ -124,6 +133,11 @@ public class GroupService {
         groupRepository.delete(group);
     }
 
+    // 그룹 상세정보 조회
+    public Group read(Long groupId) {
+        return groupRepository.findById(groupId).orElseThrow();
+    }
+
     // 그룹 목록 조회
     public Page<Group> list(Pageable pageable) {
         return groupRepository.findAll(pageable);
@@ -132,10 +146,5 @@ public class GroupService {
     // 그룹 목록 검색
     public Page<Group> search(String groupName, Pageable pageable) {
         return groupRepository.findByGroupNameContaining(groupName, pageable);
-    }
-
-    // 그룹 상세정보 조회
-    public Group findById(Long groupId) {
-        return groupRepository.findById(groupId).orElseThrow();
     }
 }

@@ -2,12 +2,14 @@ package kr.ac.chungbuk.harmonize.entity;
 
 import jakarta.persistence.*;
 import kr.ac.chungbuk.harmonize.enums.GroupType;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 @Entity
 @Table(name = "`groups`")
 public class Group {
@@ -37,4 +39,13 @@ public class Group {
 
     @OneToMany(mappedBy = "group", fetch = FetchType.EAGER)
     private List<GroupMember> members;
+
+
+    @Builder
+    public Group(String groupName, GroupType groupType, Integer groupSize, String agency) {
+        this.groupName = groupName;
+        this.groupType = groupType;
+        this.groupSize = groupSize;
+        this.agency = agency;
+    }
 }

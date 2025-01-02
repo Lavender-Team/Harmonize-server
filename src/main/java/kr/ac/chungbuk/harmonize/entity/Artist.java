@@ -42,6 +42,7 @@ public class Artist {
 
     @Builder
     public Artist(String artistName, Gender gender, String activityPeriod, String nation, String agency) {
+        this.artistId = artistId;
         this.artistName = artistName;
         this.gender = gender;
         this.activityPeriod = activityPeriod;
