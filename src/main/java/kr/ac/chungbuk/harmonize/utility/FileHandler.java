@@ -1,9 +1,11 @@
 package kr.ac.chungbuk.harmonize.utility;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,7 +18,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
+@Component
 public class FileHandler {
+
+    @Value("${file.dir}")
+    private String fileDir;
+
 
     /**
      * 음악의 앨범 표지를 파일시스템에 저장할 때 사용합니다.
@@ -26,8 +33,8 @@ public class FileHandler {
      * @return 음악 파일에 접근하기 위한 URL
      * @throws IOException
      */
-    public static String saveAlbumCoverFile(MultipartFile file, Long musicId) throws IOException {
-        String directoryPath = System.getProperty("user.dir") + "/upload/albumcover/";
+    public String saveAlbumCoverFile(MultipartFile file, Long musicId) throws IOException {
+        String directoryPath = fileDir + "albumcover/";
         if (!new File(directoryPath).exists()) {
             new File(directoryPath).mkdirs();
         }
@@ -47,8 +54,8 @@ public class FileHandler {
      * @param albumCoverPath 음악 파일에 접근하기 위한 URL (saveAlbumCoverFile의 return 값)
      * @throws IOException
      */
-    public static void deleteAlbumCoverFile(String albumCoverPath, Long musicId) throws IOException {
-        String directoryPath = System.getProperty("user.dir") + "/upload/albumcover/";
+    public void deleteAlbumCoverFile(String albumCoverPath, Long musicId) throws IOException {
+        String directoryPath = fileDir + "albumcover/";
         String filename = albumCoverPath.substring(albumCoverPath.indexOf(String.valueOf(musicId)));
 
         Files.deleteIfExists(Paths.get(directoryPath + filename));
@@ -62,8 +69,8 @@ public class FileHandler {
      * @return 음악 파일에 접근하기 위한 URL
      * @throws IOException
      */
-    public static String saveAudioFile(MultipartFile audioFile, Long musicId) throws IOException {
-        String directoryPath = System.getProperty("user.dir") + "/upload/audio/";
+    public String saveAudioFile(MultipartFile audioFile, Long musicId) throws IOException {
+        String directoryPath = fileDir + "audio/";
         if (!new File(directoryPath).exists()) {
             new File(directoryPath).mkdirs();
         }
@@ -83,8 +90,8 @@ public class FileHandler {
      * @param audioFilePath 음악 파일에 접근하기 위한 URL (saveAudioFile의 return 값)
      * @throws IOException
      */
-    public static void deleteAudioFile(String audioFilePath, Long musicId) throws IOException {
-        String directoryPath = System.getProperty("user.dir") + "/upload/audio/";
+    public void deleteAudioFile(String audioFilePath, Long musicId) throws IOException {
+        String directoryPath = fileDir + "audio/";
         String filename = audioFilePath.substring(audioFilePath.indexOf(String.valueOf(musicId)));
 
         Files.deleteIfExists(Paths.get(directoryPath + filename));
@@ -96,8 +103,8 @@ public class FileHandler {
      * @param file     저장할 프로필 이미지 파일
      * @param artistId 가수 ID
      */
-    public static String saveProfileImageFile(MultipartFile file, Long artistId) throws IOException {
-        String directoryPath = System.getProperty("user.dir") + "/upload/profile/";
+    public String saveProfileImageFile(MultipartFile file, Long artistId) throws IOException {
+        String directoryPath = fileDir + "profile/";
         if (!new File(directoryPath).exists()) {
             new File(directoryPath).mkdirs();
         }
@@ -118,8 +125,8 @@ public class FileHandler {
      * @param profileImagePath 가수 파일에 접근하기 위한 URL (saveProfileImageFile의 return 값)
      * @param artistId         가수 ID
      */
-    public static void deleteProfileImageFile(String profileImagePath, Long artistId) throws IOException {
-        String directoryPath = System.getProperty("user.dir") + "/upload/profile/";
+    public void deleteProfileImageFile(String profileImagePath, Long artistId) throws IOException {
+        String directoryPath = fileDir + "profile/";
         String filename = profileImagePath.substring(profileImagePath.indexOf(String.valueOf(artistId)));
 
         Files.deleteIfExists(Paths.get(directoryPath + filename));
@@ -131,8 +138,8 @@ public class FileHandler {
      * @param file     저장할 프로필 이미지 파일
      * @param groupId  그룹 ID
      */
-    public static String saveGroupProfileImageFile(MultipartFile file, Long groupId) throws IOException {
-        String directoryPath = System.getProperty("user.dir") + "/upload/group/profile/";
+    public String saveGroupProfileImageFile(MultipartFile file, Long groupId) throws IOException {
+        String directoryPath = fileDir + "group/profile/";
         if (!new File(directoryPath).exists()) {
             new File(directoryPath).mkdirs();
         }
@@ -153,8 +160,8 @@ public class FileHandler {
      * @param profileImagePath 그룹 프로필 이미지 파일에 접근하기 위한 URL (saveProfileImageFile의 return 값)
      * @param groupId          그룹 ID
      */
-    public static void deleteGroupProfileImageFile(String profileImagePath, Long groupId) throws IOException {
-        String directoryPath = System.getProperty("user.dir") + "/upload/group/profile/";
+    public void deleteGroupProfileImageFile(String profileImagePath, Long groupId) throws IOException {
+        String directoryPath = fileDir + "group/profile/";
         String filename = profileImagePath.substring(profileImagePath.indexOf(String.valueOf(groupId)));
 
         Files.deleteIfExists(Paths.get(directoryPath + filename));
@@ -166,14 +173,14 @@ public class FileHandler {
      * @param filepath 복사할 프로필 이미지 파일 경로
      * @param groupId  그룹 ID
      */
-    public static String copyArtistProfileImageFile(String filepath, Long groupId, Long artistId) throws IOException {
-        String directoryPath = System.getProperty("user.dir") + "/upload/group/profile/";
+    public String copyArtistProfileImageFile(String filepath, Long groupId, Long artistId) throws IOException {
+        String directoryPath = fileDir + "group/profile/";
         if (!new File(directoryPath).exists()) {
             new File(directoryPath).mkdirs();
         }
 
-        String artistDirectoryPath = System.getProperty("user.dir") + "/upload/profile/";
-        String groupDirectoryPath = System.getProperty("user.dir") + "/upload/group/profile/";
+        String artistDirectoryPath = fileDir + "profile/";
+        String groupDirectoryPath = fileDir + "group/profile/";
         String filename = filepath.substring(filepath.indexOf(String.valueOf(artistId)));
         String fileExtension = StringUtils.getFilenameExtension(filename);
 
@@ -191,12 +198,12 @@ public class FileHandler {
      * @param title  음악 제목
      * @param result 업로드 결과를 설명하는 문자열
      */
-    public static void writeBulkUploadLog(String title, String result, boolean isFileUpload) throws IOException {
+    public void writeBulkUploadLog(String title, String result, boolean isFileUpload) throws IOException {
         String filename = "bulk_log.txt";
         if (isFileUpload)
             filename = "bulk_file_log.txt";
 
-        File file = new File(System.getProperty("user.dir") + "/upload/" + filename);
+        File file = new File(fileDir + filename);
         if (!file.exists()) {
             file.createNewFile();
         }
@@ -210,12 +217,12 @@ public class FileHandler {
     /**
      * 벌크 업로드 결과 파일의 내용을 지웁니다.
      */
-    public static void clearBulkUploadLog(boolean isFileUpload) throws IOException {
+    public void clearBulkUploadLog(boolean isFileUpload) throws IOException {
         String filename = "bulk_log.txt";
         if (isFileUpload)
             filename = "bulk_file_log.txt";
 
-        File file = new File(System.getProperty("user.dir") + "/upload/" + filename);
+        File file = new File(fileDir + filename);
         if (!file.exists()) {
             file.createNewFile();
         }
@@ -230,8 +237,8 @@ public class FileHandler {
      * @param file     저장할 프로필 이미지 파일
      * @param userId   유저 ID
      */
-    public static String saveVoiceRecordingFile(MultipartFile file, Long userId) throws IOException {
-        String directoryPath = System.getProperty("user.dir") + "/upload/voice_recording/";
+    public String saveVoiceRecordingFile(MultipartFile file, Long userId) throws IOException {
+        String directoryPath = fileDir + "voice_recording/";
         if (!new File(directoryPath).exists()) {
             new File(directoryPath).mkdirs();
         }
@@ -246,7 +253,7 @@ public class FileHandler {
         return "/upload/voice_recording/" + userId + "." + fileExtension;
     }
 
-    public static ResponseEntity<FileSystemResource> getFileSystemResource(String filename, String path) throws IOException {
+    public ResponseEntity<FileSystemResource> getFileSystemResource(String filename, String path) throws IOException {
         FileSystemResource resource = new FileSystemResource(path);
 
         MediaType mediaType;
@@ -262,4 +269,26 @@ public class FileHandler {
                         new String(filename.getBytes("UTF-8"), "ISO-8859-1") + "\"")
                 .body(resource);
     }
+
+    public String getUploadDirectoryPath() {
+        return fileDir;
+    }
+
+    public String getAlbumcoverDirectoryPath() {
+        return fileDir + "albumcover/";
+    }
+
+    public String getProfileDirectoryPath() {
+        return fileDir + "profile/";
+    }
+
+    public String getGroupProfileDirectoryPath() {
+        return fileDir + "group/profile/";
+    }
+
+    public String getAudioDirectoryPath() {
+        return fileDir + "audio/";
+    }
+
+
 }

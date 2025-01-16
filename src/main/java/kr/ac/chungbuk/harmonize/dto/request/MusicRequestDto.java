@@ -3,7 +3,9 @@ package kr.ac.chungbuk.harmonize.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,6 +15,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class MusicRequestDto {
 
     @NotBlank
@@ -34,4 +37,18 @@ public class MusicRequestDto {
     private Long groupId;
 
     List<String> themes;
+
+
+    @Builder
+    public MusicRequestDto(String title, String genre, MultipartFile albumCover, String karaokeNum,
+                           LocalDateTime releaseDate, String playLink, Long groupId, List<String> themes) {
+        this.title = title;
+        this.genre = genre;
+        this.albumCover = albumCover;
+        this.karaokeNum = karaokeNum;
+        this.releaseDate = releaseDate;
+        this.playLink = playLink;
+        this.groupId = groupId;
+        this.themes = themes;
+    }
 }

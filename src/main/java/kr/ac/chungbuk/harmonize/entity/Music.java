@@ -2,13 +2,16 @@ package kr.ac.chungbuk.harmonize.entity;
 
 import jakarta.persistence.*;
 import kr.ac.chungbuk.harmonize.enums.Genre;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Entity
+@NoArgsConstructor
 @Data
+@Entity
 public class Music {
 
     @Id
@@ -60,5 +63,17 @@ public class Music {
 
     public synchronized void countView() {
         this.view++;
+    }
+
+    @Builder
+    public Music(String title, Genre genre, String karaokeNum, LocalDateTime releaseDate, String playLink, Long view,
+                 Long likes) {
+        this.title = title;
+        this.genre = genre;
+        this.karaokeNum = karaokeNum;
+        this.releaseDate = releaseDate;
+        this.playLink = playLink;
+        this.view = view;
+        this.likes = likes;
     }
 }

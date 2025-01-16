@@ -18,5 +18,6 @@ public class SearchRequestDto {
     @Pattern(regexp = "^(KPOP|POP|BALLADE|RAP|DANCE|JPOP|RNB|FOLK|ROCK|OST|INDIE|TROT|KID)$")
     private String genre;
 
-    // TODO: 음역대 검색 구현
+    private Double highestPitch;
+    private Double lowestPitch;
 }

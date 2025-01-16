@@ -30,6 +30,7 @@ import java.io.IOException;
 public class GroupController {
 
     private final GroupService groupService;
+    private final FileHandler fileHandler;
 
     // 그룹 생성
     @ResponseStatus(HttpStatus.CREATED)
@@ -77,7 +78,7 @@ public class GroupController {
     @ResponseBody
     @GetMapping("/{groupId}")
     public GroupDto readGroup(@PathVariable Long groupId) {
-        Group group = groupService.findById(groupId);
+        Group group = groupService.read(groupId);
         return GroupDto.build(group);
     }
 
@@ -88,10 +89,10 @@ public class GroupController {
         if (filename.contains(".."))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Filename cannot contains \"..\"");
 
-        String path = System.getProperty("user.dir") + "/upload/group/profile/" + filename;
+        String path = fileHandler.getGroupProfileDirectoryPath() + filename;
 
         if (new File(path).exists()) {
-            return FileHandler.getFileSystemResource(filename, path);
+            return fileHandler.getFileSystemResource(filename, path);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
         }

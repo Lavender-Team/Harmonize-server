@@ -2,12 +2,15 @@ package kr.ac.chungbuk.harmonize.entity;
 
 import jakarta.persistence.*;
 import kr.ac.chungbuk.harmonize.enums.Gender;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@Entity
 @Data
+@NoArgsConstructor
+@Entity
 public class Artist {
 
     @Id
@@ -35,4 +38,15 @@ public class Artist {
 
     @OneToMany(mappedBy = "artist", fetch = FetchType.EAGER)
     private List<GroupMember> groups;
+
+
+    @Builder
+    public Artist(String artistName, Gender gender, String activityPeriod, String nation, String agency) {
+        this.artistId = artistId;
+        this.artistName = artistName;
+        this.gender = gender;
+        this.activityPeriod = activityPeriod;
+        this.nation = nation;
+        this.agency = agency;
+    }
 }
