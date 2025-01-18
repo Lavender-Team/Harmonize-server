@@ -1,37 +1,32 @@
 package kr.ac.chungbuk.harmonize.service;
 
-import jakarta.transaction.Transactional;
 import kr.ac.chungbuk.harmonize.entity.Bookmark;
 import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.entity.User;
 import kr.ac.chungbuk.harmonize.repository.BookmarkRepository;
 import kr.ac.chungbuk.harmonize.repository.MusicRepository;
 import kr.ac.chungbuk.harmonize.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
 
 
-@Service
 @Slf4j
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
+@Service
 // 북마크(좋아요), 추천 평가 등 음악과 관련된 사용자 행위를 담당하는 서비스
 public class MusicActionService {
 
     private final UserRepository userRepository;
     private final MusicRepository musicRepository;
     private final BookmarkRepository bookmarkRepository;
-
-    @Autowired
-    public MusicActionService(UserRepository userRepository, MusicRepository musicRepository,
-                              BookmarkRepository bookmarkRepository) {
-        this.userRepository = userRepository;
-        this.musicRepository = musicRepository;
-        this.bookmarkRepository = bookmarkRepository;
-    }
 
     // 북마크(좋아요 버튼)
     @Transactional
