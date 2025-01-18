@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.MockBeans;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
@@ -42,6 +43,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
+@MockBeans({
+        @MockBean(KafkaTopicConfig.class),
+        @MockBean(ReplyingKafkaTemplate.class),
+        @MockBean(ScheduledTask.class)
+})
 class MusicServiceTest {
 
     @Autowired
@@ -60,13 +66,6 @@ class MusicServiceTest {
     ThemeRepository themeRepository;
     @Autowired
     FileHandler fileHandler;
-
-    @MockBean
-    KafkaTopicConfig kafkaTopicConfig;
-    @MockBean
-    ReplyingKafkaTemplate<String, String, String> replyingKafkaTemplate;
-    @MockBean
-    ScheduledTask scheduledTask;
 
     @Value("${file.dir}")
     String fileDir;
