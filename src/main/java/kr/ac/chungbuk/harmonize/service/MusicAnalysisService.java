@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.messaging.support.MessageBuilder;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -118,7 +119,7 @@ public class MusicAnalysisService {
         }
 
         InputStream stream = lyricFile.getInputStream();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
         String lyric = reader.lines().collect(Collectors.joining("\n"));
         music.setLyrics(lyric);
     }
