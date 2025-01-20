@@ -4,8 +4,13 @@ import kr.ac.chungbuk.harmonize.config.KafkaTopicConfig;
 import kr.ac.chungbuk.harmonize.config.ScheduledTask;
 import kr.ac.chungbuk.harmonize.dto.request.MusicRequestDto;
 import kr.ac.chungbuk.harmonize.entity.Music;
+import kr.ac.chungbuk.harmonize.entity.MusicAnalysis;
+import kr.ac.chungbuk.harmonize.entity.User;
+import kr.ac.chungbuk.harmonize.enums.Role;
+import kr.ac.chungbuk.harmonize.enums.Status;
 import kr.ac.chungbuk.harmonize.repository.MusicAnalysisRepository;
 import kr.ac.chungbuk.harmonize.repository.MusicRepository;
+import kr.ac.chungbuk.harmonize.repository.UserRepository;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
 import kr.ac.chungbuk.harmonize.utility.FileUtils;
 import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
@@ -19,6 +24,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.MockBeans;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
+import org.springframework.kafka.requestreply.RequestReplyMessageFuture;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.GenericMessage;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,16 +34,24 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.*;
 
+@SuppressWarnings("unchecked")
 @SpringBootTest
 @MockBeans({
         @MockBean(KafkaTopicConfig.class),
@@ -53,6 +69,8 @@ class MusicAnalysisServiceTest {
     @Autowired
     MusicRepository musicRepository;
     @Autowired
+    UserRepository userRepository;
+    @Autowired
     FileHandler fileHandler;
 
     @Value("${file.dir}")
@@ -65,6 +83,7 @@ class MusicAnalysisServiceTest {
     void tearDown() {
         musicAnalysisRepository.deleteAllInBatch();
         musicRepository.deleteAllInBatch();
+        userRepository.deleteAllInBatch();
 
         FileUtils.deleteFolderContents(new File(fileDir));
     }
@@ -251,6 +270,196 @@ class MusicAnalysisServiceTest {
                 .hasMessage("Audio file not uploaded");
     }
 
+    @DisplayName("음악 분석 모델로 모델을 돌리지 않고 기존 값만 재분석 요청합니다.")
+    @Test
+    void analyzeWithoutModel() throws IOException {
+        // given
+        MusicRequestDto musicRequest = createMusicRequest("audio");
+        Music music = musicService.create(musicRequest);
+        MultipartFile audioFile = getAudioFile();
+        musicAnalysisService.updateAudioFile(audioFile);
+
+        copySampleTestResultXlsxFile(music);
+
+        given(kafkaTemplate.send(anyString(), anyString(), anyString()))
+                .willReturn(null);
+
+        // when
+        musicAnalysisService.analyzeWithoutModel(music.getMusicId());
+
+        // then
+        verify(kafkaTemplate).send(
+                eq("musicAnalysis"),
+                contains("\"command\": \"analysis_offline\"")
+        );
+    }
+
+    @DisplayName("음악 재분석 요청시 모델 결과 파일이 없으면 예외가 발생합니다.")
+    @Test
+    void analyzeWithoutModelNoXlsxFile() throws IOException {
+        // given
+        MusicRequestDto musicRequest = createMusicRequest("audio");
+        Music music = musicService.create(musicRequest);
+        MultipartFile audioFile = getAudioFile();
+        musicAnalysisService.updateAudioFile(audioFile);
+
+        // when then
+        assertThatThrownBy(() -> musicAnalysisService.analyzeWithoutModel(music.getMusicId()))
+                .isInstanceOf(FileNotFoundException.class)
+                .hasMessage(music.getMusicId() + "번 음악 xlsx 파일이 존재하지 않음");
+    }
+
+    @DisplayName("음악 분석 결과에서 특정 Pitch 값을 제거합니다.")
+    @Test
+    void deletePitch() throws Exception {
+        // given
+        MusicRequestDto musicRequest = createMusicRequest("audio");
+        Music music = musicService.create(musicRequest);
+        MultipartFile audioFile = getAudioFile();
+        musicAnalysisService.updateAudioFile(audioFile);
+
+        copySampleTestResultXlsxFile(music);
+        MusicAnalysis analysis = musicAnalysisRepository.save(new MusicAnalysis(music.getMusicId(), Status.COMPLETE));
+        music.setAnalysis(analysis);
+        musicRepository.save(music);
+
+        given(kafkaTemplate.send(anyString(), anyString(), anyString()))
+                .willReturn(null);
+
+        // when
+        musicAnalysisService.deletePitch(music.getMusicId(), 0.123);
+
+        // then
+        verify(kafkaTemplate).send(
+                eq("musicAnalysis"),
+                contains("\"command\": \"delete\"")
+        );
+    }
+
+    @DisplayName("음악 분석 결과에서 특정 범위 Pitch 값 전체를 제거합니다.")
+    @Test
+    void deletePitchRange() throws Exception {
+        // given
+        MusicRequestDto musicRequest = createMusicRequest("audio");
+        Music music = musicService.create(musicRequest);
+        MultipartFile audioFile = getAudioFile();
+        musicAnalysisService.updateAudioFile(audioFile);
+
+        copySampleTestResultXlsxFile(music);
+        MusicAnalysis analysis = musicAnalysisRepository.save(new MusicAnalysis(music.getMusicId(), Status.COMPLETE));
+        music.setAnalysis(analysis);
+        musicRepository.save(music);
+
+        given(kafkaTemplate.send(anyString(), anyString(), anyString()))
+                .willReturn(null);
+
+        // when
+        musicAnalysisService.deletePitchRange(music.getMusicId(), 0.123, "upper");
+
+        // then
+        verify(kafkaTemplate).send(
+                eq("musicAnalysis"),
+                contains("\"command\": \"delete\"")
+        );
+    }
+
+    @DisplayName("음악 분석 결과 수정 요청시 분석이 완료되지 않았으면 예외가 발생합니다.")
+    @Test
+    void deletePitchNotComplete() throws Exception {
+        // given
+        MusicRequestDto musicRequest = createMusicRequest("audio");
+        Music music = musicService.create(musicRequest);
+        MultipartFile audioFile = getAudioFile();
+        musicAnalysisService.updateAudioFile(audioFile);
+
+        copySampleTestResultXlsxFile(music);
+
+        given(kafkaTemplate.send(anyString(), anyString(), anyString()))
+                .willReturn(null);
+
+        // when then
+        assertThatThrownBy(() -> musicAnalysisService.deletePitch(music.getMusicId(), 0.123))
+            .isInstanceOf(Exception.class)
+            .hasMessage("Analysis status is not COMPLETE");
+        assertThatThrownBy(() -> musicAnalysisService.deletePitchRange(music.getMusicId(), 0.123, "upper"))
+                .isInstanceOf(Exception.class)
+                .hasMessage("Analysis status is not COMPLETE");
+    }
+
+    @DisplayName("콘텐츠 기반 추천 결과 업데이트 요청을 보냅니다.")
+    @Test
+    void requestContentBasedRec() {
+        // given
+        given(kafkaTemplate.send(anyString(), anyString(), anyString()))
+                .willReturn(null);
+
+        // when
+        musicAnalysisService.requestContentBasedRec();
+
+        // then
+        verify(kafkaTemplate).send(
+                eq("musicRecSys"),
+                contains("\"command\": \"content-based\"")
+        );
+    }
+
+    @DisplayName("전체 회원 대상 추천 결과 업데이트 요청을 보냅니다.")
+    @Test
+    void requestCollaborativeRec() throws ExecutionException, InterruptedException, TimeoutException {
+        // given
+        String expectedPayload = "all";
+        GenericMessage mockMessage = new GenericMessage<>(expectedPayload);
+        RequestReplyMessageFuture<String, String> mockFuture = mock(RequestReplyMessageFuture.class);
+
+        given(mockFuture.get(20, TimeUnit.SECONDS)).willReturn(mockMessage);
+        given(kafkaTemplate.sendAndReceive(any(Message.class))).willReturn(mockFuture);
+
+        // when
+        Object payload = musicAnalysisService.requestCollaborativeRec();
+
+        // then
+        assertThat(payload).isEqualTo(expectedPayload);
+    }
+
+    @DisplayName("한 명의 회원 대상 추천 결과 업데이트 요청을 보냅니다.")
+    @Test
+    void requestCollaborativeRecOne() throws ExecutionException, InterruptedException, TimeoutException {
+        // given
+        User user = userRepository.save(createUser());
+
+        String expectedPayload = String.valueOf(user.getUserId());
+        GenericMessage mockMessage = new GenericMessage<>(expectedPayload);
+        RequestReplyMessageFuture<String, String> mockFuture = mock(RequestReplyMessageFuture.class);
+
+        given(mockFuture.get(20, TimeUnit.SECONDS)).willReturn(mockMessage);
+        given(kafkaTemplate.sendAndReceive(any(Message.class))).willReturn(mockFuture);
+
+        // when
+        Object payload = musicAnalysisService.requestCollaborativeRecOne(user.getUserId());
+
+        // then
+        assertThat(payload).isEqualTo(expectedPayload);
+    }
+
+    @DisplayName("모델의 현재 상태를 확인합니다.")
+    @Test
+    void checkSystemStatus() throws ExecutionException, InterruptedException, TimeoutException {
+        // given
+        String expectedPayload = "pong";
+        GenericMessage mockMessage = new GenericMessage<>(expectedPayload);
+        RequestReplyMessageFuture<String, String> mockFuture = mock(RequestReplyMessageFuture.class);
+
+        given(mockFuture.get(2, TimeUnit.SECONDS)).willReturn(mockMessage);
+        given(kafkaTemplate.sendAndReceive(any(Message.class))).willReturn(mockFuture);
+
+        // when
+        Map<String, Boolean> status = musicAnalysisService.checkSystemStatus();
+
+        // then
+        assertThat(status.get("musicAnalysis")).isTrue();
+        assertThat(status.get("recSys")).isTrue();
+    }
+
 
     private MusicRequestDto createMusicRequest(String title) {
         return MusicRequestDto.builder()
@@ -262,6 +471,16 @@ class MusicAnalysisServiceTest {
                         LocalTime.of(0, 0, 0)
                 ))
                 .playLink("link.com")
+                .build();
+    }
+
+    private User createUser() {
+        return User.builder()
+                .loginId("loginId")
+                .password("password")
+                .email("email@email.com")
+                .nickname("홍길동")
+                .role(Role.USER)
                 .build();
     }
 
@@ -288,5 +507,14 @@ class MusicAnalysisServiceTest {
                 "text/plain",
                 fileInputStream
         );
+    }
+
+    private void copySampleTestResultXlsxFile(Music music) throws IOException {
+        Path folderPath = Paths.get(fileHandler.getAudioDirectoryPath() + music.getMusicId());
+        Files.createDirectory(folderPath);
+
+        Path source = Paths.get("src/test/resources/pitch.xlsx");
+        Path target = Paths.get(fileHandler.getAudioDirectoryPath() + music.getMusicId() + "/pitch.xlsx");
+        Files.copy(source, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
     }
 }

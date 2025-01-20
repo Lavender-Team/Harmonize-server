@@ -1,6 +1,5 @@
 package kr.ac.chungbuk.harmonize.service;
 
-import jakarta.transaction.Transactional;
 import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.entity.User;
 import kr.ac.chungbuk.harmonize.enums.Status;
@@ -9,12 +8,12 @@ import kr.ac.chungbuk.harmonize.repository.UserRepository;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
 import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
 import org.springframework.kafka.requestreply.RequestReplyMessageFuture;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.messaging.support.MessageBuilder;
 

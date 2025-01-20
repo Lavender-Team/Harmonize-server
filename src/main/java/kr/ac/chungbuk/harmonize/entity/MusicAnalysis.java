@@ -49,5 +49,10 @@ public class MusicAnalysis {
         this.status = Status.INCOMPLETE;
     }
 
+    public MusicAnalysis(Long musicId, Status status) {
+        this.musicId = musicId;
+        this.status = status;
+    }
+
     public MusicAnalysis() {}
 }
