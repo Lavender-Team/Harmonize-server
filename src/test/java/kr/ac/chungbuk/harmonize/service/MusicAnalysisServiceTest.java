@@ -4,7 +4,6 @@ import kr.ac.chungbuk.harmonize.config.KafkaTopicConfig;
 import kr.ac.chungbuk.harmonize.config.ScheduledTask;
 import kr.ac.chungbuk.harmonize.dto.request.MusicRequestDto;
 import kr.ac.chungbuk.harmonize.entity.Music;
-import kr.ac.chungbuk.harmonize.enums.Genre;
 import kr.ac.chungbuk.harmonize.repository.MusicAnalysisRepository;
 import kr.ac.chungbuk.harmonize.repository.MusicRepository;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
@@ -25,16 +24,17 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.*;
 
 @SpringBootTest
 @MockBeans({
@@ -57,6 +57,9 @@ class MusicAnalysisServiceTest {
 
     @Value("${file.dir}")
     String fileDir;
+
+    @MockBean
+    ReplyingKafkaTemplate<String, String, String> kafkaTemplate;
 
     @AfterEach
     void tearDown() {
@@ -207,6 +210,45 @@ class MusicAnalysisServiceTest {
         // when then
         assertThatThrownBy(() -> musicAnalysisService.updateLyricFile(lyricFile))
                 .isInstanceOf(NoSuchElementException.class);
+    }
+
+    @DisplayName("음악 분석 모델로 분석 요청을 전송합니다.")
+    @Test
+    void analyze() throws IOException {
+        // given
+        MusicRequestDto musicRequest = createMusicRequest("audio");
+        Music music = musicService.create(musicRequest);
+        MultipartFile audioFile = getAudioFile();
+        musicAnalysisService.updateAudioFile(audioFile);
+
+        given(kafkaTemplate.send(anyString(), anyString(), anyString()))
+                .willReturn(null);
+
+        double confidence = 0.8;
+
+        // when
+        musicAnalysisService.analyze(music.getMusicId(), confidence);
+
+        // then
+        verify(kafkaTemplate).send(
+                eq("musicAnalysis"),
+                contains("\"command\": \"analysis\"")
+        );
+    }
+
+    @DisplayName("음악 분석 요청시 음악 파일이 업로드되지 않았으면 예외가 발생합니다.")
+    @Test
+    void analyzeNoAudioFile() throws IOException {
+        // given
+        MusicRequestDto musicRequest = createMusicRequest("음악");
+        Music music = musicService.create(musicRequest);
+
+        double confidence = 0.8;
+
+        // when then
+        assertThatThrownBy(() -> musicAnalysisService.analyze(music.getMusicId(), confidence))
+                .isInstanceOf(FileNotFoundException.class)
+                .hasMessage("Audio file not uploaded");
     }
 
 
