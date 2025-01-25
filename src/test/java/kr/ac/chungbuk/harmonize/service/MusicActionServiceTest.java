@@ -1,7 +1,6 @@
 package kr.ac.chungbuk.harmonize.service;
 
-import kr.ac.chungbuk.harmonize.config.KafkaTopicConfig;
-import kr.ac.chungbuk.harmonize.config.ScheduledTask;
+import kr.ac.chungbuk.harmonize.IntegrationTestSupport;
 import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.entity.User;
 import kr.ac.chungbuk.harmonize.enums.Genre;
@@ -13,12 +12,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.MockBeans;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,15 +22,9 @@ import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@MockBeans({
-        @MockBean(KafkaTopicConfig.class),
-        @MockBean(ReplyingKafkaTemplate.class),
-        @MockBean(ScheduledTask.class)
-})
-class MusicActionServiceTest {
+
+class MusicActionServiceTest extends IntegrationTestSupport {
 
     @Autowired
     MusicActionService musicActionService;

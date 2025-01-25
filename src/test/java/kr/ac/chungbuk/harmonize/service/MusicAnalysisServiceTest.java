@@ -1,7 +1,6 @@
 package kr.ac.chungbuk.harmonize.service;
 
-import kr.ac.chungbuk.harmonize.config.KafkaTopicConfig;
-import kr.ac.chungbuk.harmonize.config.ScheduledTask;
+import kr.ac.chungbuk.harmonize.IntegrationTestSupport;
 import kr.ac.chungbuk.harmonize.dto.request.MusicRequestDto;
 import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.entity.MusicAnalysis;
@@ -19,11 +18,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.MockBeans;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
 import org.springframework.kafka.requestreply.RequestReplyMessageFuture;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.GenericMessage;
@@ -52,13 +47,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.*;
 
 @SuppressWarnings("unchecked")
-@SpringBootTest
-@MockBeans({
-        @MockBean(KafkaTopicConfig.class),
-        @MockBean(ReplyingKafkaTemplate.class),
-        @MockBean(ScheduledTask.class)
-})
-class MusicAnalysisServiceTest {
+class MusicAnalysisServiceTest extends IntegrationTestSupport {
 
     @Autowired
     MusicAnalysisService musicAnalysisService;
@@ -75,9 +64,6 @@ class MusicAnalysisServiceTest {
 
     @Value("${file.dir}")
     String fileDir;
-
-    @MockBean
-    ReplyingKafkaTemplate<String, String, String> kafkaTemplate;
 
     @AfterEach
     void tearDown() {
