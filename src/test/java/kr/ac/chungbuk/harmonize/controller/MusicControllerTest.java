@@ -64,7 +64,7 @@ class MusicControllerTest extends ControllerTestSupport {
             numBuilder.append("1");
         }
 
-        MockHttpServletRequestBuilder request = createMusicCreateRequest("발라드", numBuilder.toString());
+        MockHttpServletRequestBuilder request = createMusicCreateRequest("BALLADE", numBuilder.toString());
 
         // when then
         mockMvc.perform(request)
