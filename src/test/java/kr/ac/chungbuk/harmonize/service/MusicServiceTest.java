@@ -1,7 +1,6 @@
 package kr.ac.chungbuk.harmonize.service;
 
-import kr.ac.chungbuk.harmonize.config.KafkaTopicConfig;
-import kr.ac.chungbuk.harmonize.config.ScheduledTask;
+import kr.ac.chungbuk.harmonize.IntegrationTestSupport;
 import kr.ac.chungbuk.harmonize.dto.request.GroupRequestDto;
 import kr.ac.chungbuk.harmonize.dto.request.MusicRequestDto;
 import kr.ac.chungbuk.harmonize.dto.request.SearchRequestDto;
@@ -20,11 +19,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.io.File;
@@ -41,8 +37,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@SpringBootTest
-class MusicServiceTest {
+
+class MusicServiceTest extends IntegrationTestSupport {
 
     @Autowired
     MusicService musicService;
@@ -60,13 +56,6 @@ class MusicServiceTest {
     ThemeRepository themeRepository;
     @Autowired
     FileHandler fileHandler;
-
-    @MockBean
-    KafkaTopicConfig kafkaTopicConfig;
-    @MockBean
-    ReplyingKafkaTemplate<String, String, String> replyingKafkaTemplate;
-    @MockBean
-    ScheduledTask scheduledTask;
 
     @Value("${file.dir}")
     String fileDir;

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import kr.ac.chungbuk.harmonize.enums.Gender;
 import kr.ac.chungbuk.harmonize.enums.Genre;
 import kr.ac.chungbuk.harmonize.enums.Role;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
@@ -73,6 +74,7 @@ public class User implements UserDetails {
     public User() {
     }
 
+    @Builder
     public User(String loginId, String password, String email, String nickname, Role role, Gender gender, Integer age) {
         this.loginId = loginId;
         this.password = password;

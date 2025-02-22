@@ -1,6 +1,5 @@
 package kr.ac.chungbuk.harmonize.service;
 
-import jakarta.transaction.Transactional;
 import kr.ac.chungbuk.harmonize.entity.Music;
 import kr.ac.chungbuk.harmonize.entity.User;
 import kr.ac.chungbuk.harmonize.enums.Status;
@@ -9,16 +8,17 @@ import kr.ac.chungbuk.harmonize.repository.UserRepository;
 import kr.ac.chungbuk.harmonize.utility.FileHandler;
 import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
 import org.springframework.kafka.requestreply.RequestReplyMessageFuture;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.messaging.support.MessageBuilder;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -79,7 +79,7 @@ public class MusicAnalysisService {
 
     // 음악 파일 업로드 (벌크 업로드)
     @Transactional
-    public void updateAudioFile(MultipartFile audioFile) throws Exception {
+    public void updateAudioFile(MultipartFile audioFile) throws IOException {
 
         String originalFilename = audioFile.getOriginalFilename();
         assert originalFilename != null;
@@ -118,7 +118,7 @@ public class MusicAnalysisService {
         }
 
         InputStream stream = lyricFile.getInputStream();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
         String lyric = reader.lines().collect(Collectors.joining("\n"));
         music.setLyrics(lyric);
     }
